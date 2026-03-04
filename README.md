@@ -5,14 +5,15 @@
 <h1 align="center">ImportaREST GO</h1>
 
 <p align="center">
-  <strong>Importação inteligente de NFS-e para o sistema REST</strong><br>
-  Processamento automatizado de XMLs fiscais com classificação de serviços por IA.
+  <strong>Importação inteligente de NFS-e para a REST de Goiânia</strong><br>
+  Processamento automatizado de XMLs fiscais com classificação de serviços por IA para geração da Relação de Serviços de Terceiros.
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/python-3.10+-blue?logo=python&logoColor=white" alt="Python 3.10+">
   <img src="https://img.shields.io/badge/plataforma-Windows-0078D6?logo=windows&logoColor=white" alt="Windows">
-  <img src="https://img.shields.io/badge/IA-N8N%20%2B%20LLM-blueviolet?logo=n8n&logoColor=white" alt="N8N + LLM">
+  <img src="https://img.shields.io/badge/IA-N8N%20%2B%20GPT--4o--mini-blueviolet?logo=n8n&logoColor=white" alt="N8N + GPT-4o-mini">
+  <img src="https://img.shields.io/badge/município-Goiânia--GO-orange" alt="Goiânia-GO">
   <img src="https://img.shields.io/badge/status-produção-brightgreen" alt="Em produção">
 </p>
 
@@ -20,11 +21,11 @@
 
 ## O Problema
 
-Escritórios contábeis que utilizam o **sistema REST** precisam importar notas fiscais de serviço eletrônicas (NFS-e) manualmente — um processo repetitivo, demorado e propenso a erros. Cada município emite XMLs em formatos diferentes, os campos variam entre prefeituras, e a classificação do serviço (Item da Lista Complementar) exige conhecimento técnico-fiscal.
+A **REST (Relação de Serviços de Terceiros)** é um documento fiscal municipal obrigatório na **Prefeitura de Goiânia**, utilizado para declarar mensalmente a aquisição de serviços tomados de terceiros e o recolhimento do ISS retido. Escritórios contábeis precisam importar notas fiscais de serviço eletrônicas (NFS-e) manualmente para compor essa declaração — um processo repetitivo, demorado e propenso a erros. Cada município emite XMLs em formatos diferentes, os campos variam entre prefeituras, e a classificação do serviço (Item da Lista Complementar 116/2003) exige conhecimento técnico-fiscal.
 
 ## A Solução
 
-O **ImportaREST GO** automatiza todo o fluxo: lê os XMLs, extrai os dados fiscais, classifica o serviço usando inteligência artificial e gera o arquivo TXT pronto para importação no REST — em segundos.
+O **ImportaREST GO** automatiza todo o fluxo de geração da REST de Goiânia: lê os XMLs das NFS-e, extrai os dados fiscais, classifica o serviço usando inteligência artificial e gera o arquivo TXT pronto para importação na declaração — em segundos.
 
 ---
 
@@ -52,7 +53,7 @@ O **ImportaREST GO** automatiza todo o fluxo: lê os XMLs, extrai os dados fisca
                                                                       │
                                                                       ▼
 📄 Arquivo TXT             ⬅  🧩 Montagem do TXT           ⬅  🤖 Classificação IA
-(pronto para REST)             (cabeçalho + linhas)             (Item LC + DDD)
+(pronto para a REST)           (cabeçalho + linhas)             (Item LC + DDD)
 ```
 
 1. O usuário informa o **código da empresa** e a **vigência** (mês/ano)
@@ -60,8 +61,8 @@ O **ImportaREST GO** automatiza todo o fluxo: lê os XMLs, extrai os dados fisca
 3. Cada XML é parseado, com detecção automática do padrão (ABRASF ou Nacional)
 4. Os dados fiscais são extraídos: prestador, tomador, valores, impostos, descrição do serviço
 5. A descrição é enviada ao pipeline de IA para classificação do serviço
-6. O arquivo TXT é montado no formato exigido pelo sistema REST
-7. O usuário salva o arquivo e importa diretamente no REST
+6. O arquivo TXT é montado no formato exigido pela declaração REST de Goiânia
+7. O usuário salva o arquivo e importa diretamente na REST da Prefeitura de Goiânia
 
 ---
 
@@ -91,7 +92,7 @@ importarest-go/
 │   ├── extractor.py         # Extração de 50+ campos das NFS-e
 │   ├── validators.py        # Validações e regras fiscais
 │   ├── formatters.py        # Formatação de campos (data, UF, alíquota)
-│   └── txt_builder.py       # Montagem das linhas do TXT de importação
+│   └── txt_builder.py       # Montagem das linhas do TXT para a REST
 ├── services/                # Integrações externas
 │   ├── ibge.py              # Consulta de municípios via API IBGE
 │   ├── n8n_client.py        # Comunicação com webhook N8N (IA)
@@ -209,13 +210,13 @@ pip install ttkbootstrap Pillow requests
 python main.py
 ```
 
-1. Insira o **código da empresa** cadastrada no REST
+1. Insira o **código da empresa** cadastrada na REST de Goiânia
 2. Insira a **vigência** no formato `MMYYYY` (ex: `012026` para janeiro/2026)
 3. Marque **"Gerar notas MEI"** se desejar incluir notas de MEI de Goiânia
 4. Clique em **INICIAR IMPORTAÇÃO**
 5. Acompanhe o progresso em tempo real
 6. Ao finalizar, clique em **BAIXAR TXT** e salve o arquivo
-7. Importe o TXT no sistema REST
+7. Importe o TXT na declaração REST da Prefeitura de Goiânia
 
 ---
 
