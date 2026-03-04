@@ -1,0 +1,5084 @@
+{
+  "name": "NFS-e XML Processing with AI-Powered LC Item Matching and Validation",
+  "nodes": [
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.Mensagem_erro_1 }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        3616,
+        2112
+      ],
+      "id": "ec314d43-554d-4deb-be33-7e26472a0fa1",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "content": "# Configuraçao para consulta da IA na Base de dados",
+        "height": 672,
+        "width": 1184,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2160,
+        2816
+      ],
+      "typeVersion": 1,
+      "id": "e9f8be51-0b83-429a-902e-ead563eb5009",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# De/Para\n## equivalencia com ITEM LC 116 de Goiânia\n",
+        "height": 704,
+        "width": 576,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        4256,
+        1616
+      ],
+      "typeVersion": 1,
+      "id": "2e38054a-57ef-46e5-98f3-364e87157a9e",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "\n# Chegada das notas\n",
+        "height": 272,
+        "width": 224
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2160,
+        2080
+      ],
+      "typeVersion": 1,
+      "id": "de592814-0bb1-495d-b7ce-6f3dfd5daa41",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "# Extração dos campos das notas selecionadas",
+        "height": 688,
+        "width": 528,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2592,
+        1696
+      ],
+      "typeVersion": 1,
+      "id": "25f7a788-8857-4d0e-888f-2a127814c608",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Consulta API CEP",
+        "height": 224,
+        "width": 176,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3808,
+        1840
+      ],
+      "typeVersion": 1,
+      "id": "601ef42f-068c-4b39-9c6a-4ed35b2bbc1a",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "# Ramo De Extração\n## Ramo caso a nota seja classificada como modo:extract",
+        "height": 336,
+        "width": 400,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        5344,
+        1472
+      ],
+      "typeVersion": 1,
+      "id": "7b77e9ea-2523-47f7-8af5-0b02888a44d8",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n# Ramo De Mapeamento ITEM LC e DDD\n## Ramo caso a nota seja classificada como modo:Map_only\n",
+        "height": 592,
+        "width": 400,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        5360,
+        1872
+      ],
+      "typeVersion": 1,
+      "id": "9d08d632-03e0-48bc-b8b8-64688bf575cb",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "##                                              Ramo Extract Correto\n                                          ",
+        "height": 176,
+        "width": 704,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        5168,
+        1664
+      ],
+      "typeVersion": 1,
+      "id": "be9fa9b6-6679-4791-9170-8cf196268054",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "##                                               Ramo Extract Incorreto\n                                           ",
+        "height": 192,
+        "width": 528,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3296,
+        2064
+      ],
+      "typeVersion": 1,
+      "id": "fa00941d-b1d7-4312-b135-ee4ec64c8aa1",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "##                                               Ramo Map_only Correto\n                                          ",
+        "height": 192,
+        "width": 704,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        5168,
+        1872
+      ],
+      "typeVersion": 1,
+      "id": "9878d342-bbd0-4ffb-9655-645a4eb1b5f4",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "##                                               Ramo Map_only Incorreto\n                                          ",
+        "height": 192,
+        "width": 704,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        5168,
+        2064
+      ],
+      "typeVersion": 1,
+      "id": "bf4e3eaa-5760-4795-8a70-c46d44f03fca",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "nfse-processing",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "9e9bb413-e5a7-41d4-9d57-8629daf30947",
+      "name": "Receber Webhook NFS-e",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        2224,
+        2192
+      ],
+      "webhookId": "e097b7ac-c1ab-4807-bcd0-6a9e41dba694"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0eaf8559-959b-4e56-9183-1456fab6fb75",
+              "leftValue": "={{ $json.body.modo }}",
+              "rightValue": "extract",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "15b7f2b1-afa1-4447-92ef-5b1b5e59448e",
+              "leftValue": "={{ $json.body.modo }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2448,
+        2192
+      ],
+      "id": "9372cf35-ca65-4ea3-adab-1a9007f20ec5",
+      "name": "Modo: Extract ou Map Only?"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Please analyze the following raw NFS-e XML content and extract the fields as specified in your system instructions:\n\nRAW XML CONTENT:\n{{ $json.body.conteudo_xml }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a specialist in Brazilian NFS-e XML tax classification. Your mission is to extract structured fiscal data and determine the correct item_lc_final, prioritizing the most legally precise service classification available in the XML.\n\nCRITICAL INSTRUCTION – ITEM LC (item_lc_final)\nTHIS IS THE MOST IMPORTANT FIELD IN THE ENTIRE EXTRACTION. Errors in item_lc_final will cause legal and fiscal consequences downstream. Apply maximum attention and care when determining this value.\n\nYou must extract the most technically accurate legal service classification available.\n\nPriority logic (very important):\n\nPrefer structured national tax classification tags that represent official federal service classification.\n\nIf a structured tax classification description exists (for example, a legal service classification field used for federal ISS alignment), use it.\n\nOnly if no structured legal classification is available, analyze service-related descriptive tags and extract the legally relevant portion.\n\nIgnore purely commercial descriptions, financial breakdowns, order numbers, dates, installment information, payment details, or accounting annotations.\n\nThe value must represent the legal service nature aligned with LC 116/2003.\n\nDo NOT:\n\nInclude order numbers\nInclude financial breakdowns\nInclude invoice narrative noise\nInclude unrelated operational comments\n\nBEFORE finalizing item_lc_final, ask yourself:\n\nDoes this value represent a legally recognized service classification under LC 116/2003?\nIs it free of commercial noise, financial data, or operational annotations?\nIs it the most precise classification available in the XML, not a fallback generic description?\n\nIf any answer is \"no\", re-evaluate and correct before returning.\n\nThe goal is to return the legally correct service classification description, not the commercial description.\n\nRename the field to: item_lc_final\n\nGENERAL EXTRACTION RULES\n\nmodelo:\nReturn \"2\" only if codigo_municipio corresponds to Goiânia (5208707 or 520870). Otherwise, return \"4\".\n\nnumero_documento:\nSequential number.\n\nvalor_tributavel:\nISS taxable base.\n\nvalor_documento:\nGross value.\n\naliquota:\nNumeric percentage only.\n\ndata_emissao:\nFormat ddmmaaaa.\n\ndata_pagamento:\nSame value as data_emissao (ddmmaaaa).\n\ncpf_cnpj:\n14 numeric digits only.\n\nrazao_social:\nLegal name of the service provider (prestador).\n\ninscricao_municipal:\nIf the service provider (prestador) municipality is Goiânia (codigo_municipio = 5208707 or 520870), extract the municipal registration normally.\nIf the service provider is NOT from Goiânia, return \"\" (empty string).\n\ncep:\nExtract the CEP of the service provider (prestador).\nReturn only 8 numeric digits without separators.\nIf not found, return \"\".\n\nendereco:\nExtract the street name (logradouro) of the service provider.\nDo not include number, complement, bairro, cidade or estado in this field.\n\nnumero:\nExtract only the street number of the service provider’s address.\nReturn digits only.\nIf not available, return \"\".\n\nbairro:\nExtract the neighborhood (bairro) of the service provider.\n\ncidade:\nExtract the municipality name of the service provider.\n\nestado:\nExtract the 2-letter UF of the service provider.\n\ncodigo_area:\nExtract the DDD (area code) of the service provider’s phone, if available.\nReturn only 2 numeric digits.\nIf not available, return \"\".\n\nimposto_retido (ISSQN):\nThis field may contain different numeric codes depending on the NFS-e layout (for example:\n1 = imposto não retido\n2 = imposto retido pelo tomador\n3 = imposto retido por intermediário\netc.)\n\nYou must interpret the ISSQN retention status according to the specific layout standard used in the XML.\nIf the ISS is retained by any party (tomador, intermediário, substituto, etc.), return \"1\".\nIf the ISS is not retained, return \"0\".\nReturn only \"1\" (retained) or \"0\" (not retained).\n\ncodigo_municipio:\nExtract the official 7-digit IBGE municipality code directly from the XML.\nDo not infer.\nDo not fabricate.\nReturn only digits.\n\ntributado_municipio:\nReturn \"1\" only if codigo_municipio corresponds to Goiânia (5208707 or 520870). Otherwise return \"0\".\n\nunidade_economica:\nAlways \"0\".\n\nCONFIDENCE FIELDS (MANDATORY)\n\nconfidence_score:\n0-100 based on certainty of item_lc_final extraction.\n\nconfidence_level:\n\"Low\", \"Medium\", or \"High\"\n\nIf confidence_score is below 70, re-read the XML and attempt to find a more precise classification before finalizing.\n\nOUTPUT RULE\nReturn ONLY a valid JSON object.\nDo not include explanations.\nIf a field is not found, return an empty string \"\".\nAll fields must be present in the JSON output."
+        }
+      },
+      "id": "09239d58-6564-42ba-b2f2-34be00439116",
+      "name": "IA Extrair Dados do XML",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        2704,
+        1808
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "81f30e13-0a5c-4de8-a352-9db8775d576e",
+              "leftValue": "={{ $json.output.confidence_score }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "3a10b697-ca10-4a85-8195-f28b22e84ba5",
+              "leftValue": "={{ $json.output.confidence_score }}",
+              "rightValue": 85,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3168,
+        1808
+      ],
+      "id": "d9170119-2683-4abe-9270-d3e32fb10e26",
+      "name": "Confiança Extração ≥ 85?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ef406db7-0cfd-4074-969a-fb6c899d24ef",
+              "name": "item_lc",
+              "value": "={{ $('Receber Webhook NFS-e').item.json.body.dados_parciais.item_lc_final }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3392,
+        1632
+      ],
+      "id": "3f97edb8-3bb2-4943-bdda-657a734cbcfe",
+      "name": "Preparar Item LC (via Extração)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ef406db7-0cfd-4074-969a-fb6c899d24ef",
+              "name": "CEP",
+              "value": "={{ $('IA Extrair Dados do XML').item.json.output.cep }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3392,
+        1824
+      ],
+      "id": "4e838dab-ab91-4fd4-9b4d-25e77b91d9f7",
+      "name": "Preparar CEP (via Extração)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7921c608-e9a4-43aa-8164-b88918d8f966",
+              "name": "Mensagem_erro_1",
+              "value": "={\n  \"status\": \"manual_review\",\n  \"confidence_score\": \"{{ $json.output.confidence_score }}\",\n  \"motivo\": \"Confidence abaixo do mínimo\"\n}\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3392,
+        2112
+      ],
+      "id": "d1881523-cdf9-4770-8e4d-8c0f77bbbe9e",
+      "name": "Montar Erro: Baixa Confiança"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ef406db7-0cfd-4074-969a-fb6c899d24ef",
+              "name": "item_lc",
+              "value": "={{ $json.body.dados_parciais.item_lc_final }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3392,
+        2288
+      ],
+      "id": "a3042060-9789-45bd-bd2b-e41ec2c75d6f",
+      "name": "Preparar Item LC (via Webhook)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ef406db7-0cfd-4074-969a-fb6c899d24ef",
+              "name": "CEP",
+              "value": "={{ $('Receber Webhook NFS-e').item.json.body.dados_parciais.cep }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3392,
+        2480
+      ],
+      "id": "0a13f5de-7275-435b-9a34-b6e9c1d48c50",
+      "name": "Preparar CEP (via Webhook)"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3616,
+        1712
+      ],
+      "id": "17ed8197-b589-4601-8c89-a83387f05895",
+      "name": "Unificar Item LC"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3616,
+        1904
+      ],
+      "id": "16caa8ab-64a8-49a3-849a-1f6dd2499605",
+      "name": "Unificar CEP"
+    },
+    {
+      "parameters": {
+        "url": "=https://viacep.com.br/ws/{{\n $json[\"CEP\"] }}/json/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        3840,
+        1904
+      ],
+      "id": "0f883406-1fb6-4561-bd25-2d691064376b",
+      "name": "Consultar Endereço (ViaCEP)"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        4064,
+        1728
+      ],
+      "id": "0061da47-4728-408c-a63f-7674ef4b2123",
+      "name": "Combinar LC + Endereço"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analise a seguinte descrição de serviço extraída do XML:\n\n{{ $json.item_lc }}\nCom base nesta descrição:\n\nUtilize a ferramenta de busca para encontrar o item correspondente na lista da LC 116.\n\nRetorne apenas os campos solicitados no formato JSON obrigatório.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are a Brazilian Tax Law Specialist with strict expertise in Complementary Law 116/2003.\nINPUT DATA\nRaw LC Item: {{ $json.item_lc }}\nMunicipality: {{ $json.localidade }}\nPARSING RULE\nThe field 'Raw LC Item' arrives in the format \"CODE - DESCRIPTION\" (e.g., \"1402 - Assistencia tecnica\").\n\nSplit the field by the separator \" - \" (space dash space).\nThe LEFT part is the LC code from the invoice (e.g., \"1402\").\nThe RIGHT part is the raw service description (e.g., \"Assistencia tecnica\").\nIf there is no \" - \" separator, treat the ENTIRE field as a raw description with no code.\n\nTASK\nDetermine the most technically accurate LC 116 item based on the data provided, following a strict priority logic.\nCLASSIFICATION LOGIC (STRICT PRIORITY ORDER)\nSTEP 1 - Validate the LC Code from the Invoice\n\nAfter parsing, check if the LC code part is present and not empty, \"0\", or null.\nIf present, normalize it to standard LC 116 format (e.g., \"1402\" -> \"14.02\", \"702\" -> \"7.02\", \"0105\" -> \"1.05\").\nQuery the Supabase database: does this normalized code exist as a valid LC 116 item?\nIf the code EXISTS in Supabase:\n\nCompare the parsed description with the official description of that item.\nThe description does NOT need to be identical. Abbreviated, truncated, misspelled, or partial descriptions are EXPECTED and ACCEPTABLE. Examples of valid matches:\n\n\"assist. tec. info\" matched with 14.02 (Assistencia tecnica) = VALID\n\"desenv. sist.\" matched with 1.04 (Elaboracao de programas de computadores) = VALID\n\"consult. contab.\" matched with 17.19 (Contabilidade) = VALID\n\"manut. equip.\" matched with 14.01 (Manutencao e conservacao de maquinas) = VALID\n\"serv. limpeza predial\" matched with 7.10 (Limpeza, manutencao e conservacao) = VALID\n\n\nIf there is minimum semantic compatibility between the description and the item category, CONFIRM this item as the result.\nSet confidence_level: \"High\" and confidence_score: 0.95 or above.\nSet method: \"INVOICE_CODE_VALIDATED\"\nDO NOT attempt to find a \"better\" item via semantic search. The validated code IS the answer.\n\n\n\nSTEP 2 - Code Invalid or Absent, Use Semantic Search\nIf the LC code is empty, \"0\", null, or does NOT exist in the Supabase database:\n\nDiscard the code entirely.\nAnalyze the parsed description only.\nCompare with the Top 5 Supabase matches via semantic search.\nIdentify the core economic activity and legal verb.\nDisregard generic terms (\"taxa\", \"servico\", \"manutencao\" when used alone).\nSelect the most specific item.\nSet method: \"SEMANTIC_SEARCH\"\nAssign confidence_score based on match quality.\n\nSTEP 3 - Conflict Between Code and Description\nIf the LC code EXISTS in Supabase, BUT the description describes a CLEARLY DIFFERENT service (e.g., code 14.02 \"Assistencia tecnica\" but description says \"transporte municipal de passageiros\"):\n\nPRIORITIZE the description for semantic search.\nReturn the item found via description.\nSet confidence_level: \"Medium\"\nSet method: \"SEMANTIC_SEARCH_CONFLICT\"\nIn 'justificativa', explicitly state the conflict between the invoice code and the description.\n\nIMPORTANT: This step ONLY applies when the description is CLEARLY incompatible with the code. Minor differences, abbreviations, or poor descriptions are NOT conflicts - they are expected. When in doubt, TRUST THE CODE.\nLC ITEM FORMAT RULE (STRICT AND MANDATORY)\nThe variable 'item_lc_final' MUST follow these mathematical rules to avoid formatting errors:\n\nTAKE the original LC item (e.g., 7.09, 17.12, 1.05).\nREMOVE the dot.\nADD a leading zero ONLY if the result has 3 digits.\nVALIDATION EXAMPLES:\n\n1.05 -> \"0105\" (Correct) | NEVER \"1005\" or \"1050\"\n7.09 -> \"0709\" (Correct) | NEVER \"7009\" or \"7090\"\n8.02 -> \"0802\" (Correct) | NEVER \"8002\"\n17.12 -> \"1712\" (Correct)\n\n\nMAXIMUM RANGE: The item cannot exceed \"4001\" (LC Item 40.01). If you generate \"8002\", you are WRONG.\n\nOUTPUT RULES\n\nReturn ONLY valid JSON.\nNo markdown, no text outside JSON.\nThe 'item_lc_final' is the MOST IMPORTANT variable. Double-check the 4-digit logic before outputting.\n\nOUTPUT JSON:\n{\n\"item_lc_final\": \"0000\",\n\"item_lc_formatted\": \"00.00\",\n\"method\": \"INVOICE_CODE_VALIDATED | SEMANTIC_SEARCH | SEMANTIC_SEARCH_CONFLICT\",\n\"justificativa\": \"Texto tecnico curto justificando a escolha baseada na LC 116/03.\",\n\"confidence_score\": 0.00,\n\"confidence_level\": \"Low/Medium/High\"\n}"
+        }
+      },
+      "id": "966f023f-10ad-4409-8864-acddb7be57b7",
+      "name": "IA Classificar Item LC 116",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        4432,
+        1728
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1a1bbc4c-9901-48ff-aaf6-abc13dbf5ea8",
+              "leftValue": "={{ $('Receber Webhook NFS-e').first().json.body.modo }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "6b0489c9-68ef-4ed4-8110-c0817a921160",
+              "leftValue": "={{ $('Receber Webhook NFS-e').first().json.body.modo }}",
+              "rightValue": "extract",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        4848,
+        1744
+      ],
+      "id": "db8ef847-9927-49a1-98bc-86d6c0241566",
+      "name": "Modo Original: Extract?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e0bd6c1d-7c8d-4643-a287-256518b5a779",
+              "name": "linha_final",
+              "value": "={{ $('IA Extrair Dados do XML').item.json.output.modelo }};{{ $('IA Extrair Dados do XML').item.json.output.numero_documento }};{{ $('IA Extrair Dados do XML').item.json.output.valor_tributavel }};{{ $('IA Extrair Dados do XML').item.json.Foutput.valor_documento }};{{ $('IA Extrair Dados do XML').item.json.output.aliquota }};{{ $('IA Extrair Dados do XML').item.json.output.data_emissao }};{{ $('IA Extrair Dados do XML').item.json.output.data_pagamento }};{{ $('IA Extrair Dados do XML').item.json.output.cpf_cnpj }};{{ $('IA Extrair Dados do XML').item.json.output.razao_social }};{{ $('IA Extrair Dados do XML').item.json.output.inscricao_municipal }};{{ $('IA Extrair Dados do XML').item.json.output.imposto_retido }};{{ $('Consultar Endereço (ViaCEP)').item.json.cep.replace(/\\D/g, '') }};{{ $('Consultar Endereço (ViaCEP)').item.json.logradouro }};{{ $('IA Extrair Dados do XML').item.json.output.numero }};{{ $('Consultar Endereço (ViaCEP)').item.json.bairro }};{{ $('Consultar Endereço (ViaCEP)').item.json.localidade }};{{ $('Consultar Endereço (ViaCEP)').item.json.uf }};{{ $('Consultar Endereço (ViaCEP)').item.json.ddd }};{{ $('IA Extrair Dados do XML').item.json.output.tributado_municipio }};{{ $('IA Classificar Item LC 116').item.json.output.item_lc_final }};{{ $('IA Extrair Dados do XML').item.json.output.unidade_economica }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5360,
+        1712
+      ],
+      "id": "d95f1f88-1ec8-4eb8-9493-eae510d983f9",
+      "name": "Montar Linha TXT Final"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.linha_final }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        5584,
+        1712
+      ],
+      "id": "5201c8e9-c1af-4743-aa1e-40a7bcd2459e",
+      "name": "Responder: Linha TXT (Extract)"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $json.output.confidence_score }}",
+              "rightValue": "=",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "4cd92be7-ee23-4ede-a34e-67c3496448f5",
+              "leftValue": "={{ $json.output.confidence_score }}",
+              "rightValue": 0.75,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "dac9d73a-b031-4c93-9076-50e5766ce644",
+      "name": "Confiança LC ≥ 75%?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        5040,
+        1920
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "13307132-95c2-45e4-b3f4-e7eb50332230",
+              "name": "Mensagem_erro_2",
+              "value": "=[\n  {\n    \"DDD\": \"{{ $('Consultar Endereço (ViaCEP)').item.json.ddd }}\",\n    \"itemLC\": \"{{ $('IA Classificar Item LC 116').item.json.output.item_lc_final }}\",\n    \"estado\": \"{{ $('Consultar Endereço (ViaCEP)').item.json.uf }}\",\n    \"logradouro\": \"{{ $('Consultar Endereço (ViaCEP)').item.json.logradouro }}\",\n    \"bairro\": \"{{ $('Consultar Endereço (ViaCEP)').item.json.bairro }}\",\n    \"cidade\": \"{{ $('Consultar Endereço (ViaCEP)').item.json.localidade }}\"\n  }\n]\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5360,
+        1904
+      ],
+      "id": "71cb988e-f783-48c5-ac0b-06532095ff59",
+      "name": "Montar Resposta: DDD + Item LC"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.Mensagem_erro_2 }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        5584,
+        1904
+      ],
+      "id": "244dba4d-8487-4978-952a-d20f0ff85fce",
+      "name": "Responder: DDD + LC (Map Only)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "13307132-95c2-45e4-b3f4-e7eb50332230",
+              "name": "Mensagem_erro_2",
+              "value": "=[\n  {\n    \"ddd\": \"{{ $('Consultar Endereço (ViaCEP)').item.json.ddd }}\"\n    \"status\": \"manual_review_map_only\",\n    \"motivo\": \"Não foi possível determinar DDD e Item LC final (consulta falhou/baixa confiança)\",\n    \"item_lc_original\": \"{{ $('Unificar Item LC').item.json.item_lc }}\"\n    \"localidade\": \"{{ $json.localidade }}\"\n    \"chave_nfse\": \"{{ $('Receber Webhook NFS-e').first().json.body.arquivo }}\"\n  }\n]\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5360,
+        2096
+      ],
+      "id": "830547d1-6dc2-4520-8f0e-f63f9c5c95ae",
+      "name": "Montar Erro: Manual Review"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.Mensagem_erro_2 }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        5584,
+        2096
+      ],
+      "id": "4068dd1a-7796-4b3e-b9be-17eea65a35dd",
+      "name": "Responder: Manual Review (Map Only)"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_object"
+            }
+          },
+          "temperature": 0,
+          "timeout": 180000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        2672,
+        2032
+      ],
+      "id": "8de5862f-34eb-41d7-a9b3-fb91c5fa9203",
+      "name": "GPT-4o-mini (Extração)",
+      "credentials": {
+        "openAiApi": {
+          "id": "RfD8OvXV8pHkd9cQ",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"modelo\": { \n      \"type\": \"string\"\n    },\n    \"numero_documento\": { \n      \"type\": \"string\"\n    },\n    \"valor_tributavel\": { \n      \"type\": \"string\"\n    },\n    \"valor_documento\": { \n      \"type\": \"string\"\n    },\n    \"aliquota\": { \n      \"type\": \"string\"\n    },\n    \"data_emissao\": { \n      \"type\": \"string\"\n    },\n    \"data_pagamento\": { \n      \"type\": \"string\"\n    },\n    \"cpf_cnpj\": { \n      \"type\": \"string\"\n    },\n    \"razao_social\": { \n      \"type\": \"string\"\n    },\n    \"inscricao_municipal\": { \n      \"type\": \"string\"\n    },\n    \"imposto_retido\": { \n      \"type\": \"string\"\n    },\n    \"cep\": {\n      \"type\": \"string\"\n    },\n    \"numero\": { \n      \"type\": \"string\"\n    },\n    \"codigo_municipio\": {\n      \"type\": \"string\"\n    },\n    \"tributado_municipio\": { \n      \"type\": \"string\"\n    },\n    \"item_lc_final\": { \n      \"type\": \"string\"\n    },\n    \"unidade_economica\": { \n      \"type\": \"string\"\n    },\n    \"confidence_score\": { \n      \"type\": \"number\"\n    },\n    \"confidence_level\": { \n      \"type\": \"string\"\n    }\n  },\n  \"required\": [\n    \"modelo\",\n    \"numero_documento\",\n    \"valor_tributavel\",\n    \"valor_documento\",\n    \"aliquota\",\n    \"data_emissao\",\n    \"data_pagamento\",\n    \"cpf_cnpj\",\n    \"razao_social\",\n    \"inscricao_municipal\",\n    \"imposto_retido\",\n    \"cep\",\n    \"numero\",\n    \"codigo_municipio\",\n    \"tributado_municipio\",\n    \"item_lc_final\",\n    \"unidade_economica\",\n    \"confidence_score\",\n    \"confidence_level\"\n  ]\n}",
+        "autoFix": true
+      },
+      "id": "29ca4263-d329-4133-b0c3-11d52ca8224b",
+      "name": "Parser Estruturado (Extração)",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2832,
+        2000
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmOpenHuggingFaceInference",
+      "typeVersion": 1,
+      "position": [
+        2832,
+        2176
+      ],
+      "id": "04fc9d5d-14f3-4582-8b0d-07de981aecba",
+      "name": "HuggingFace (Parser)",
+      "credentials": {
+        "huggingFaceApi": {
+          "id": "bN5XbsldkgAIzI8h",
+          "name": "HuggingFaceApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_object"
+            }
+          },
+          "temperature": 0,
+          "timeout": 180000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        4288,
+        1952
+      ],
+      "id": "e30ddbe3-5989-41e2-8354-0dd812596082",
+      "name": "GPT-4o-mini (Classificação LC)",
+      "credentials": {
+        "openAiApi": {
+          "id": "RfD8OvXV8pHkd9cQ",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"item_lc_final\": \"0000\",\n  \"justificativa\": \"string\",\n  \"confidence_score\": 0,\n  \"confidence_level\": \"Low\"\n}\n"
+      },
+      "id": "3f377ed1-7942-4aa6-b526-52d4fcb981ed",
+      "name": "Parser Estruturado (Classificação)",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        4704,
+        1952
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Use esta ferramenta para buscar o código municipal de Goiânia. Forneça um termo de busca baseado na descrição do serviço (ex: 'processamento', 'hospedagem', 'consultoria') para encontrar o subitem correspondente da LC 116 e o código de Goiânia.",
+        "tableName": {
+          "__rl": true,
+          "value": "servicos_ia",
+          "mode": "list",
+          "cachedResultName": "servicos_ia"
+        },
+        "topK": 20,
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        4416,
+        1952
+      ],
+      "id": "78cc01e9-2138-4825-a2e5-f509bccef72b",
+      "name": "Supabase: Busca LC 116",
+      "credentials": {
+        "supabaseApi": {
+          "id": "58WRc3c9SCAyHovZ",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
+      "typeVersion": 1,
+      "position": [
+        4496,
+        2160
+      ],
+      "id": "ebfe8b13-4b6a-4130-8bc5-7b0694d13e9b",
+      "name": "Embeddings HuggingFace (Busca)",
+      "credentials": {
+        "huggingFaceApi": {
+          "id": "bN5XbsldkgAIzI8h",
+          "name": "HuggingFaceApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "16QWBN1J7suuJ1jybNxo9sYhw4xW5-pau",
+          "mode": "list",
+          "cachedResultName": "deepseek_json_20260205_36f7dc.json",
+          "cachedResultUrl": "https://drive.google.com/file/d/16QWBN1J7suuJ1jybNxo9sYhw4xW5-pau/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2224,
+        2912
+      ],
+      "id": "60312ede-5cab-4aa6-a64e-c42aebe2ab18",
+      "name": "Download Base LC 116 (Drive)",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "5l8mZrmEDqPjA3MD",
+          "name": "Google Drive account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        2448,
+        2912
+      ],
+      "id": "65a5d509-f299-4cda-b6a2-3abdcf38c345",
+      "name": "Extrair JSON LC 116"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        2672,
+        2912
+      ],
+      "id": "2ee453e7-32be-478d-9689-7e8ce46d426b",
+      "name": "Separar Itens LC"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "servicos_ia",
+          "mode": "list",
+          "cachedResultName": "servicos_ia"
+        },
+        "embeddingBatchSize": "={{ 200 }}",
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        2928,
+        2912
+      ],
+      "id": "9a2fc6b7-879f-4874-916c-2c8c1b2c1280",
+      "name": "Supabase: Inserir LC 116",
+      "credentials": {
+        "supabaseApi": {
+          "id": "58WRc3c9SCAyHovZ",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
+      "typeVersion": 1,
+      "position": [
+        2896,
+        3136
+      ],
+      "id": "73a4df45-1e83-4bc8-9d7b-5f46045e72f8",
+      "name": "Embeddings HuggingFace (Inserção)",
+      "credentials": {
+        "huggingFaceApi": {
+          "id": "bN5XbsldkgAIzI8h",
+          "name": "HuggingFaceApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $('Separar Itens LC').item.json.id }} - {{ $json.content }}",
+        "textSplittingMode": "custom",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "codigo_item",
+                "value": "={{ $('Separar Itens LC').item.json.id }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        3024,
+        3136
+      ],
+      "id": "93aff30c-b02a-44df-a167-5f845e24b7f6",
+      "name": "Carregar Documento LC"
+    },
+    {
+      "parameters": {
+        "chunkSize": 4000,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        3104,
+        3344
+      ],
+      "id": "b1dfa3e8-1953-4fd9-828a-6254c0a8d988",
+      "name": "Dividir Texto em Chunks"
+    }
+  ],
+  "pinData": {
+    "Receber Webhook NFS-e": [
+      {
+        "json": {
+          "headers": {
+            "host": "joaomarcos1303.app.n8n.cloud",
+            "user-agent": "python-requests/2.32.5",
+            "content-length": "6891",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "cdn-loop": "cloudflare; loops=1; subreqs=1",
+            "cf-connecting-ip": "189.112.126.162",
+            "cf-ew-via": "15",
+            "cf-ipcountry": "BR",
+            "cf-ray": "9cedb621d3fef173-FRA",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-worker": "n8n.cloud",
+            "content-type": "application/json",
+            "x-forwarded-for": "189.112.126.162, 172.70.248.33",
+            "x-forwarded-host": "joaomarcos1303.app.n8n.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "traefik-prod-users-gwc-13-6db466c7ff-d7vlh",
+            "x-is-trusted": "yes",
+            "x-real-ip": "189.112.126.162"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "arquivo": "35503081269034668000156000000683884325120052769591.xml",
+            "modo": "map_only",
+            "cep": "05425902",
+            "dados_parciais": {
+              "padrao": "nacional",
+              "numero": "6838843",
+              "vlr_trib": "0.00",
+              "vlr_doc": "0.00",
+              "cnpj_p": "69034668000156",
+              "razao_p": "PLUXEE BENEFICIOS BRASIL S.A.",
+              "im_p": "77184114",
+              "iss_ret": "1",
+              "uf": "SP",
+              "codigo_municipio": null,
+              "aliq_val": "2.00",
+              "dt_fmt": "31122025",
+              "item_lc_final": "171201 - Administração em geral, inclusive de bens e negócios de terceiros.",
+              "cep": "05425902",
+              "endereco": "DRA RUTH CARDOSO",
+              "numero_end": "7221",
+              "bairro": "PINHEIROS"
+            },
+            "conteudo_xml": "<?xml version=\"1.0\" encoding=\"utf-8\"?><NFSe xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" versao=\"1.01\" xmlns=\"http://www.sped.fazenda.gov.br/nfse\"><infNFSe Id=\"NFS35503081269034668000156000000683884325120052769591\"><xLocEmi>São Paulo</xLocEmi><xLocPrestacao>São Paulo</xLocPrestacao><nNFSe>6838843</nNFSe><cLocIncid>3550308</cLocIncid><xTribNac>Administração em geral, inclusive de bens e negócios de terceiros.</xTribNac><verAplic>1.0.4+8D0A89</verAplic><ambGer>1</ambGer><tpEmis>2</tpEmis><cStat>100</cStat><dhProc>2025-12-31T14:18:51-03:00</dhProc><nDFSe>6838843</nDFSe><emit><CNPJ>69034668000156</CNPJ><IM>77184114</IM><xNome>PLUXEE BENEFICIOS BRASIL S.A.</xNome><enderNac><xLgr>DRA RUTH CARDOSO</xLgr><nro>7221</nro><xCpl>CONJ  801 901 E 1201</xCpl><xBairro>PINHEIROS</xBairro><cMun>3550308</cMun><UF>SP</UF><CEP>05425902</CEP></enderNac></emit><valores><vBC>0.00</vBC><pAliqAplic>2.00</pAliqAplic><vISSQN>0.00</vISSQN><vLiq>0.00</vLiq></valores><DPS versao=\"1.01\"><infDPS Id=\"DPS355030826903466800015600001000000006838843\"><tpAmb>1</tpAmb><dhEmi>2025-12-31T14:18:51-03:00</dhEmi><verAplic>1.0.4+8D0A89</verAplic><serie>1</serie><nDPS>6838843</nDPS><dCompet>2025-12-31</dCompet><tpEmit>1</tpEmit><cLocEmi>3550308</cLocEmi><prest><CNPJ>69034668000156</CNPJ><IM>77184114</IM><regTrib><opSimpNac>1</opSimpNac><regEspTrib>0</regEspTrib></regTrib></prest><toma><CNPJ>18862523000102</CNPJ><xNome>CENTROBELT PRODUTOS E COMERCIO DE B</xNome><end><endNac><cMun>5208707</cMun><CEP>74375280</CEP></endNac><xLgr>R  DAS MAGNOLIAS</xLgr><nro>1354</nro><xCpl>QUADRA103 LOTE 01</xCpl><xBairro>PARQUE OESTE INDUSTRIAL</xBairro></end><email>financeiro@nevaskadistribuidora.com.br</email></toma><serv><locPrest><cLocPrestacao>3550308</cLocPrestacao></locPrest><cServ><cTribNac>171201</cTribNac><cTribMun>004</cTribMun><xDescServ>17 ALIMENTAÇÃO EMV 4790.00 \nGESTAO COBRANCA 0.00 \\ TX DISPON CREDITO 0.00 \\ TX ADMIN 0.00 \nIRRF RECOLHIMENTO EFETUADO PELO EMITENTE CONF. IN/SRF 153/87 R$0.00 \nSERVIÇO ENQUADRADO COMO ADMINISTRAÇÃO DE CONVÊNIO \nEntr/Cred 31/12/2025 \n Nro Pedido.: 41183828/25</xDescServ><cNBS>999999999</cNBS><cIntContrib>0000002238424D</cIntContrib></cServ></serv><valores><vServPrest><vServ>0.00</vServ></vServPrest><trib><tribMun><tribISSQN>1</tribISSQN><tpRetISSQN>1</tpRetISSQN><pAliq>2.00</pAliq></tribMun><totTrib><vTotTrib><vTotTribFed>0.00</vTotTribFed><vTotTribEst>0.00</vTotTribEst><vTotTribMun>0.00</vTotTribMun></vTotTrib></totTrib></trib></valores></infDPS></DPS></infNFSe><Signature xmlns=\"http://www.w3.org/2000/09/xmldsig#\"><SignedInfo><CanonicalizationMethod Algorithm=\"http://www.w3.org/TR/2001/REC-xml-c14n-20010315\" /><SignatureMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#rsa-sha1\" /><Reference URI=\"#NFS35503081269034668000156000000683884325120052769591\"><Transforms><Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\" /><Transform Algorithm=\"http://www.w3.org/TR/2001/REC-xml-c14n-20010315\" /></Transforms><DigestMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#sha1\" /><DigestValue>q1jozDm+3l2EjmETF1CjGDA1rxY=</DigestValue></Reference></SignedInfo><SignatureValue>vcbzoHziSh0hdkvLtW0eN76JTNbm5qoC7q6/jjn88/VNQBf07hH7g6kRfhKRr3TXErTUbs1YRl4VsHJjmJT8RVI3pdFyodW2nRCriVvpDRjXHNHyIcv6e/BwlhuYvXIkEwmvewNJAtUDrlUpl5FSStDStPh7o/q62XhpOu30xMrSEW1J08XJ1hrG96cjEJky2MTK9LEdFXOji9HJ+LaBL7Xum3V+bMOl/am2BM7Gt7n5yrQ1OP/BCSAPfAmcv5nUIwr+EuSndT6VysWKivlurOBfO496fRgzHj/D1CdGDyK9aQxJ1qtIBqFsgWcmVCNLRqFiAdJnP44Z36rGLcNDTg==</SignatureValue><KeyInfo><X509Data><X509Certificate>MIIHbTCCBVWgAwIBAgIIEd4lAhQ5orAwDQYJKoZIhvcNAQELBQAwdTELMAkGA1UEBhMCQlIxEzARBgNVBAoTCklDUC1CcmFzaWwxNjA0BgNVBAsTLVNlY3JldGFyaWEgZGEgUmVjZWl0YSBGZWRlcmFsIGRvIEJyYXNpbCAtIFJGQjEZMBcGA1UEAxMQQUMgU09MVVRJIFJGQiBWNTAeFw0yNTAyMTQxMjM0MDBaFw0yNjAyMTQxMjM0MDBaMIIBADELMAkGA1UEBhMCQlIxEzARBgNVBAoTCklDUC1CcmFzaWwxCzAJBgNVBAgTAlNQMRIwEAYDVQQHEwlTYW8gUGF1bG8xGTAXBgNVBAsTEFZpZGVvY29uZmVyZW5jaWExFzAVBgNVBAsTDjA5NDYxNjQ3MDAwMTk1MTYwNAYDVQQLEy1TZWNyZXRhcmlhIGRhIFJlY2VpdGEgRmVkZXJhbCBkbyBCcmFzaWwgLSBSRkIxFjAUBgNVBAsTDVJGQiBlLUNOUEogQTExNzA1BgNVBAMTLlNFQ1JFVEFSSUEgTVVOSUNJUEFMIERBIEZBWkVOREE6NDYzOTIxMzAwMDAxMTgwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDWRc08e70Cr3zFqn5vvq9IVoOpv+NmPuzkXcqCMPfuRVatRE2Q0rD9mzzAHps4LAfrpsRyz9p7mmbmwsCNluDhBJzyKnqUFzd/9XuWXud3CUpT8tdPm7EFFKjFIDoHxFRc7AEzIqatg2kBxqdpuc/T1vyjPI4L9ZA5FHqYXDP1rhOx2Px5yrYJZkZLZBwBZW/qU9u993V+gq/dboCTTRHgEstrVk7aj6a9prPP211mMQxE9UZXFSZESI5ePPIqnySiIoxqMM7RlcyCQy0HE//ZTex2yQZo1vFO3cHWez7q7Byv/So6OHeDPAEgrLluvQ+hCHd5y2cl6ORp5Ajs+15NAgMBAAGjggJyMIICbjAJBgNVHRMEAjAAMB8GA1UdIwQYMBaAFPzyggCy+L2f1YLbYCAnMzzCvsyZME8GCCsGAQUFBwEBBEMwQTA/BggrBgEFBQcwAoYzaHR0cDovL2NjZC5hY3NvbHV0aS5jb20uYnIvbGNyL2FjLXNvbHV0aS1yZmItdjUucDdiMIHDBgNVHREEgbswgbiBIWxhcmVsbGFub0BzZi5wcmVmZWl0dXJhLnNwLmdvdi5icqAlBgVgTAEDAqAcExpMVUlTIEZFTElQRSBWSURBTCBBUkVMTEFOT6AZBgVgTAEDA6AQEw40NjM5MjEzMDAwMDExOKA4BgVgTAEDBKAvEy0xOTA0MTk4NzM2NjYzMTAxODQ2MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDCgFwYFYEwBAwegDhMMMDAwMDAwMDAwMDAwMFgGA1UdIARRME8wTQYGYEwBAgEoMEMwQQYIKwYBBQUHAgEWNWh0dHA6Ly9jY2QuYWNzb2x1dGkuY29tLmJyL2RvY3MvZHBjLWFjLXNvbHV0aS1yZmIucGRmMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDBDCBgAYDVR0fBHkwdzA5oDegNYYzaHR0cDovL2NjZC5hY3NvbHV0aS5jb20uYnIvbGNyL2FjLXNvbHV0aS1yZmItdjUuY3JsMDqgOKA2hjRodHRwOi8vY2NkMi5hY3NvbHV0aS5jb20uYnIvbGNyL2FjLXNvbHV0aS1yZmItdjUuY3JsMB0GA1UdDgQWBBR5NuHnMeGlxRzdDfgOgckc8RO86zAOBgNVHQ8BAf8EBAMCBeAwDQYJKoZIhvcNAQELBQADggIBALmbiZ7SAHGobaJoXlzoe6GwtpDxZYL1YSEO39t8hJIdl0BiDuS/l7vXZ20TYm0UufEkRAQsbQ2i9Um8ZKDHTASLfUJ7Z3xIIQfTqcE/Lkbcb9eckHbwz+bHMBL023q1gGgZfSzkLrhUjaUck7Zy/KhABMsvpfJaZNc6u0LDh8Nh1qkD6C+T6/UarYl8ICK4W9Usbf169Y0KAdi+KsHYggF7/xAzLeddHVBZsopPhSjUWJIYbdNLQsTh4S00N7C0WRv67zFCYKm0OKQ/F+IHf705Lha6tJtGdl6rqcdDgXOJ3ZOfjHuYdTtjvQim96dOZPGVe5ZHPbTwjWeFYWIWCSH+A5AFxPG5a3xDA5zbUeC42bVsLTikv7iA6EXDb+hAiE4NCexa2f4O/q32NAulUw7K0x8qgV7eiB51H0z91D6PqeBYGE9owZt4xQA9vClkz6fXP1iK68H+0O/g1/Sa9ehvbIwKgMgg5i727QaUD2cRDokMfGIlp1+9lTjt6YdldxQE75obSnA8TYztwF7ZIXEQQA1BhZERdLLE3VLepdS62eADRDuEpYvo+EaYCrNyMP9tPd0emNQlj2uEDnxo62UCcQXH6yP8/GgBuesGyzMiIIog2Lddw3BLC0BS9GHP5IFUxCPJ98z66UHjlh3DttZpVNf+sGINNY0hI49mT4WK</X509Certificate></X509Data></KeyInfo></Signature></NFSe>"
+          },
+          "webhookUrl": "https://joaomarcos1303.app.n8n.cloud/webhook-test/nfse-processing",
+          "executionMode": "test"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Extrair JSON LC 116": [
+      {
+        "json": {
+          "data": [
+            {
+              "id": "1.01",
+              "content": "Análise e desenvolvimento de sistemas.",
+              "metadata": {
+                "codigo_servico": "1.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "1.02",
+              "content": "Programação.",
+              "metadata": {
+                "codigo_servico": "1.02",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "1.03",
+              "content": "Processamento, armazenamento ou hospedagem de dados, textos, imagens, vídeos, páginas eletrônicas, aplicativos e sistemas de informação, entre outros formatos, e congêneres.",
+              "metadata": {
+                "codigo_servico": "1.03",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "1.04",
+              "content": "Elaboração de programas de computadores, inclusive de jogos eletrônicos, independentemente da arquitetura construtiva da máquina em que o programa será executado, incluindo tablets, smartphones e congêneres.",
+              "metadata": {
+                "codigo_servico": "1.04",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "1.05",
+              "content": "Licenciamento ou cessão de direito de uso de programas de computação.",
+              "metadata": {
+                "codigo_servico": "1.05",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "1.06",
+              "content": "Assessoria e consultoria em informática.",
+              "metadata": {
+                "codigo_servico": "1.06",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "1.07",
+              "content": "Suporte técnico em informática, inclusive instalação, configuração e manutenção de programas de computação e bancos de dados.",
+              "metadata": {
+                "codigo_servico": "1.07",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "1.08",
+              "content": "Planejamento, confecção, manutenção e atualização de páginas eletrônicas.",
+              "metadata": {
+                "codigo_servico": "1.08",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "1.09",
+              "content": "Disponibilização, sem cessão definitiva, de conteúdos de áudio, vídeo, imagem e texto por meio da internet, respeitada a imunidade de livros, jornais e periódicos (exceto a distribuição de conteúdos pelas prestadoras de Serviço de Acesso Condicionado, de que trata a Lei nº 12.485, de 12 de setembro de 2011, sujeita ao ICMS).",
+              "metadata": {
+                "codigo_servico": "1.09",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "2.01",
+              "content": "Serviços de pesquisas e desenvolvimento de qualquer natureza.",
+              "metadata": {
+                "codigo_servico": "2.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "3.02",
+              "content": "Cessão de direito de uso de marcas e de sinais de propaganda.",
+              "metadata": {
+                "codigo_servico": "3.02",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "3.03",
+              "content": "Exploração de salões de festas, centro de convenções, escritórios virtuais, stands, quadras esportivas, estádios, ginásios, auditórios, casas de espetáculos, parques de diversões, canchas e congêneres, para realização de eventos ou negócios de qualquer natureza.",
+              "metadata": {
+                "codigo_servico": "3.03",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "3.04",
+              "content": "Locação, sublocação, arrendamento, direito de passagem ou permissão de uso, compartilhado ou não, de ferrovia, rodovia, postes, cabos, dutos e condutos de qualquer natureza.",
+              "metadata": {
+                "codigo_servico": "3.04",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "3.05",
+              "content": "Cessão de andaimes, palcos, coberturas e outras estruturas de uso temporário.",
+              "metadata": {
+                "codigo_servico": "3.05",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "4.01",
+              "content": "Medicina e biomedicina.",
+              "metadata": {
+                "codigo_servico": "4.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "4.02",
+              "content": "Análises clínicaS, patologia, eletricidade médica, radioterapia, quimioterapia, ultra-sonografia, ressonância magnética, radiologia, tomografia e congêneres.",
+              "metadata": {
+                "codigo_servico": "4.02",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "4.03",
+              "content": "Hospitais, clínicas, laboratórios, sanatórios, manicômios, casas de saúde, prontos-socorros, ambulatórios e congêneres.",
+              "metadata": {
+                "codigo_servico": "4.03",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "4.04",
+              "content": "Instrumentação cirúrgica.",
+              "metadata": {
+                "codigo_servico": "4.04",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "4.05",
+              "content": "Acupuntura.",
+              "metadata": {
+                "codigo_servico": "4.05",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "4.06",
+              "content": "Enfermagem, inclusive serviços auxiliares.",
+              "metadata": {
+                "codigo_servico": "4.06",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "4.07",
+              "content": "Serviços farmacêuticos.",
+              "metadata": {
+                "codigo_servico": "4.07",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "4.08",
+              "content": "Terapia ocupacional, fisioterapia e fonoaudiologia.",
+              "metadata": {
+                "codigo_servico": "4.08",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "4.09",
+              "content": "Terapias de qualquer espécie destinadas ao tratamento físico, orgânico e mental.",
+              "metadata": {
+                "codigo_servico": "4.09",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "4.10",
+              "content": "Nutrição.",
+              "metadata": {
+                "codigo_servico": "4.10",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "4.11",
+              "content": "Obstetrícia.",
+              "metadata": {
+                "codigo_servico": "4.11",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "4.12",
+              "content": "Odontologia.",
+              "metadata": {
+                "codigo_servico": "4.12",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "4.13",
+              "content": "Ortóptica.",
+              "metadata": {
+                "codigo_servico": "4.13",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "4.14",
+              "content": "Próteses sob encomenda.",
+              "metadata": {
+                "codigo_servico": "4.14",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "4.15",
+              "content": "Psicanálise.",
+              "metadata": {
+                "codigo_servico": "4.15",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "4.16",
+              "content": "Psicologia.",
+              "metadata": {
+                "codigo_servico": "4.16",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "4.17",
+              "content": "Casas de repouso e de recuperação, creches, asilos e congêneres.",
+              "metadata": {
+                "codigo_servico": "4.17",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "4.18",
+              "content": "Inseminação artificial, fertilização in vitro e congêneres.",
+              "metadata": {
+                "codigo_servico": "4.18",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "4.19",
+              "content": "Bancos de sangue, leite, pele, olhos, óvulos, sêmen e congêneres.",
+              "metadata": {
+                "codigo_servico": "4.19",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "4.20",
+              "content": "Coleta de sangue, leite, tecidos, sêmen, órgãos e materiais biológicos de qualquer espécie.",
+              "metadata": {
+                "codigo_servico": "4.20",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "4.21",
+              "content": "Unidade de atendimento, assistência ou tratamento móvel e congêneres.",
+              "metadata": {
+                "codigo_servico": "4.21",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "4.22",
+              "content": "Planos de medicina de grupo ou individual e convênios para prestação de assistência médica, hospitalar, odontológica e congêneres.",
+              "metadata": {
+                "codigo_servico": "4.22",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "4.23",
+              "content": "Outros planos de saúde que se cumpram através de serviços de terceiros contratados, credenciados, cooperados ou apenas pagos pelo operador do plano mediante indicação do beneficiário.",
+              "metadata": {
+                "codigo_servico": "4.23",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "5.01",
+              "content": "Medicina veterinária e zootecnia.",
+              "metadata": {
+                "codigo_servico": "5.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "5.02",
+              "content": "Hospitais, clínicas, ambulatórios, prontos-socorros e congêneres, na área veterinária.",
+              "metadata": {
+                "codigo_servico": "5.02",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "5.03",
+              "content": "Laboratórios de análise na área veterinária.",
+              "metadata": {
+                "codigo_servico": "5.03",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "5.04",
+              "content": "Inseminação artificial, fertilização in vitro e congêneres.",
+              "metadata": {
+                "codigo_servico": "5.04",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "5.05",
+              "content": "Bancos de sangue e de órgãos e congêneres.",
+              "metadata": {
+                "codigo_servico": "5.05",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "5.06",
+              "content": "Coleta de sangue, leite, tecidos, sêmen, órgãos e materiais biológicos de qualquer espécie.",
+              "metadata": {
+                "codigo_servico": "5.06",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "5.07",
+              "content": "Unidade de atendimento, assistência ou tratamento móvel e congêneres.",
+              "metadata": {
+                "codigo_servico": "5.07",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "5.08",
+              "content": "Guarda, tratamento, amestramento, embelezamento, alojamento e congêneres.",
+              "metadata": {
+                "codigo_servico": "5.08",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "5.09",
+              "content": "Planos de atendimento e assistência médico-veterinária.",
+              "metadata": {
+                "codigo_servico": "5.09",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "6.01",
+              "content": "Barbearia, cabeleireiros, manicuros, pedicuros e congêneres.",
+              "metadata": {
+                "codigo_servico": "6.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "6.02",
+              "content": "Esteticistas, tratamento de pele, depilação e congêneres.",
+              "metadata": {
+                "codigo_servico": "6.02",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "6.03",
+              "content": "Banhos, duchas, sauna, massagens e congêneres.",
+              "metadata": {
+                "codigo_servico": "6.03",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "6.04",
+              "content": "Ginástica, dança, esportes, natação, artes marciais e demais atividades físicas.",
+              "metadata": {
+                "codigo_servico": "6.04",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "6.05",
+              "content": "Centros de emagrecimento, spa e congêneres.",
+              "metadata": {
+                "codigo_servico": "6.05",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "6.06",
+              "content": "Aplicação de tatuagens, piercings e congêneres.",
+              "metadata": {
+                "codigo_servico": "6.06",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "7.01",
+              "content": "Engenharia, agronomia, agrimensura, arquitetura, geologia, urbanismo, paisagismo e congêneres.",
+              "metadata": {
+                "codigo_servico": "7.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "7.02",
+              "content": "Execução, por administração, empreitada ou subempreitada, de obras de construção civil, hidráulica ou elétrica e de outras obras semelhantes, inclusive sondagem, perfuração de poços, escavação, drenagem e irrigação, terraplanagem, pavimentação, concretagem e a instalação e montagem de produtos, peças e equipamentos (exceto o fornecimento de mercadorias produzidas pelo prestador de serviços fora do local da prestação dos serviços, que fica sujeito ao ICMS).",
+              "metadata": {
+                "codigo_servico": "7.02",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "7.03",
+              "content": "Elaboração de planos diretores, estudos de viabilidade, estudos organizacionais e outros, relacionados com obras e serviços de engenharia; elaboração de anteprojetos, projetos básicos e projetos executivos para trabalhos de engenharia.",
+              "metadata": {
+                "codigo_servico": "7.03",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "7.04",
+              "content": "Demolição.",
+              "metadata": {
+                "codigo_servico": "7.04",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "7.05",
+              "content": "Reparação, conservação e reforma de edifícios, estradas, pontes, portos e congêneres (exceto o fornecimento de mercadorias produzidas pelo prestador dos serviços, fora do local da prestação dos serviços, que fica sujeito ao ICMS).",
+              "metadata": {
+                "codigo_servico": "7.05",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "7.06",
+              "content": "Colocação e instalação de tapetes, carpetes, assoalhos, cortinas, revestimentos de parede, vidros, divisórias, placas de gesso e congêneres, com material fornecido pelo tomador do serviço.",
+              "metadata": {
+                "codigo_servico": "7.06",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "7.07",
+              "content": "Recuperação, raspagem, polimento e lustração de pisos e congêneres.",
+              "metadata": {
+                "codigo_servico": "7.07",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "7.08",
+              "content": "Calafetação.",
+              "metadata": {
+                "codigo_servico": "7.08",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "7.09",
+              "content": "Varrição, coleta, remoção, incineração, tratamento, reciclagem, separação e destinação final de lixo, rejeitos e outros resíduos quaisquer.",
+              "metadata": {
+                "codigo_servico": "7.09",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "7.10",
+              "content": "Limpeza, manutenção e conservação de vias e logradouros públicos, imóveis, chaminés, piscinas, parques, jardins e congêneres.",
+              "metadata": {
+                "codigo_servico": "7.10",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "7.11",
+              "content": "Decoração e jardinagem, inclusive corte e poda de árvores.",
+              "metadata": {
+                "codigo_servico": "7.11",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "7.12",
+              "content": "Controle e tratamento de efluentes de qualquer natureza e de agentes físicos, químicos e biológicos.",
+              "metadata": {
+                "codigo_servico": "7.12",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "7.13",
+              "content": "Dedetização, desinfecção, desinsetização, imunização, higienização, desratização, pulverização e congêneres.",
+              "metadata": {
+                "codigo_servico": "7.13",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "7.16",
+              "content": "Florestamento, reflorestamento, semeadura, adubação, reparação de solo, plantio, silagem, colheita, corte e descascamento de árvores, silvicultura, exploração florestal e dos serviços congêneres indissociáveis da formação, manutenção e colheita de florestas, para quaisquer fins e por quaisquer meios.",
+              "metadata": {
+                "codigo_servico": "7.16",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "7.17",
+              "content": "Escoramento, contenção de encostas e serviços congêneres.",
+              "metadata": {
+                "codigo_servico": "7.17",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "7.18",
+              "content": "Limpeza e dragagem de rios, portos, canais, baías, lagos, lagoas, represas, açudes e congêneres.",
+              "metadata": {
+                "codigo_servico": "7.18",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "7.19",
+              "content": "Acompanhamento e fiscalização da execução de obras de engenharia, arquitetura e urbanismo.",
+              "metadata": {
+                "codigo_servico": "7.19",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "7.20",
+              "content": "Aerofotogrametria (inclusive interpretação), cartografia, mapeamento, levantamentos topográficos, batimétricos, geográficos, geodésicos, geológicos, geofísicos e congêneres.",
+              "metadata": {
+                "codigo_servico": "7.20",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "7.21",
+              "content": "Pesquisa, perfuração, cimentação, mergulho, perfilagem, concretação, testemunhagem, pescaria, estimulação e outros serviços relacionados com a exploração e explotação de petróleo, gás natural e de outros recursos minerais.",
+              "metadata": {
+                "codigo_servico": "7.21",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "7.22",
+              "content": "Nucleação e bombardeamento de nuvens e congêneres.",
+              "metadata": {
+                "codigo_servico": "7.22",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "8.01",
+              "content": "Ensino regular pré-escolar, fundamental, médio e superior.",
+              "metadata": {
+                "codigo_servico": "8.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "8.02",
+              "content": "Instrução, treinamento, orientação pedagógica e educacional, avaliação de conhecimentos de qualquer natureza.",
+              "metadata": {
+                "codigo_servico": "8.02",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "9.01",
+              "content": "Hospedagem de qualquer natureza em hotéis, apart-service condominiais, flat, apart-hotéis, hotéis residência, residence-service, suite service, hotelaria marítima, motéis, pensões e congêneres; ocupação por temporada com fornecimento de serviço (o valor da alimentação e gorjeta, quando incluído no preço da diária, fica sujeito ao Imposto Sobre Serviços).",
+              "metadata": {
+                "codigo_servico": "9.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "9.02",
+              "content": "Agenciamento, organização, promoção, intermediação e execução de programas de turismo, passeios, viagens, excursões, hospedagens e congêneres.",
+              "metadata": {
+                "codigo_servico": "9.02",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "9.03",
+              "content": "Guias de turismo.",
+              "metadata": {
+                "codigo_servico": "9.03",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "10.01",
+              "content": "Agenciamento, corretagem ou intermediação de câmbio, de seguros, de cartões de crédito, de planos de saúde e de planos de previdência privada.",
+              "metadata": {
+                "codigo_servico": "10.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "10.02",
+              "content": "Agenciamento, corretagem ou intermediação de títulos em geral, valores mobiliários e contratos quaisquer.",
+              "metadata": {
+                "codigo_servico": "10.02",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "10.03",
+              "content": "Agenciamento, corretagem ou intermediação de direitos de propriedade industrial, artística ou literária.",
+              "metadata": {
+                "codigo_servico": "10.03",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "10.04",
+              "content": "Agenciamento, corretagem ou intermediação de contratos de arrendamento mercantil (leasing), de franquia (franchising) e de faturização (factoring).",
+              "metadata": {
+                "codigo_servico": "10.04",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "10.05",
+              "content": "Agenciamento, corretagem ou intermediação de bens móveis ou imóveis, não abrangidos em outros itens ou subitens, inclusive aqueles realizados no âmbito de Bolsas de Mercadorias e Futuros, por quaisquer meios.",
+              "metadata": {
+                "codigo_servico": "10.05",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "10.06",
+              "content": "Agenciamento marítimo.",
+              "metadata": {
+                "codigo_servico": "10.06",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "10.07",
+              "content": "Agenciamento de noticias.",
+              "metadata": {
+                "codigo_servico": "10.07",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "10.08",
+              "content": "Agenciamento de publicidade e propaganda, inclusive o agenciamento de veiculação por quaisquer meios.",
+              "metadata": {
+                "codigo_servico": "10.08",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "10.09",
+              "content": "Representação de qualquer natureza, inclusive comercial.",
+              "metadata": {
+                "codigo_servico": "10.09",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "10.10",
+              "content": "Distribuição de bens de terceiros.",
+              "metadata": {
+                "codigo_servico": "10.10",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "11.01",
+              "content": "Guarda e estacionamento de veículos terrestres automotores, de aeronaves e de embarcações.",
+              "metadata": {
+                "codigo_servico": "11.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "11.02",
+              "content": "Vigilância, segurança ou monitoramento de bens, pessoas e semoventes.",
+              "metadata": {
+                "codigo_servico": "11.02",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "11.03",
+              "content": "Escolta, inclusive de veículos e cargas.",
+              "metadata": {
+                "codigo_servico": "11.03",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "11.04",
+              "content": "Armazenamento, depósito, carga, descarga, arrumação e guarda de bens de qualquer espécie.",
+              "metadata": {
+                "codigo_servico": "11.04",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "11.05",
+              "content": "Serviços relacionados ao monitoramento e rastreamento a distância, em qualquer via ou local, de veículos, cargas, pessoas e semoventes em circulação ou movimento, realizados por meio de telefonia móvel, transmissão de satélites, rádio ou qualquer outro meio, inclusive pelas empresas de Tecnologia da Informação Veicular, independentemente de o prestador de serviços ser proprietário ou não da infraestrutura de telecomunicações que utiliza.",
+              "metadata": {
+                "codigo_servico": "11.05",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "12.01",
+              "content": "Espetáculos teatrais.",
+              "metadata": {
+                "codigo_servico": "12.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "12.02",
+              "content": "Exibições cinematográficas.",
+              "metadata": {
+                "codigo_servico": "12.02",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "12.03",
+              "content": "Espetáculos circenses.",
+              "metadata": {
+                "codigo_servico": "12.03",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "12.04",
+              "content": "Programas de auditório.",
+              "metadata": {
+                "codigo_servico": "12.04",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "12.05",
+              "content": "Parques de diversões, centros de lazer e congêneres.",
+              "metadata": {
+                "codigo_servico": "12.05",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "12.06",
+              "content": "Boates, taxi-dancing e congêneres.",
+              "metadata": {
+                "codigo_servico": "12.06",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "12.07",
+              "content": "Shows, ballet, danças, desfiles, bailes, óperas, concertos, recitais, festivais e congêneres.",
+              "metadata": {
+                "codigo_servico": "12.07",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "12.08",
+              "content": "Feiras, exposições, congressos e congêneres.",
+              "metadata": {
+                "codigo_servico": "12.08",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "12.09",
+              "content": "Bilhares, boliches e diversões eletrônicas ou não.",
+              "metadata": {
+                "codigo_servico": "12.09",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "12.10",
+              "content": "Corridas e competições de animais.",
+              "metadata": {
+                "codigo_servico": "12.10",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "12.11",
+              "content": "Competições esportivas ou de destreza física ou intelectual, com ou sem a participação do espectador.",
+              "metadata": {
+                "codigo_servico": "12.11",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "12.12",
+              "content": "Execução de música.",
+              "metadata": {
+                "codigo_servico": "12.12",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "12.13",
+              "content": "Produção, mediante ou sem encomenda prévia, de eventos, espetáculos, entrevistas, shows, ballet, danças, desfiles, bailes, teatros, óperas, concertos, recitais, festivais e congêneres.",
+              "metadata": {
+                "codigo_servico": "12.13",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "12.14",
+              "content": "Fornecimento de música para ambientes fechados ou não, mediante transmissão por qualquer processo.",
+              "metadata": {
+                "codigo_servico": "12.14",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "12.15",
+              "content": "Desfiles de blocos carnavalescos ou folclóricos, trios elétricos e congêneres.",
+              "metadata": {
+                "codigo_servico": "12.15",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "12.16",
+              "content": "Exibição de filmes, entrevistas, musicais, espetáculos, shows, concertos, desfiles, óperas, competições esportivas, de destreza intelectual ou congêneres.",
+              "metadata": {
+                "codigo_servico": "12.16",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "12.17",
+              "content": "Recreação e animação, inclusive em festas e eventos de qualquer natureza.",
+              "metadata": {
+                "codigo_servico": "12.17",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "13.02",
+              "content": "Fonografia ou gravação de sons, inclusive trucagem, dublagem, mixagem e congêneres.",
+              "metadata": {
+                "codigo_servico": "13.02",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "13.03",
+              "content": "Fotografia e cinematografia, inclusive revelação, ampliação, cópia, reprodução, trucagem e congêneres.",
+              "metadata": {
+                "codigo_servico": "13.03",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "13.04",
+              "content": "Reprografia, microfilmagem e digitalização.",
+              "metadata": {
+                "codigo_servico": "13.04",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "13.05",
+              "content": "Composição gráfica, inclusive confecção de impressos gráficos, fotocomposição, clicheria, zincografia, litografia e fotolitografia, exceto se destinados a posterior operação de comercialização ou industrialização, ainda que incorporados, de qualquer forma, a outra mercadoria que deva ser objeto de posterior circulação, tais como bulas, rótulos, etiquetas, caixas, cartuchos, embalagens e manuais técnicos e de instrução, quando ficarão sujeitos ao ICMS.",
+              "metadata": {
+                "codigo_servico": "13.05",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "14.01",
+              "content": "Lubrificação, limpeza, lustração, revisão, carga e recarga, conserto, restauração, blindagem, manutenção e conservação de máquinas, veículos, aparelhos, equipamentos, motores, elevadores ou de qualquer objeto (exceto peças e partes empregadas, que ficam sujeitas ao ICMS).",
+              "metadata": {
+                "codigo_servico": "14.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "14.02",
+              "content": "Assistência técnica.",
+              "metadata": {
+                "codigo_servico": "14.02",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "14.03",
+              "content": "Recondicionamento de motores (exceto peças e partes empregadas, que ficam sujeitas ao ICMS).",
+              "metadata": {
+                "codigo_servico": "14.03",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "14.04",
+              "content": "Recauchutagem ou regeneração de pneus.",
+              "metadata": {
+                "codigo_servico": "14.04",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "14.05",
+              "content": "Restauração, recondicionamento, acondicionamento, pintura, beneficiamento, lavagem, secagem, tingimento, galvanoplastia, anodização, corte, recorte, plastificação, costura, acabamento, polimento e congêneres de objetos quaisquer.",
+              "metadata": {
+                "codigo_servico": "14.05",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "14.06",
+              "content": "Instalação e montagem de aparelhos, máquinas e equipamentos, inclusive montagem industrial, prestados ao usuário final, exclusivamente com material por ele fornecido.",
+              "metadata": {
+                "codigo_servico": "14.06",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "14.07",
+              "content": "Colocação de molduras e congêneres.",
+              "metadata": {
+                "codigo_servico": "14.07",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "14.08",
+              "content": "Encadernação, gravação e douração de livros, revistas e congêneres.",
+              "metadata": {
+                "codigo_servico": "14.08",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "14.09",
+              "content": "Alfaiataria e costura, quando o material for fornecido pelo usuário final, exceto aviamento.",
+              "metadata": {
+                "codigo_servico": "14.09",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "14.10",
+              "content": "Tinturaria e lavanderia.",
+              "metadata": {
+                "codigo_servico": "14.10",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "14.11",
+              "content": "Tapeçaria e reforma de estofamentos em geral.",
+              "metadata": {
+                "codigo_servico": "14.11",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "14.12",
+              "content": "Funilaria e lanternagem.",
+              "metadata": {
+                "codigo_servico": "14.12",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "14.13",
+              "content": "Carpintaria e serralheria.",
+              "metadata": {
+                "codigo_servico": "14.13",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "14.14",
+              "content": "Guincho intramunicipal, guindaste e içamento.",
+              "metadata": {
+                "codigo_servico": "14.14",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "15.01",
+              "content": "Administração de fundos quaisquer, de consórcio, de cartão de crédito ou débito e congêneres, de carteira de clientes, de cheques pré-datados e congêneres.",
+              "metadata": {
+                "codigo_servico": "15.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "15.02",
+              "content": "Abertura de contas em geral, inclusive conta-corrente, conta de investimentos e aplicação e caderneta de poupança, no País e no exterior, bem como a manutenção das referidas contas ativas e inativas.",
+              "metadata": {
+                "codigo_servico": "15.02",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "15.03",
+              "content": "Locação e manutenção de cofres particulares, de terminais eletrônicos, de terminais de atendimento e de bens e equipamentos em geral.",
+              "metadata": {
+                "codigo_servico": "15.03",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "15.04",
+              "content": "Fornecimento ou emissão de atestados em geral, inclusive atestado de idoneidade, atestado de capacidade financeira e congêneres.",
+              "metadata": {
+                "codigo_servico": "15.04",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "15.05",
+              "content": "Cadastro, elaboração de ficha cadastral, renovação cadastral e congêneres, inclusão ou exclusão no Cadastro de Emitentes de Cheques sem Fundos – CCF ou em quaisquer outros bancos cadastrais.",
+              "metadata": {
+                "codigo_servico": "15.05",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "15.06",
+              "content": "Emissão, reemissão e fornecimento de avisos, comprovantes e documentos em geral; abono de firmas; coleta e entrega de documentos, bens e valores; comunicação com outra agência ou com a administração central; licenciamento eletrônico de veículos; transferência de veículos; agenciamento fiduciário ou depositário; devolução de bens em custódia.",
+              "metadata": {
+                "codigo_servico": "15.06",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "15.07",
+              "content": "Acesso, movimentação, atendimento e consulta a contas em geral, por qualquer meio ou processo, inclusive por telefone, fac-símile, internet e telex, acesso a terminais de atendimento, inclusive vinte e quatro horas; acesso a outro banco e a rede compartilhada; fornecimento de saldo, extrato e demais informações relativas a contas em geral, por qualquer meio ou processo.",
+              "metadata": {
+                "codigo_servico": "15.07",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "15.08",
+              "content": "Emissão, reemissão, alteração, cessão, substituição, cancelamento e registro de contrato de crédito; estudo, análise e avaliação de operações de crédito; emissão, concessão, alteração ou contratação de aval, fiança, anuência e congêneres; serviços relativos a abertura de crédito, para quaisquer fins.",
+              "metadata": {
+                "codigo_servico": "15.08",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "15.09",
+              "content": "Arrendamento mercantil (leasing) de quaisquer bens, inclusive cessão de direitos e obrigações, substituição de garantia, alteração, cancelamento e registro de contrato, e demais serviços relacionados ao arrendamento mercantil (leasing).",
+              "metadata": {
+                "codigo_servico": "15.09",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "15.10",
+              "content": "Serviços relacionados a cobranças, recebimentos ou pagamentos em geral, de títulos quaisquer, de contas ou carnês, de câmbio, de tributos e por conta de terceiros, inclusive os efetuados por meio eletrônico, automático ou por máquinas de atendimento; fornecimento de posição de cobrança, recebimento ou pagamento; emissão de carnês, fichas de compensação, impressos e documentos em geral.",
+              "metadata": {
+                "codigo_servico": "15.10",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "15.11",
+              "content": "Devolução de títulos, protesto de títulos, sustação de protesto, manutenção de títulos, reapresentação de títulos, e demais serviços a eles relacionados.",
+              "metadata": {
+                "codigo_servico": "15.11",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "15.12",
+              "content": "Custódia em geral, inclusive de títulos e valores mobiliários.",
+              "metadata": {
+                "codigo_servico": "15.12",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "15.13",
+              "content": "Serviços relacionados a operações de câmbio em geral, edição, alteração, prorrogação, cancelamento e baixa de contrato de câmbio; emissão de registro de exportação ou de crédito; cobrança ou depósito no exterior; emissão, fornecimento e cancelamento de cheques de viagem; fornecimento, transferência, cancelamento e demais serviços relativos a carta de crédito de importação, exportação e garantias recebidas; envio e recebimento de mensagens em geral relacionadas a operações de câmbio.",
+              "metadata": {
+                "codigo_servico": "15.13",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "15.14",
+              "content": "Fornecimento, emissão, reemissão, renovação e manutenção de cartão magnético, cartão de crédito, cartão de débito, cartão salário e congêneres.",
+              "metadata": {
+                "codigo_servico": "15.14",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "15.15",
+              "content": "Compensação de cheques e títulos quaisquer; serviços relacionados a depósito, inclusive depósito identificado, a saque de contas quaisquer, por qualquer meio ou processo, inclusive em terminais eletrônicos e de atendimento.",
+              "metadata": {
+                "codigo_servico": "15.15",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "15.16",
+              "content": "Emissão, reemissão, liquidação, alteração, cancelamento e baixa de ordens de pagamento, ordens de crédito e similares, por qualquer meio ou processo; serviços relacionados à transferência de valores, dados, fundos, pagamentos e similares, inclusive entre contas em geral.",
+              "metadata": {
+                "codigo_servico": "15.16",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "15.17",
+              "content": "Emissão, fornecimento, devolução, sustação, cancelamento e oposição de cheques quaisquer, avulso ou por talão.",
+              "metadata": {
+                "codigo_servico": "15.17",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "15.18",
+              "content": "Serviços relacionados a crédito imobiliário, avaliação e vistoria de imóvel ou obra, análise técnica e jurídica, emissão, reemissão, alteração, transferência e renegociação de contrato, emissão e reemissão do termo de quitação e demais serviços relacionados a crédito imobiliário.",
+              "metadata": {
+                "codigo_servico": "15.18",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "16.01",
+              "content": "Serviços de transporte coletivo municipal rodoviário, metroviário, ferroviário e aquaviário de passageiros.",
+              "metadata": {
+                "codigo_servico": "16.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "16.02",
+              "content": "Outros serviços de transporte de natureza municipal.",
+              "metadata": {
+                "codigo_servico": "16.02",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "17.01",
+              "content": "Assessoria ou consultoria de qualquer natureza, não contida em outros itens desta lista; análise, exame, pesquisa, coleta, compilação e fornecimento de dados e informações de qualquer natureza, inclusive cadastro e similares.",
+              "metadata": {
+                "codigo_servico": "17.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "17.02",
+              "content": "Datilografia, digitação, estenografia, expediente, secretaria em geral, resposta audível, redação, edição, interpretação, revisão, tradução, apoio e infra-estrutura administrativa e congêneres.",
+              "metadata": {
+                "codigo_servico": "17.02",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "17.03",
+              "content": "Planejamento, coordenação, programação ou organização técnica, financeira ou administrativa.",
+              "metadata": {
+                "codigo_servico": "17.03",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "17.04",
+              "content": "Recrutamento, agenciamento, seleção e colocação de mão-de-obra.",
+              "metadata": {
+                "codigo_servico": "17.04",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "17.05",
+              "content": "Fornecimento de mão-de-obra, mesmo em caráter temporário, inclusive de empregados ou trabalhadores, avulsos ou temporários, contratados pelo prestador de serviço.",
+              "metadata": {
+                "codigo_servico": "17.05",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "17.06",
+              "content": "Propaganda e publicidade, inclusive promoção de vendas, planejamento de campanhas ou sistemas de publicidade, elaboração de desenhos, textos e demais materiais publicitários.",
+              "metadata": {
+                "codigo_servico": "17.06",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "17.08",
+              "content": "Franquia (franchising).",
+              "metadata": {
+                "codigo_servico": "17.08",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "17.09",
+              "content": "Perícias, laudos, exames técnicos e análises técnicas.",
+              "metadata": {
+                "codigo_servico": "17.09",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "17.10",
+              "content": "Planejamento, organização e administração de feiras, exposições, congressos e congêneres.",
+              "metadata": {
+                "codigo_servico": "17.10",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "17.11",
+              "content": "Organização de festas e recepções; bufê (exceto o fornecimento de alimentação e bebidas, que fica sujeito ao ICMS).",
+              "metadata": {
+                "codigo_servico": "17.11",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "17.12",
+              "content": "Administração em geral, inclusive de bens e negócios de terceiros.",
+              "metadata": {
+                "codigo_servico": "17.12",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "17.13",
+              "content": "Leilão e congêneres.",
+              "metadata": {
+                "codigo_servico": "17.13",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "17.14",
+              "content": "Advocacia.",
+              "metadata": {
+                "codigo_servico": "17.14",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "17.15",
+              "content": "Arbitragem de qualquer espécie, inclusive jurídica.",
+              "metadata": {
+                "codigo_servico": "17.15",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "17.16",
+              "content": "Auditoria.",
+              "metadata": {
+                "codigo_servico": "17.16",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "17.17",
+              "content": "Análise de Organização e Métodos.",
+              "metadata": {
+                "codigo_servico": "17.17",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "17.18",
+              "content": "Atuária e cálculos técnicos de qualquer natureza.",
+              "metadata": {
+                "codigo_servico": "17.18",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "17.19",
+              "content": "Contabilidade, inclusive serviços técnicos e auxiliares.",
+              "metadata": {
+                "codigo_servico": "17.19",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "17.20",
+              "content": "Consultoria e assessoria econômica ou financeira.",
+              "metadata": {
+                "codigo_servico": "17.20",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "17.21",
+              "content": "Estatística.",
+              "metadata": {
+                "codigo_servico": "17.21",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "17.22",
+              "content": "Cobrança em geral.",
+              "metadata": {
+                "codigo_servico": "17.22",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "17.23",
+              "content": "Assessoria, análise, avaliação, atendimento, consulta, cadastro, seleção, gerenciamento de informações, administração de contas a receber ou a pagar e em geral, relacionados a operações de faturização (factoring).",
+              "metadata": {
+                "codigo_servico": "17.23",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "17.24",
+              "content": "Apresentação de palestras, conferências, seminários e congêneres.",
+              "metadata": {
+                "codigo_servico": "17.24",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "17.25",
+              "content": "Inserção de textos, desenhos e outros materiais de propaganda e publicidade, em qualquer meio (exceto em livros, jornais, periódicos e nas modalidades de serviços de radiodifusão sonora e de sons e imagens de recepção livre e gratuita).",
+              "metadata": {
+                "codigo_servico": "17.25",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "18.01",
+              "content": "Serviços de regulação de sinistros vinculados a contratos de seguros; inspeção e avaliação de riscos para cobertura de contratos de seguros; prevenção e gerência de riscos seguráveis e congêneres.",
+              "metadata": {
+                "codigo_servico": "18.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "19.01",
+              "content": "Serviços de distribuição e venda de bilhetes e demais produtos de loteria, bingos, cartões, pules ou cupons de apostas, sorteios, prêmios, inclusive os decorrentes de títulos de capitalização e congêneres.",
+              "metadata": {
+                "codigo_servico": "19.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "20.01",
+              "content": "Serviços portuários, ferroportuários, utilização de porto, movimentação de passageiros, reboque de embarcações, rebocador escoteiro, atracação, desatracação, serviços de praticagem, capatazia, armazenagem de qualquer natureza, serviços acessórios, movimentação de mercadorias, serviços de apoio marítimo, de movimentação ao largo, serviços de armadores, estiva, conferência, logística e congêneres.",
+              "metadata": {
+                "codigo_servico": "20.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "20.02",
+              "content": "Serviços aeroportuários, utilização de aeroporto, movimentação de passageiros, armazenagem de qualquer natureza, capatazia, movimentação de aeronaves, serviços de apoio aeroportuários, serviços acessórios, movimentação de mercadorias, logística e congêneres.",
+              "metadata": {
+                "codigo_servico": "20.02",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "20.03",
+              "content": "Serviços de terminais rodoviários, ferroviários, metroviários, movimentação de passageiros, mercadorias, inclusive suas operações, logística e congêneres.",
+              "metadata": {
+                "codigo_servico": "20.03",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "21.01",
+              "content": "Serviços de registros públicos, cartorários e notariais.",
+              "metadata": {
+                "codigo_servico": "21.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "22.01",
+              "content": "Serviços de exploração de rodovia mediante cobrança de preço ou pedágio dos usuários, envolvendo execução de serviços de conservação, manutenção, melhoramentos para adequação de capacidade e segurança de trânsito, operação, monitoração, assistência aos usuários e outros serviços definidos em contratos, atos de concessão ou de permissão ou em normas oficiais.",
+              "metadata": {
+                "codigo_servico": "22.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "23.01",
+              "content": "Serviços de programação e comunicação visual, desenho industrial e congêneres.",
+              "metadata": {
+                "codigo_servico": "23.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "24.01",
+              "content": "Serviços de chaveiros, confecção de carimbos, placas, sinalização visual, banners, adesivos e congêneres.",
+              "metadata": {
+                "codigo_servico": "24.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "25.01",
+              "content": "Funerais, inclusive fornecimento de caixão, urna ou esquifes; aluguel de capela; transporte do corpo cadavérico; fornecimento de flores, coroas e outros paramentos; desembaraço de certidão de óbito; fornecimento de véu,",
+              "metadata": {
+                "codigo_servico": "25.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "25.02",
+              "content": "Translado intramunicipal e cremação de corpos e partes de corpos cadavéricos.",
+              "metadata": {
+                "codigo_servico": "25.02",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "25.03",
+              "content": "Planos ou convênio funerários.",
+              "metadata": {
+                "codigo_servico": "25.03",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "25.04",
+              "content": "Manutenção e conservação de jazigos e cemitérios.",
+              "metadata": {
+                "codigo_servico": "25.04",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "25.05",
+              "content": "Cessão de uso de espaços em cemitérios para sepultamento.",
+              "metadata": {
+                "codigo_servico": "25.05",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "26.01",
+              "content": "Serviços de coleta, remessa ou entrega de correspondências, documentos, objetos, bens ou valores, inclusive pelos correios e suas agências franqueadas; courrier e congêneres.",
+              "metadata": {
+                "codigo_servico": "26.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "27.01",
+              "content": "Serviços de assistência social.",
+              "metadata": {
+                "codigo_servico": "27.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "28.01",
+              "content": "Serviços de avaliação de bens e serviços de qualquer natureza.",
+              "metadata": {
+                "codigo_servico": "28.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "29.01",
+              "content": "Serviços de biblioteconomia.",
+              "metadata": {
+                "codigo_servico": "29.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "30.01",
+              "content": "Serviços de biologia, biotecnologia e química.",
+              "metadata": {
+                "codigo_servico": "30.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "31.01",
+              "content": "Serviços técnicos em edificações, eletrônica, eletrotécnica, mecânica, telecomunicações e congêneres.",
+              "metadata": {
+                "codigo_servico": "31.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "32.01",
+              "content": "Serviços de desenhos técnicos.",
+              "metadata": {
+                "codigo_servico": "32.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "33.01",
+              "content": "Serviços de desembaraço aduaneiro, comissários, despachantes e congêneres.",
+              "metadata": {
+                "codigo_servico": "33.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "34.01",
+              "content": "Serviços de investigações particulares, detetives e congêneres.",
+              "metadata": {
+                "codigo_servico": "34.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "35.01",
+              "content": "Serviços de reportagem, assessoria de imprensa, jornalismo e relações públicas.",
+              "metadata": {
+                "codigo_servico": "35.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "36.01",
+              "content": "Serviços de meteorologia.",
+              "metadata": {
+                "codigo_servico": "36.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "37.01",
+              "content": "Serviços de artistas, atletas, modelos e manequins.",
+              "metadata": {
+                "codigo_servico": "37.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "38.01",
+              "content": "Serviços de museologia.",
+              "metadata": {
+                "codigo_servico": "38.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "39.01",
+              "content": "Serviços de ourivesaria e lapidação (quando o material for fornecido pelo tomador do serviço).",
+              "metadata": {
+                "codigo_servico": "39.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            },
+            {
+              "id": "40.01",
+              "content": "Obras de arte sob encomenda.",
+              "metadata": {
+                "codigo_servico": "40.01",
+                "fonte_legal": "LC 116/2003"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "Separar Itens LC": [
+      {
+        "json": {
+          "id": "1.01",
+          "content": "Análise e desenvolvimento de sistemas.",
+          "metadata": {
+            "codigo_servico": "1.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "1.02",
+          "content": "Programação.",
+          "metadata": {
+            "codigo_servico": "1.02",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "1.03",
+          "content": "Processamento, armazenamento ou hospedagem de dados, textos, imagens, vídeos, páginas eletrônicas, aplicativos e sistemas de informação, entre outros formatos, e congêneres.",
+          "metadata": {
+            "codigo_servico": "1.03",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "1.04",
+          "content": "Elaboração de programas de computadores, inclusive de jogos eletrônicos, independentemente da arquitetura construtiva da máquina em que o programa será executado, incluindo tablets, smartphones e congêneres.",
+          "metadata": {
+            "codigo_servico": "1.04",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "1.05",
+          "content": "Licenciamento ou cessão de direito de uso de programas de computação.",
+          "metadata": {
+            "codigo_servico": "1.05",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "1.06",
+          "content": "Assessoria e consultoria em informática.",
+          "metadata": {
+            "codigo_servico": "1.06",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "1.07",
+          "content": "Suporte técnico em informática, inclusive instalação, configuração e manutenção de programas de computação e bancos de dados.",
+          "metadata": {
+            "codigo_servico": "1.07",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "1.08",
+          "content": "Planejamento, confecção, manutenção e atualização de páginas eletrônicas.",
+          "metadata": {
+            "codigo_servico": "1.08",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "1.09",
+          "content": "Disponibilização, sem cessão definitiva, de conteúdos de áudio, vídeo, imagem e texto por meio da internet, respeitada a imunidade de livros, jornais e periódicos (exceto a distribuição de conteúdos pelas prestadoras de Serviço de Acesso Condicionado, de que trata a Lei nº 12.485, de 12 de setembro de 2011, sujeita ao ICMS).",
+          "metadata": {
+            "codigo_servico": "1.09",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "2.01",
+          "content": "Serviços de pesquisas e desenvolvimento de qualquer natureza.",
+          "metadata": {
+            "codigo_servico": "2.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "3.02",
+          "content": "Cessão de direito de uso de marcas e de sinais de propaganda.",
+          "metadata": {
+            "codigo_servico": "3.02",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "3.03",
+          "content": "Exploração de salões de festas, centro de convenções, escritórios virtuais, stands, quadras esportivas, estádios, ginásios, auditórios, casas de espetáculos, parques de diversões, canchas e congêneres, para realização de eventos ou negócios de qualquer natureza.",
+          "metadata": {
+            "codigo_servico": "3.03",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "3.04",
+          "content": "Locação, sublocação, arrendamento, direito de passagem ou permissão de uso, compartilhado ou não, de ferrovia, rodovia, postes, cabos, dutos e condutos de qualquer natureza.",
+          "metadata": {
+            "codigo_servico": "3.04",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "3.05",
+          "content": "Cessão de andaimes, palcos, coberturas e outras estruturas de uso temporário.",
+          "metadata": {
+            "codigo_servico": "3.05",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "4.01",
+          "content": "Medicina e biomedicina.",
+          "metadata": {
+            "codigo_servico": "4.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "4.02",
+          "content": "Análises clínicaS, patologia, eletricidade médica, radioterapia, quimioterapia, ultra-sonografia, ressonância magnética, radiologia, tomografia e congêneres.",
+          "metadata": {
+            "codigo_servico": "4.02",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "4.03",
+          "content": "Hospitais, clínicas, laboratórios, sanatórios, manicômios, casas de saúde, prontos-socorros, ambulatórios e congêneres.",
+          "metadata": {
+            "codigo_servico": "4.03",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "4.04",
+          "content": "Instrumentação cirúrgica.",
+          "metadata": {
+            "codigo_servico": "4.04",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "4.05",
+          "content": "Acupuntura.",
+          "metadata": {
+            "codigo_servico": "4.05",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "4.06",
+          "content": "Enfermagem, inclusive serviços auxiliares.",
+          "metadata": {
+            "codigo_servico": "4.06",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "4.07",
+          "content": "Serviços farmacêuticos.",
+          "metadata": {
+            "codigo_servico": "4.07",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "4.08",
+          "content": "Terapia ocupacional, fisioterapia e fonoaudiologia.",
+          "metadata": {
+            "codigo_servico": "4.08",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "4.09",
+          "content": "Terapias de qualquer espécie destinadas ao tratamento físico, orgânico e mental.",
+          "metadata": {
+            "codigo_servico": "4.09",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "4.10",
+          "content": "Nutrição.",
+          "metadata": {
+            "codigo_servico": "4.10",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "4.11",
+          "content": "Obstetrícia.",
+          "metadata": {
+            "codigo_servico": "4.11",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "4.12",
+          "content": "Odontologia.",
+          "metadata": {
+            "codigo_servico": "4.12",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "4.13",
+          "content": "Ortóptica.",
+          "metadata": {
+            "codigo_servico": "4.13",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "4.14",
+          "content": "Próteses sob encomenda.",
+          "metadata": {
+            "codigo_servico": "4.14",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "4.15",
+          "content": "Psicanálise.",
+          "metadata": {
+            "codigo_servico": "4.15",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "4.16",
+          "content": "Psicologia.",
+          "metadata": {
+            "codigo_servico": "4.16",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "4.17",
+          "content": "Casas de repouso e de recuperação, creches, asilos e congêneres.",
+          "metadata": {
+            "codigo_servico": "4.17",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "4.18",
+          "content": "Inseminação artificial, fertilização in vitro e congêneres.",
+          "metadata": {
+            "codigo_servico": "4.18",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "4.19",
+          "content": "Bancos de sangue, leite, pele, olhos, óvulos, sêmen e congêneres.",
+          "metadata": {
+            "codigo_servico": "4.19",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "4.20",
+          "content": "Coleta de sangue, leite, tecidos, sêmen, órgãos e materiais biológicos de qualquer espécie.",
+          "metadata": {
+            "codigo_servico": "4.20",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "4.21",
+          "content": "Unidade de atendimento, assistência ou tratamento móvel e congêneres.",
+          "metadata": {
+            "codigo_servico": "4.21",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "4.22",
+          "content": "Planos de medicina de grupo ou individual e convênios para prestação de assistência médica, hospitalar, odontológica e congêneres.",
+          "metadata": {
+            "codigo_servico": "4.22",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "4.23",
+          "content": "Outros planos de saúde que se cumpram através de serviços de terceiros contratados, credenciados, cooperados ou apenas pagos pelo operador do plano mediante indicação do beneficiário.",
+          "metadata": {
+            "codigo_servico": "4.23",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "5.01",
+          "content": "Medicina veterinária e zootecnia.",
+          "metadata": {
+            "codigo_servico": "5.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "5.02",
+          "content": "Hospitais, clínicas, ambulatórios, prontos-socorros e congêneres, na área veterinária.",
+          "metadata": {
+            "codigo_servico": "5.02",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "5.03",
+          "content": "Laboratórios de análise na área veterinária.",
+          "metadata": {
+            "codigo_servico": "5.03",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "5.04",
+          "content": "Inseminação artificial, fertilização in vitro e congêneres.",
+          "metadata": {
+            "codigo_servico": "5.04",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "5.05",
+          "content": "Bancos de sangue e de órgãos e congêneres.",
+          "metadata": {
+            "codigo_servico": "5.05",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "5.06",
+          "content": "Coleta de sangue, leite, tecidos, sêmen, órgãos e materiais biológicos de qualquer espécie.",
+          "metadata": {
+            "codigo_servico": "5.06",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "5.07",
+          "content": "Unidade de atendimento, assistência ou tratamento móvel e congêneres.",
+          "metadata": {
+            "codigo_servico": "5.07",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "5.08",
+          "content": "Guarda, tratamento, amestramento, embelezamento, alojamento e congêneres.",
+          "metadata": {
+            "codigo_servico": "5.08",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "5.09",
+          "content": "Planos de atendimento e assistência médico-veterinária.",
+          "metadata": {
+            "codigo_servico": "5.09",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "6.01",
+          "content": "Barbearia, cabeleireiros, manicuros, pedicuros e congêneres.",
+          "metadata": {
+            "codigo_servico": "6.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "6.02",
+          "content": "Esteticistas, tratamento de pele, depilação e congêneres.",
+          "metadata": {
+            "codigo_servico": "6.02",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "6.03",
+          "content": "Banhos, duchas, sauna, massagens e congêneres.",
+          "metadata": {
+            "codigo_servico": "6.03",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "6.04",
+          "content": "Ginástica, dança, esportes, natação, artes marciais e demais atividades físicas.",
+          "metadata": {
+            "codigo_servico": "6.04",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "6.05",
+          "content": "Centros de emagrecimento, spa e congêneres.",
+          "metadata": {
+            "codigo_servico": "6.05",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "6.06",
+          "content": "Aplicação de tatuagens, piercings e congêneres.",
+          "metadata": {
+            "codigo_servico": "6.06",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "7.01",
+          "content": "Engenharia, agronomia, agrimensura, arquitetura, geologia, urbanismo, paisagismo e congêneres.",
+          "metadata": {
+            "codigo_servico": "7.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "7.02",
+          "content": "Execução, por administração, empreitada ou subempreitada, de obras de construção civil, hidráulica ou elétrica e de outras obras semelhantes, inclusive sondagem, perfuração de poços, escavação, drenagem e irrigação, terraplanagem, pavimentação, concretagem e a instalação e montagem de produtos, peças e equipamentos (exceto o fornecimento de mercadorias produzidas pelo prestador de serviços fora do local da prestação dos serviços, que fica sujeito ao ICMS).",
+          "metadata": {
+            "codigo_servico": "7.02",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "7.03",
+          "content": "Elaboração de planos diretores, estudos de viabilidade, estudos organizacionais e outros, relacionados com obras e serviços de engenharia; elaboração de anteprojetos, projetos básicos e projetos executivos para trabalhos de engenharia.",
+          "metadata": {
+            "codigo_servico": "7.03",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "7.04",
+          "content": "Demolição.",
+          "metadata": {
+            "codigo_servico": "7.04",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "7.05",
+          "content": "Reparação, conservação e reforma de edifícios, estradas, pontes, portos e congêneres (exceto o fornecimento de mercadorias produzidas pelo prestador dos serviços, fora do local da prestação dos serviços, que fica sujeito ao ICMS).",
+          "metadata": {
+            "codigo_servico": "7.05",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "7.06",
+          "content": "Colocação e instalação de tapetes, carpetes, assoalhos, cortinas, revestimentos de parede, vidros, divisórias, placas de gesso e congêneres, com material fornecido pelo tomador do serviço.",
+          "metadata": {
+            "codigo_servico": "7.06",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "7.07",
+          "content": "Recuperação, raspagem, polimento e lustração de pisos e congêneres.",
+          "metadata": {
+            "codigo_servico": "7.07",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "7.08",
+          "content": "Calafetação.",
+          "metadata": {
+            "codigo_servico": "7.08",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "7.09",
+          "content": "Varrição, coleta, remoção, incineração, tratamento, reciclagem, separação e destinação final de lixo, rejeitos e outros resíduos quaisquer.",
+          "metadata": {
+            "codigo_servico": "7.09",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "7.10",
+          "content": "Limpeza, manutenção e conservação de vias e logradouros públicos, imóveis, chaminés, piscinas, parques, jardins e congêneres.",
+          "metadata": {
+            "codigo_servico": "7.10",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "7.11",
+          "content": "Decoração e jardinagem, inclusive corte e poda de árvores.",
+          "metadata": {
+            "codigo_servico": "7.11",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "7.12",
+          "content": "Controle e tratamento de efluentes de qualquer natureza e de agentes físicos, químicos e biológicos.",
+          "metadata": {
+            "codigo_servico": "7.12",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "7.13",
+          "content": "Dedetização, desinfecção, desinsetização, imunização, higienização, desratização, pulverização e congêneres.",
+          "metadata": {
+            "codigo_servico": "7.13",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "7.16",
+          "content": "Florestamento, reflorestamento, semeadura, adubação, reparação de solo, plantio, silagem, colheita, corte e descascamento de árvores, silvicultura, exploração florestal e dos serviços congêneres indissociáveis da formação, manutenção e colheita de florestas, para quaisquer fins e por quaisquer meios.",
+          "metadata": {
+            "codigo_servico": "7.16",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "7.17",
+          "content": "Escoramento, contenção de encostas e serviços congêneres.",
+          "metadata": {
+            "codigo_servico": "7.17",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "7.18",
+          "content": "Limpeza e dragagem de rios, portos, canais, baías, lagos, lagoas, represas, açudes e congêneres.",
+          "metadata": {
+            "codigo_servico": "7.18",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "7.19",
+          "content": "Acompanhamento e fiscalização da execução de obras de engenharia, arquitetura e urbanismo.",
+          "metadata": {
+            "codigo_servico": "7.19",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "7.20",
+          "content": "Aerofotogrametria (inclusive interpretação), cartografia, mapeamento, levantamentos topográficos, batimétricos, geográficos, geodésicos, geológicos, geofísicos e congêneres.",
+          "metadata": {
+            "codigo_servico": "7.20",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "7.21",
+          "content": "Pesquisa, perfuração, cimentação, mergulho, perfilagem, concretação, testemunhagem, pescaria, estimulação e outros serviços relacionados com a exploração e explotação de petróleo, gás natural e de outros recursos minerais.",
+          "metadata": {
+            "codigo_servico": "7.21",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "7.22",
+          "content": "Nucleação e bombardeamento de nuvens e congêneres.",
+          "metadata": {
+            "codigo_servico": "7.22",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "8.01",
+          "content": "Ensino regular pré-escolar, fundamental, médio e superior.",
+          "metadata": {
+            "codigo_servico": "8.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "8.02",
+          "content": "Instrução, treinamento, orientação pedagógica e educacional, avaliação de conhecimentos de qualquer natureza.",
+          "metadata": {
+            "codigo_servico": "8.02",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "9.01",
+          "content": "Hospedagem de qualquer natureza em hotéis, apart-service condominiais, flat, apart-hotéis, hotéis residência, residence-service, suite service, hotelaria marítima, motéis, pensões e congêneres; ocupação por temporada com fornecimento de serviço (o valor da alimentação e gorjeta, quando incluído no preço da diária, fica sujeito ao Imposto Sobre Serviços).",
+          "metadata": {
+            "codigo_servico": "9.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "9.02",
+          "content": "Agenciamento, organização, promoção, intermediação e execução de programas de turismo, passeios, viagens, excursões, hospedagens e congêneres.",
+          "metadata": {
+            "codigo_servico": "9.02",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "9.03",
+          "content": "Guias de turismo.",
+          "metadata": {
+            "codigo_servico": "9.03",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "10.01",
+          "content": "Agenciamento, corretagem ou intermediação de câmbio, de seguros, de cartões de crédito, de planos de saúde e de planos de previdência privada.",
+          "metadata": {
+            "codigo_servico": "10.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "10.02",
+          "content": "Agenciamento, corretagem ou intermediação de títulos em geral, valores mobiliários e contratos quaisquer.",
+          "metadata": {
+            "codigo_servico": "10.02",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "10.03",
+          "content": "Agenciamento, corretagem ou intermediação de direitos de propriedade industrial, artística ou literária.",
+          "metadata": {
+            "codigo_servico": "10.03",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "10.04",
+          "content": "Agenciamento, corretagem ou intermediação de contratos de arrendamento mercantil (leasing), de franquia (franchising) e de faturização (factoring).",
+          "metadata": {
+            "codigo_servico": "10.04",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "10.05",
+          "content": "Agenciamento, corretagem ou intermediação de bens móveis ou imóveis, não abrangidos em outros itens ou subitens, inclusive aqueles realizados no âmbito de Bolsas de Mercadorias e Futuros, por quaisquer meios.",
+          "metadata": {
+            "codigo_servico": "10.05",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "10.06",
+          "content": "Agenciamento marítimo.",
+          "metadata": {
+            "codigo_servico": "10.06",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "10.07",
+          "content": "Agenciamento de noticias.",
+          "metadata": {
+            "codigo_servico": "10.07",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "10.08",
+          "content": "Agenciamento de publicidade e propaganda, inclusive o agenciamento de veiculação por quaisquer meios.",
+          "metadata": {
+            "codigo_servico": "10.08",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "10.09",
+          "content": "Representação de qualquer natureza, inclusive comercial.",
+          "metadata": {
+            "codigo_servico": "10.09",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "10.10",
+          "content": "Distribuição de bens de terceiros.",
+          "metadata": {
+            "codigo_servico": "10.10",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "11.01",
+          "content": "Guarda e estacionamento de veículos terrestres automotores, de aeronaves e de embarcações.",
+          "metadata": {
+            "codigo_servico": "11.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "11.02",
+          "content": "Vigilância, segurança ou monitoramento de bens, pessoas e semoventes.",
+          "metadata": {
+            "codigo_servico": "11.02",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "11.03",
+          "content": "Escolta, inclusive de veículos e cargas.",
+          "metadata": {
+            "codigo_servico": "11.03",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "11.04",
+          "content": "Armazenamento, depósito, carga, descarga, arrumação e guarda de bens de qualquer espécie.",
+          "metadata": {
+            "codigo_servico": "11.04",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "11.05",
+          "content": "Serviços relacionados ao monitoramento e rastreamento a distância, em qualquer via ou local, de veículos, cargas, pessoas e semoventes em circulação ou movimento, realizados por meio de telefonia móvel, transmissão de satélites, rádio ou qualquer outro meio, inclusive pelas empresas de Tecnologia da Informação Veicular, independentemente de o prestador de serviços ser proprietário ou não da infraestrutura de telecomunicações que utiliza.",
+          "metadata": {
+            "codigo_servico": "11.05",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "12.01",
+          "content": "Espetáculos teatrais.",
+          "metadata": {
+            "codigo_servico": "12.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "12.02",
+          "content": "Exibições cinematográficas.",
+          "metadata": {
+            "codigo_servico": "12.02",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "12.03",
+          "content": "Espetáculos circenses.",
+          "metadata": {
+            "codigo_servico": "12.03",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "12.04",
+          "content": "Programas de auditório.",
+          "metadata": {
+            "codigo_servico": "12.04",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "12.05",
+          "content": "Parques de diversões, centros de lazer e congêneres.",
+          "metadata": {
+            "codigo_servico": "12.05",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "12.06",
+          "content": "Boates, taxi-dancing e congêneres.",
+          "metadata": {
+            "codigo_servico": "12.06",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "12.07",
+          "content": "Shows, ballet, danças, desfiles, bailes, óperas, concertos, recitais, festivais e congêneres.",
+          "metadata": {
+            "codigo_servico": "12.07",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "12.08",
+          "content": "Feiras, exposições, congressos e congêneres.",
+          "metadata": {
+            "codigo_servico": "12.08",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "12.09",
+          "content": "Bilhares, boliches e diversões eletrônicas ou não.",
+          "metadata": {
+            "codigo_servico": "12.09",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "12.10",
+          "content": "Corridas e competições de animais.",
+          "metadata": {
+            "codigo_servico": "12.10",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "12.11",
+          "content": "Competições esportivas ou de destreza física ou intelectual, com ou sem a participação do espectador.",
+          "metadata": {
+            "codigo_servico": "12.11",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "12.12",
+          "content": "Execução de música.",
+          "metadata": {
+            "codigo_servico": "12.12",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "12.13",
+          "content": "Produção, mediante ou sem encomenda prévia, de eventos, espetáculos, entrevistas, shows, ballet, danças, desfiles, bailes, teatros, óperas, concertos, recitais, festivais e congêneres.",
+          "metadata": {
+            "codigo_servico": "12.13",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "12.14",
+          "content": "Fornecimento de música para ambientes fechados ou não, mediante transmissão por qualquer processo.",
+          "metadata": {
+            "codigo_servico": "12.14",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "12.15",
+          "content": "Desfiles de blocos carnavalescos ou folclóricos, trios elétricos e congêneres.",
+          "metadata": {
+            "codigo_servico": "12.15",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "12.16",
+          "content": "Exibição de filmes, entrevistas, musicais, espetáculos, shows, concertos, desfiles, óperas, competições esportivas, de destreza intelectual ou congêneres.",
+          "metadata": {
+            "codigo_servico": "12.16",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "12.17",
+          "content": "Recreação e animação, inclusive em festas e eventos de qualquer natureza.",
+          "metadata": {
+            "codigo_servico": "12.17",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "13.02",
+          "content": "Fonografia ou gravação de sons, inclusive trucagem, dublagem, mixagem e congêneres.",
+          "metadata": {
+            "codigo_servico": "13.02",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "13.03",
+          "content": "Fotografia e cinematografia, inclusive revelação, ampliação, cópia, reprodução, trucagem e congêneres.",
+          "metadata": {
+            "codigo_servico": "13.03",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "13.04",
+          "content": "Reprografia, microfilmagem e digitalização.",
+          "metadata": {
+            "codigo_servico": "13.04",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "13.05",
+          "content": "Composição gráfica, inclusive confecção de impressos gráficos, fotocomposição, clicheria, zincografia, litografia e fotolitografia, exceto se destinados a posterior operação de comercialização ou industrialização, ainda que incorporados, de qualquer forma, a outra mercadoria que deva ser objeto de posterior circulação, tais como bulas, rótulos, etiquetas, caixas, cartuchos, embalagens e manuais técnicos e de instrução, quando ficarão sujeitos ao ICMS.",
+          "metadata": {
+            "codigo_servico": "13.05",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "14.01",
+          "content": "Lubrificação, limpeza, lustração, revisão, carga e recarga, conserto, restauração, blindagem, manutenção e conservação de máquinas, veículos, aparelhos, equipamentos, motores, elevadores ou de qualquer objeto (exceto peças e partes empregadas, que ficam sujeitas ao ICMS).",
+          "metadata": {
+            "codigo_servico": "14.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "14.02",
+          "content": "Assistência técnica.",
+          "metadata": {
+            "codigo_servico": "14.02",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "14.03",
+          "content": "Recondicionamento de motores (exceto peças e partes empregadas, que ficam sujeitas ao ICMS).",
+          "metadata": {
+            "codigo_servico": "14.03",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "14.04",
+          "content": "Recauchutagem ou regeneração de pneus.",
+          "metadata": {
+            "codigo_servico": "14.04",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "14.05",
+          "content": "Restauração, recondicionamento, acondicionamento, pintura, beneficiamento, lavagem, secagem, tingimento, galvanoplastia, anodização, corte, recorte, plastificação, costura, acabamento, polimento e congêneres de objetos quaisquer.",
+          "metadata": {
+            "codigo_servico": "14.05",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "14.06",
+          "content": "Instalação e montagem de aparelhos, máquinas e equipamentos, inclusive montagem industrial, prestados ao usuário final, exclusivamente com material por ele fornecido.",
+          "metadata": {
+            "codigo_servico": "14.06",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "14.07",
+          "content": "Colocação de molduras e congêneres.",
+          "metadata": {
+            "codigo_servico": "14.07",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "14.08",
+          "content": "Encadernação, gravação e douração de livros, revistas e congêneres.",
+          "metadata": {
+            "codigo_servico": "14.08",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "14.09",
+          "content": "Alfaiataria e costura, quando o material for fornecido pelo usuário final, exceto aviamento.",
+          "metadata": {
+            "codigo_servico": "14.09",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "14.10",
+          "content": "Tinturaria e lavanderia.",
+          "metadata": {
+            "codigo_servico": "14.10",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "14.11",
+          "content": "Tapeçaria e reforma de estofamentos em geral.",
+          "metadata": {
+            "codigo_servico": "14.11",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "14.12",
+          "content": "Funilaria e lanternagem.",
+          "metadata": {
+            "codigo_servico": "14.12",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "14.13",
+          "content": "Carpintaria e serralheria.",
+          "metadata": {
+            "codigo_servico": "14.13",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "14.14",
+          "content": "Guincho intramunicipal, guindaste e içamento.",
+          "metadata": {
+            "codigo_servico": "14.14",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "15.01",
+          "content": "Administração de fundos quaisquer, de consórcio, de cartão de crédito ou débito e congêneres, de carteira de clientes, de cheques pré-datados e congêneres.",
+          "metadata": {
+            "codigo_servico": "15.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "15.02",
+          "content": "Abertura de contas em geral, inclusive conta-corrente, conta de investimentos e aplicação e caderneta de poupança, no País e no exterior, bem como a manutenção das referidas contas ativas e inativas.",
+          "metadata": {
+            "codigo_servico": "15.02",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "15.03",
+          "content": "Locação e manutenção de cofres particulares, de terminais eletrônicos, de terminais de atendimento e de bens e equipamentos em geral.",
+          "metadata": {
+            "codigo_servico": "15.03",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "15.04",
+          "content": "Fornecimento ou emissão de atestados em geral, inclusive atestado de idoneidade, atestado de capacidade financeira e congêneres.",
+          "metadata": {
+            "codigo_servico": "15.04",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "15.05",
+          "content": "Cadastro, elaboração de ficha cadastral, renovação cadastral e congêneres, inclusão ou exclusão no Cadastro de Emitentes de Cheques sem Fundos – CCF ou em quaisquer outros bancos cadastrais.",
+          "metadata": {
+            "codigo_servico": "15.05",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "15.06",
+          "content": "Emissão, reemissão e fornecimento de avisos, comprovantes e documentos em geral; abono de firmas; coleta e entrega de documentos, bens e valores; comunicação com outra agência ou com a administração central; licenciamento eletrônico de veículos; transferência de veículos; agenciamento fiduciário ou depositário; devolução de bens em custódia.",
+          "metadata": {
+            "codigo_servico": "15.06",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "15.07",
+          "content": "Acesso, movimentação, atendimento e consulta a contas em geral, por qualquer meio ou processo, inclusive por telefone, fac-símile, internet e telex, acesso a terminais de atendimento, inclusive vinte e quatro horas; acesso a outro banco e a rede compartilhada; fornecimento de saldo, extrato e demais informações relativas a contas em geral, por qualquer meio ou processo.",
+          "metadata": {
+            "codigo_servico": "15.07",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "15.08",
+          "content": "Emissão, reemissão, alteração, cessão, substituição, cancelamento e registro de contrato de crédito; estudo, análise e avaliação de operações de crédito; emissão, concessão, alteração ou contratação de aval, fiança, anuência e congêneres; serviços relativos a abertura de crédito, para quaisquer fins.",
+          "metadata": {
+            "codigo_servico": "15.08",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "15.09",
+          "content": "Arrendamento mercantil (leasing) de quaisquer bens, inclusive cessão de direitos e obrigações, substituição de garantia, alteração, cancelamento e registro de contrato, e demais serviços relacionados ao arrendamento mercantil (leasing).",
+          "metadata": {
+            "codigo_servico": "15.09",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "15.10",
+          "content": "Serviços relacionados a cobranças, recebimentos ou pagamentos em geral, de títulos quaisquer, de contas ou carnês, de câmbio, de tributos e por conta de terceiros, inclusive os efetuados por meio eletrônico, automático ou por máquinas de atendimento; fornecimento de posição de cobrança, recebimento ou pagamento; emissão de carnês, fichas de compensação, impressos e documentos em geral.",
+          "metadata": {
+            "codigo_servico": "15.10",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "15.11",
+          "content": "Devolução de títulos, protesto de títulos, sustação de protesto, manutenção de títulos, reapresentação de títulos, e demais serviços a eles relacionados.",
+          "metadata": {
+            "codigo_servico": "15.11",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "15.12",
+          "content": "Custódia em geral, inclusive de títulos e valores mobiliários.",
+          "metadata": {
+            "codigo_servico": "15.12",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "15.13",
+          "content": "Serviços relacionados a operações de câmbio em geral, edição, alteração, prorrogação, cancelamento e baixa de contrato de câmbio; emissão de registro de exportação ou de crédito; cobrança ou depósito no exterior; emissão, fornecimento e cancelamento de cheques de viagem; fornecimento, transferência, cancelamento e demais serviços relativos a carta de crédito de importação, exportação e garantias recebidas; envio e recebimento de mensagens em geral relacionadas a operações de câmbio.",
+          "metadata": {
+            "codigo_servico": "15.13",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "15.14",
+          "content": "Fornecimento, emissão, reemissão, renovação e manutenção de cartão magnético, cartão de crédito, cartão de débito, cartão salário e congêneres.",
+          "metadata": {
+            "codigo_servico": "15.14",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "15.15",
+          "content": "Compensação de cheques e títulos quaisquer; serviços relacionados a depósito, inclusive depósito identificado, a saque de contas quaisquer, por qualquer meio ou processo, inclusive em terminais eletrônicos e de atendimento.",
+          "metadata": {
+            "codigo_servico": "15.15",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "15.16",
+          "content": "Emissão, reemissão, liquidação, alteração, cancelamento e baixa de ordens de pagamento, ordens de crédito e similares, por qualquer meio ou processo; serviços relacionados à transferência de valores, dados, fundos, pagamentos e similares, inclusive entre contas em geral.",
+          "metadata": {
+            "codigo_servico": "15.16",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "15.17",
+          "content": "Emissão, fornecimento, devolução, sustação, cancelamento e oposição de cheques quaisquer, avulso ou por talão.",
+          "metadata": {
+            "codigo_servico": "15.17",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "15.18",
+          "content": "Serviços relacionados a crédito imobiliário, avaliação e vistoria de imóvel ou obra, análise técnica e jurídica, emissão, reemissão, alteração, transferência e renegociação de contrato, emissão e reemissão do termo de quitação e demais serviços relacionados a crédito imobiliário.",
+          "metadata": {
+            "codigo_servico": "15.18",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "16.01",
+          "content": "Serviços de transporte coletivo municipal rodoviário, metroviário, ferroviário e aquaviário de passageiros.",
+          "metadata": {
+            "codigo_servico": "16.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "16.02",
+          "content": "Outros serviços de transporte de natureza municipal.",
+          "metadata": {
+            "codigo_servico": "16.02",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "17.01",
+          "content": "Assessoria ou consultoria de qualquer natureza, não contida em outros itens desta lista; análise, exame, pesquisa, coleta, compilação e fornecimento de dados e informações de qualquer natureza, inclusive cadastro e similares.",
+          "metadata": {
+            "codigo_servico": "17.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "17.02",
+          "content": "Datilografia, digitação, estenografia, expediente, secretaria em geral, resposta audível, redação, edição, interpretação, revisão, tradução, apoio e infra-estrutura administrativa e congêneres.",
+          "metadata": {
+            "codigo_servico": "17.02",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "17.03",
+          "content": "Planejamento, coordenação, programação ou organização técnica, financeira ou administrativa.",
+          "metadata": {
+            "codigo_servico": "17.03",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "17.04",
+          "content": "Recrutamento, agenciamento, seleção e colocação de mão-de-obra.",
+          "metadata": {
+            "codigo_servico": "17.04",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "17.05",
+          "content": "Fornecimento de mão-de-obra, mesmo em caráter temporário, inclusive de empregados ou trabalhadores, avulsos ou temporários, contratados pelo prestador de serviço.",
+          "metadata": {
+            "codigo_servico": "17.05",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "17.06",
+          "content": "Propaganda e publicidade, inclusive promoção de vendas, planejamento de campanhas ou sistemas de publicidade, elaboração de desenhos, textos e demais materiais publicitários.",
+          "metadata": {
+            "codigo_servico": "17.06",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "17.08",
+          "content": "Franquia (franchising).",
+          "metadata": {
+            "codigo_servico": "17.08",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "17.09",
+          "content": "Perícias, laudos, exames técnicos e análises técnicas.",
+          "metadata": {
+            "codigo_servico": "17.09",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "17.10",
+          "content": "Planejamento, organização e administração de feiras, exposições, congressos e congêneres.",
+          "metadata": {
+            "codigo_servico": "17.10",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "17.11",
+          "content": "Organização de festas e recepções; bufê (exceto o fornecimento de alimentação e bebidas, que fica sujeito ao ICMS).",
+          "metadata": {
+            "codigo_servico": "17.11",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "17.12",
+          "content": "Administração em geral, inclusive de bens e negócios de terceiros.",
+          "metadata": {
+            "codigo_servico": "17.12",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "17.13",
+          "content": "Leilão e congêneres.",
+          "metadata": {
+            "codigo_servico": "17.13",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "17.14",
+          "content": "Advocacia.",
+          "metadata": {
+            "codigo_servico": "17.14",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "17.15",
+          "content": "Arbitragem de qualquer espécie, inclusive jurídica.",
+          "metadata": {
+            "codigo_servico": "17.15",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "17.16",
+          "content": "Auditoria.",
+          "metadata": {
+            "codigo_servico": "17.16",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "17.17",
+          "content": "Análise de Organização e Métodos.",
+          "metadata": {
+            "codigo_servico": "17.17",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "17.18",
+          "content": "Atuária e cálculos técnicos de qualquer natureza.",
+          "metadata": {
+            "codigo_servico": "17.18",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "17.19",
+          "content": "Contabilidade, inclusive serviços técnicos e auxiliares.",
+          "metadata": {
+            "codigo_servico": "17.19",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "17.20",
+          "content": "Consultoria e assessoria econômica ou financeira.",
+          "metadata": {
+            "codigo_servico": "17.20",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "17.21",
+          "content": "Estatística.",
+          "metadata": {
+            "codigo_servico": "17.21",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "17.22",
+          "content": "Cobrança em geral.",
+          "metadata": {
+            "codigo_servico": "17.22",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "17.23",
+          "content": "Assessoria, análise, avaliação, atendimento, consulta, cadastro, seleção, gerenciamento de informações, administração de contas a receber ou a pagar e em geral, relacionados a operações de faturização (factoring).",
+          "metadata": {
+            "codigo_servico": "17.23",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "17.24",
+          "content": "Apresentação de palestras, conferências, seminários e congêneres.",
+          "metadata": {
+            "codigo_servico": "17.24",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "17.25",
+          "content": "Inserção de textos, desenhos e outros materiais de propaganda e publicidade, em qualquer meio (exceto em livros, jornais, periódicos e nas modalidades de serviços de radiodifusão sonora e de sons e imagens de recepção livre e gratuita).",
+          "metadata": {
+            "codigo_servico": "17.25",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "18.01",
+          "content": "Serviços de regulação de sinistros vinculados a contratos de seguros; inspeção e avaliação de riscos para cobertura de contratos de seguros; prevenção e gerência de riscos seguráveis e congêneres.",
+          "metadata": {
+            "codigo_servico": "18.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "19.01",
+          "content": "Serviços de distribuição e venda de bilhetes e demais produtos de loteria, bingos, cartões, pules ou cupons de apostas, sorteios, prêmios, inclusive os decorrentes de títulos de capitalização e congêneres.",
+          "metadata": {
+            "codigo_servico": "19.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "20.01",
+          "content": "Serviços portuários, ferroportuários, utilização de porto, movimentação de passageiros, reboque de embarcações, rebocador escoteiro, atracação, desatracação, serviços de praticagem, capatazia, armazenagem de qualquer natureza, serviços acessórios, movimentação de mercadorias, serviços de apoio marítimo, de movimentação ao largo, serviços de armadores, estiva, conferência, logística e congêneres.",
+          "metadata": {
+            "codigo_servico": "20.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "20.02",
+          "content": "Serviços aeroportuários, utilização de aeroporto, movimentação de passageiros, armazenagem de qualquer natureza, capatazia, movimentação de aeronaves, serviços de apoio aeroportuários, serviços acessórios, movimentação de mercadorias, logística e congêneres.",
+          "metadata": {
+            "codigo_servico": "20.02",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "20.03",
+          "content": "Serviços de terminais rodoviários, ferroviários, metroviários, movimentação de passageiros, mercadorias, inclusive suas operações, logística e congêneres.",
+          "metadata": {
+            "codigo_servico": "20.03",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "21.01",
+          "content": "Serviços de registros públicos, cartorários e notariais.",
+          "metadata": {
+            "codigo_servico": "21.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "22.01",
+          "content": "Serviços de exploração de rodovia mediante cobrança de preço ou pedágio dos usuários, envolvendo execução de serviços de conservação, manutenção, melhoramentos para adequação de capacidade e segurança de trânsito, operação, monitoração, assistência aos usuários e outros serviços definidos em contratos, atos de concessão ou de permissão ou em normas oficiais.",
+          "metadata": {
+            "codigo_servico": "22.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "23.01",
+          "content": "Serviços de programação e comunicação visual, desenho industrial e congêneres.",
+          "metadata": {
+            "codigo_servico": "23.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "24.01",
+          "content": "Serviços de chaveiros, confecção de carimbos, placas, sinalização visual, banners, adesivos e congêneres.",
+          "metadata": {
+            "codigo_servico": "24.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "25.01",
+          "content": "Funerais, inclusive fornecimento de caixão, urna ou esquifes; aluguel de capela; transporte do corpo cadavérico; fornecimento de flores, coroas e outros paramentos; desembaraço de certidão de óbito; fornecimento de véu,",
+          "metadata": {
+            "codigo_servico": "25.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "25.02",
+          "content": "Translado intramunicipal e cremação de corpos e partes de corpos cadavéricos.",
+          "metadata": {
+            "codigo_servico": "25.02",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "25.03",
+          "content": "Planos ou convênio funerários.",
+          "metadata": {
+            "codigo_servico": "25.03",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "25.04",
+          "content": "Manutenção e conservação de jazigos e cemitérios.",
+          "metadata": {
+            "codigo_servico": "25.04",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "25.05",
+          "content": "Cessão de uso de espaços em cemitérios para sepultamento.",
+          "metadata": {
+            "codigo_servico": "25.05",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "26.01",
+          "content": "Serviços de coleta, remessa ou entrega de correspondências, documentos, objetos, bens ou valores, inclusive pelos correios e suas agências franqueadas; courrier e congêneres.",
+          "metadata": {
+            "codigo_servico": "26.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "27.01",
+          "content": "Serviços de assistência social.",
+          "metadata": {
+            "codigo_servico": "27.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "28.01",
+          "content": "Serviços de avaliação de bens e serviços de qualquer natureza.",
+          "metadata": {
+            "codigo_servico": "28.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "29.01",
+          "content": "Serviços de biblioteconomia.",
+          "metadata": {
+            "codigo_servico": "29.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "30.01",
+          "content": "Serviços de biologia, biotecnologia e química.",
+          "metadata": {
+            "codigo_servico": "30.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "31.01",
+          "content": "Serviços técnicos em edificações, eletrônica, eletrotécnica, mecânica, telecomunicações e congêneres.",
+          "metadata": {
+            "codigo_servico": "31.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "32.01",
+          "content": "Serviços de desenhos técnicos.",
+          "metadata": {
+            "codigo_servico": "32.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "33.01",
+          "content": "Serviços de desembaraço aduaneiro, comissários, despachantes e congêneres.",
+          "metadata": {
+            "codigo_servico": "33.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "34.01",
+          "content": "Serviços de investigações particulares, detetives e congêneres.",
+          "metadata": {
+            "codigo_servico": "34.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "35.01",
+          "content": "Serviços de reportagem, assessoria de imprensa, jornalismo e relações públicas.",
+          "metadata": {
+            "codigo_servico": "35.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "36.01",
+          "content": "Serviços de meteorologia.",
+          "metadata": {
+            "codigo_servico": "36.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "37.01",
+          "content": "Serviços de artistas, atletas, modelos e manequins.",
+          "metadata": {
+            "codigo_servico": "37.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "38.01",
+          "content": "Serviços de museologia.",
+          "metadata": {
+            "codigo_servico": "38.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "39.01",
+          "content": "Serviços de ourivesaria e lapidação (quando o material for fornecido pelo tomador do serviço).",
+          "metadata": {
+            "codigo_servico": "39.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      },
+      {
+        "json": {
+          "id": "40.01",
+          "content": "Obras de arte sob encomenda.",
+          "metadata": {
+            "codigo_servico": "40.01",
+            "fonte_legal": "LC 116/2003"
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Receber Webhook NFS-e": {
+      "main": [
+        [
+          {
+            "node": "Modo: Extract ou Map Only?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modo: Extract ou Map Only?": {
+      "main": [
+        [
+          {
+            "node": "IA Extrair Dados do XML",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar Item LC (via Webhook)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Preparar CEP (via Webhook)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IA Extrair Dados do XML": {
+      "main": [
+        [
+          {
+            "node": "Confiança Extração ≥ 85?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confiança Extração ≥ 85?": {
+      "main": [
+        [
+          {
+            "node": "Preparar Item LC (via Extração)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Preparar CEP (via Extração)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Montar Erro: Baixa Confiança",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Item LC (via Extração)": {
+      "main": [
+        [
+          {
+            "node": "Unificar Item LC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar CEP (via Extração)": {
+      "main": [
+        [
+          {
+            "node": "Unificar CEP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Erro: Baixa Confiança": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Item LC (via Webhook)": {
+      "main": [
+        [
+          {
+            "node": "Unificar Item LC",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Preparar CEP (via Webhook)": {
+      "main": [
+        [
+          {
+            "node": "Unificar CEP",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Unificar Item LC": {
+      "main": [
+        [
+          {
+            "node": "Combinar LC + Endereço",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unificar CEP": {
+      "main": [
+        [
+          {
+            "node": "Consultar Endereço (ViaCEP)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar Endereço (ViaCEP)": {
+      "main": [
+        [
+          {
+            "node": "Combinar LC + Endereço",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Combinar LC + Endereço": {
+      "main": [
+        [
+          {
+            "node": "IA Classificar Item LC 116",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IA Classificar Item LC 116": {
+      "main": [
+        [
+          {
+            "node": "Modo Original: Extract?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modo Original: Extract?": {
+      "main": [
+        [
+          {
+            "node": "Montar Linha TXT Final",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Confiança LC ≥ 75%?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Linha TXT Final": {
+      "main": [
+        [
+          {
+            "node": "Responder: Linha TXT (Extract)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confiança LC ≥ 75%?": {
+      "main": [
+        [
+          {
+            "node": "Montar Resposta: DDD + Item LC",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Montar Erro: Manual Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Resposta: DDD + Item LC": {
+      "main": [
+        [
+          {
+            "node": "Responder: DDD + LC (Map Only)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Erro: Manual Review": {
+      "main": [
+        [
+          {
+            "node": "Responder: Manual Review (Map Only)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT-4o-mini (Extração)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "IA Extrair Dados do XML",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser Estruturado (Extração)": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "IA Extrair Dados do XML",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HuggingFace (Parser)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Parser Estruturado (Extração)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT-4o-mini (Classificação LC)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "IA Classificar Item LC 116",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser Estruturado (Classificação)": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "IA Classificar Item LC 116",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Busca LC 116": {
+      "ai_tool": [
+        [
+          {
+            "node": "IA Classificar Item LC 116",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings HuggingFace (Busca)": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase: Busca LC 116",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Base LC 116 (Drive)": {
+      "main": [
+        [
+          {
+            "node": "Extrair JSON LC 116",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair JSON LC 116": {
+      "main": [
+        [
+          {
+            "node": "Separar Itens LC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Separar Itens LC": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Inserir LC 116",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings HuggingFace (Inserção)": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase: Inserir LC 116",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Carregar Documento LC": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase: Inserir LC 116",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dividir Texto em Chunks": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Carregar Documento LC",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "cb4745bd-9cfd-46ad-90dc-ea23c8644092",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b0f72800970a67e2da1592d3d1044ada244203608f8b9fc05995bef18461e9dc"
+  },
+  "id": "Tk9ekKdc6OsQsII4",
+  "tags": []
+}
