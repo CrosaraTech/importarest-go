@@ -6,6 +6,9 @@ from pathlib import Path
 BASE_DIR = Path(r"G:\Drives compartilhados\FISCAL\autmais\xml\Entradas\NFS-e")
 URL_N8N = "https://joaomarcos1303.app.n8n.cloud/webhook/nfse-processing"
 RELATORIO_CSV = r"G:\Drives compartilhados\FISCAL\autmais\REST\Relatorio.csv"
+PLANILHA_EMPRESAS     = Path(r"G:\Drives compartilhados\FISCAL\autmais\RELACAO_EMPRESAS_atualizada.xlsx")
+PLANILHA_COL_COD      = 0   # Coluna A (índice 0-based)
+PLANILHA_COL_ANALISTA = 3   # Coluna D (índice 0-based)
 
 # ==============================================================================
 # GOIÂNIA
