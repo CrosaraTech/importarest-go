@@ -70,7 +70,7 @@ class JanelaCrosara:
     def _construir_aba_individual(self, parent):
         center = tk.Frame(parent, bg=COR_BG, width=420)
         center.pack_propagate(False)
-        center.pack(anchor="n", expand=False)
+        center.pack(anchor="n", fill="y", expand=True)
 
         self._exibir_logo(center)
 
