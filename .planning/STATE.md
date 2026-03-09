@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-batch-ui-and-integration-01-PLAN.md
-last_updated: "2026-03-09T19:48:42.350Z"
+stopped_at: Completed 03-batch-ui-and-integration-02-PLAN.md
+last_updated: "2026-03-09T19:54:31.882Z"
 last_activity: "2026-03-09 — Completed plan 02-01: 8 test stubs for BatchOrchestrator (PROC-01 through PROC-04)"
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 7
-  completed_plans: 5
+  completed_plans: 6
   percent: 60
 ---
 
@@ -59,6 +59,7 @@ Progress: [██████░░░░] 60%
 | Phase 02-batch-orchestrator P01 | 1 | 1 | 1 min |
 | Phase 02-batch-orchestrator P02 | 3 | 1 tasks | 1 files |
 | Phase 03-batch-ui-and-integration P01 | 2 | 2 tasks | 2 files |
+| Phase 03-batch-ui-and-integration P02 | 3min | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -85,6 +86,8 @@ Recent decisions affecting current work:
 - [Phase 03-batch-ui-and-integration]: tk_root fixture uses scope=session — one Tk root shared across all batch panel tests avoids multiple Tk() instantiation issues
 - [Phase 03-batch-ui-and-integration]: root.withdraw() hides the window for headless test execution on Windows without blank Tk popup
 - [Phase 03-batch-ui-and-integration]: pytestmark skipif (not xfail) — consistent with test_spreadsheet.py and test_batch_orchestrator.py patterns
+- [Phase Phase 03-batch-ui-and-integration]: _poll_queue always reschedules (no stop flag) — inactive poll is cheap, AttributeError guards None _q before first batch
+- [Phase Phase 03-batch-ui-and-integration]: _build_summary_text returns string only (no messagebox) — keeps method testable without mocking, _on_batch_done shows dialog separately
 
 ### Pending Todos
 
@@ -98,6 +101,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-09T19:48:42.346Z
-Stopped at: Completed 03-batch-ui-and-integration-01-PLAN.md
+Last session: 2026-03-09T19:54:31.872Z
+Stopped at: Completed 03-batch-ui-and-integration-02-PLAN.md
 Resume file: None

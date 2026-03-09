@@ -38,7 +38,7 @@
 
 ### Resultado
 
-- [ ] **RESULT-01**: Ao terminar (sucesso ou abort), sistema exibe resumo final: total processadas, sucessos, erros, puladas
+- [x] **RESULT-01**: Ao terminar (sucesso ou abort), sistema exibe resumo final: total processadas, sucessos, erros, puladas
 - [x] **RESULT-02**: Se houver falhas, o resumo final exibe um aviso destacado listando cada empresa que falhou por código/nome
 
 ---
@@ -86,7 +86,7 @@
 | PROG-02 | Phase 3 | Complete |
 | PROG-03 | Phase 3 | Complete |
 | PROG-04 | Phase 3 | Complete |
-| RESULT-01 | Phase 3 | Pending |
+| RESULT-01 | Phase 3 | Complete |
 | RESULT-02 | Phase 3 | Complete |
 
 **Coverage:**
