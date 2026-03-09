@@ -62,7 +62,12 @@ Plans:
   3. During the batch run, the UI shows a progress bar with X/Y company count, the name of the company currently being processed, an estimated time remaining (visible after the first company completes), and a scrollable log of results per company
   4. At the end of the batch (whether completed or aborted), the UI shows a summary: total companies processed, number of successes, number of errors, and number skipped
   5. If any companies failed, the summary prominently lists each failed company by code and name so the analyst knows exactly what needs manual follow-up
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Test stubs: 9 skipping stubs + tk_root fixture (Wave 1)
+- [ ] 03-02-PLAN.md — Implement ui/batch_panel.py TDD green (Wave 2)
+- [ ] 03-03-PLAN.md — Refactor ui/app.py — Notebook wrapper + human verify (Wave 3)
 
 ## Progress
 
@@ -73,4 +78,4 @@ Phases execute in numeric order: 1 → 2 → 3
 |-------|----------------|--------|-----------|
 | 1. Foundation | 2/2 | Complete   | 2026-03-09 |
 | 2. Batch Orchestrator | 2/2 | Complete   | 2026-03-09 |
-| 3. Batch UI and Integration | 0/TBD | Not started | - |
+| 3. Batch UI and Integration | 0/3 | Not started | - |
