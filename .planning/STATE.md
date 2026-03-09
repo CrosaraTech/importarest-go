@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-batch-ui-and-integration-02-PLAN.md
-last_updated: "2026-03-09T19:54:31.882Z"
+stopped_at: Completed 03-batch-ui-and-integration-03-PLAN.md
+last_updated: "2026-03-09T20:30:27.467Z"
 last_activity: "2026-03-09 — Completed plan 02-01: 8 test stubs for BatchOrchestrator (PROC-01 through PROC-04)"
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 7
-  completed_plans: 6
+  completed_plans: 7
   percent: 60
 ---
 
@@ -60,6 +60,7 @@ Progress: [██████░░░░] 60%
 | Phase 02-batch-orchestrator P02 | 3 | 1 tasks | 1 files |
 | Phase 03-batch-ui-and-integration P01 | 2 | 2 tasks | 2 files |
 | Phase 03-batch-ui-and-integration P02 | 3min | 1 tasks | 1 files |
+| Phase 03-batch-ui-and-integration P03 | 5min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,9 @@ Recent decisions affecting current work:
 - [Phase 03-batch-ui-and-integration]: pytestmark skipif (not xfail) — consistent with test_spreadsheet.py and test_batch_orchestrator.py patterns
 - [Phase Phase 03-batch-ui-and-integration]: _poll_queue always reschedules (no stop flag) — inactive poll is cheap, AttributeError guards None _q before first batch
 - [Phase Phase 03-batch-ui-and-integration]: _build_summary_text returns string only (no messagebox) — keeps method testable without mocking, _on_batch_done shows dialog separately
+- [Phase 03-batch-ui-and-integration]: Window geometry 900x660 — wide enough for PainelLote batch controls, preserves Individual tab look
+- [Phase 03-batch-ui-and-integration]: Lazy analyst load on NotebookTabChanged — avoids G: drive crash at startup if drive is unavailable
+- [Phase 03-batch-ui-and-integration]: Individual tab wrapped in 420px fixed-width frame with pack_propagate(False) — prevents content stretch in 900px window
 
 ### Pending Todos
 
@@ -101,6 +105,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-09T19:54:31.872Z
-Stopped at: Completed 03-batch-ui-and-integration-02-PLAN.md
+Last session: 2026-03-09T20:30:27.459Z
+Stopped at: Completed 03-batch-ui-and-integration-03-PLAN.md
 Resume file: None
