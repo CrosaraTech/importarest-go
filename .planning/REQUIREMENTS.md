@@ -9,11 +9,11 @@
 
 ### Planilha
 
-- [ ] **PLAN-01**: Sistema lê automaticamente a planilha do caminho fixo `G:\Drives compartilhados\FISCAL\autmais\RELACAO_EMPRESAS_atualizada.xlsx` ao abrir a aba de lote
-- [ ] **PLAN-02**: Sistema filtra e exibe apenas as empresas onde a coluna MUNICIPIO contém "GOIÂNIA"
-- [ ] **PLAN-03**: Sistema valida que as colunas COD (coluna A) e ANALISTA (coluna D) existem no cabeçalho antes de prosseguir
-- [ ] **PLAN-04**: Sistema exibe mensagem de erro clara se a planilha estiver inacessível (bloqueada, não encontrada, ou formato inválido)
-- [ ] **PLAN-05**: Após seleção da analista, sistema exibe a contagem de empresas encontradas para ela
+- [x] **PLAN-01**: Sistema lê automaticamente a planilha do caminho fixo `G:\Drives compartilhados\FISCAL\autmais\RELACAO_EMPRESAS_atualizada.xlsx` ao abrir a aba de lote
+- [x] **PLAN-02**: Sistema filtra e exibe apenas as empresas onde a coluna MUNICIPIO contém "GOIÂNIA"
+- [x] **PLAN-03**: Sistema valida que as colunas COD (coluna A) e ANALISTA (coluna D) existem no cabeçalho antes de prosseguir
+- [x] **PLAN-04**: Sistema exibe mensagem de erro clara se a planilha estiver inacessível (bloqueada, não encontrada, ou formato inválido)
+- [x] **PLAN-05**: Após seleção da analista, sistema exibe a contagem de empresas encontradas para ela
 
 ### Seleção e Entrada
 
@@ -69,11 +69,11 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PLAN-01 | Phase 1 | Pending |
-| PLAN-02 | Phase 1 | Pending |
-| PLAN-03 | Phase 1 | Pending |
-| PLAN-04 | Phase 1 | Pending |
-| PLAN-05 | Phase 1 | Pending |
+| PLAN-01 | Phase 1 | Complete |
+| PLAN-02 | Phase 1 | Complete |
+| PLAN-03 | Phase 1 | Complete |
+| PLAN-04 | Phase 1 | Complete |
+| PLAN-05 | Phase 1 | Complete |
 | PROC-01 | Phase 2 | Pending |
 | PROC-02 | Phase 2 | Pending |
 | PROC-03 | Phase 2 | Pending |
