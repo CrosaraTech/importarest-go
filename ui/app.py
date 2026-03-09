@@ -1,6 +1,6 @@
 import threading
 from pathlib import Path
-from tkinter import messagebox, filedialog
+from tkinter import messagebox, filedialog, ttk
 import tkinter as tk
 import ttkbootstrap as ttkb
 
@@ -19,6 +19,7 @@ from services.processor import WorkflowProcessor
 from services.report import gravar_relatorio
 from ui.components import criar_entry, criar_botao, CircularProgress
 from ui.dialogs import abrir_tela_manual_itemlc, pedir_dados_cabecalho
+from ui.batch_panel import PainelLote
 
 
 class JanelaCrosara:
@@ -34,7 +35,7 @@ class JanelaCrosara:
 
         self.janela = ttkb.Window(themename="litera")
         self.janela.title("Importador de NFS-e – REST")
-        self.janela.geometry("420x580")
+        self.janela.geometry("900x660")
         self.janela.configure(bg=COR_BG)
         self.janela.resizable(False, False)
 
@@ -46,9 +47,34 @@ class JanelaCrosara:
     # ──────────────────────────────────────────────────────────────────────────
 
     def _construir_ui(self):
-        self._exibir_logo()
+        nb = ttk.Notebook(self.janela)
+        nb.pack(fill="both", expand=True)
 
-        card = tk.Frame(self.janela, bg=COR_CARD,
+        tab_individual = tk.Frame(nb, bg=COR_BG)
+        nb.add(tab_individual, text="Individual")
+
+        tab_lote = tk.Frame(nb, bg=COR_BG)
+        nb.add(tab_lote, text="Lote")
+
+        self._construir_aba_individual(tab_individual)
+
+        self._painel_lote = PainelLote(tab_lote)
+        self._painel_lote.pack(fill="both", expand=True)
+
+        # Lazy load: only call load_analysts when Lote tab is first activated
+        # Prevents G: drive crash at startup if drive is unavailable
+        nb.bind("<<NotebookTabChanged>>", self._on_tab_changed)
+        self._nb = nb
+        self._lote_tab_id = nb.index(tab_lote)
+
+    def _construir_aba_individual(self, parent):
+        center = tk.Frame(parent, bg=COR_BG, width=420)
+        center.pack_propagate(False)
+        center.pack(anchor="n", expand=False)
+
+        self._exibir_logo(center)
+
+        card = tk.Frame(center, bg=COR_CARD,
                         highlightbackground=COR_BORDA, highlightthickness=1)
         card.pack(fill="x", padx=24, pady=(0, 8))
 
@@ -79,12 +105,12 @@ class JanelaCrosara:
         self.chk_mei.pack(fill="x")
 
         self.btn_acao = criar_botao(
-            self.janela, "▶  INICIAR IMPORTAÇÃO",
+            center, "▶  INICIAR IMPORTAÇÃO",
             self.iniciar_processo, COR_PRIMARIA
         )
         self.btn_acao.pack(pady=14, padx=24, fill="x")
 
-        zone = tk.Frame(self.janela, bg=COR_BG)
+        zone = tk.Frame(center, bg=COR_BG)
         zone.pack(fill="both", expand=True, padx=24, pady=(0, 8))
 
         self.progress = CircularProgress(zone, size=130, bg=COR_BG)
@@ -102,7 +128,7 @@ class JanelaCrosara:
         )
         self.lbl_status.pack(pady=(2, 0))
 
-        rodape = tk.Frame(self.janela, bg=COR_BG)
+        rodape = tk.Frame(center, bg=COR_BG)
         rodape.pack(fill="x", padx=24, pady=(0, 12))
         tk.Label(rodape, text="IMPORTAREST GO  •  v2.0",
                  font=("Segoe UI", 7), bg=COR_BG, fg="#BBBBBB").pack(side="right")
@@ -110,24 +136,29 @@ class JanelaCrosara:
         self.ent_codigo.bind("<Return>", lambda e: self.ent_vigencia.focus_set())
         self.ent_vigencia.bind("<Return>", lambda e: self.iniciar_processo())
 
-    def _exibir_logo(self):
+    def _exibir_logo(self, parent):
         if _PIL_OK:
             try:
                 logo_path = Path(__file__).resolve().parent.parent / "assets" / "logo_importarest.png"
                 img = Image.open(logo_path)
                 img = img.resize((280, 78), Image.LANCZOS)
                 logo = ImageTk.PhotoImage(img)
-                lbl = tk.Label(self.janela, image=logo, bg=COR_BG)
+                lbl = tk.Label(parent, image=logo, bg=COR_BG)
                 lbl.image = logo
                 lbl.pack(pady=(20, 10))
                 return
             except (FileNotFoundError, OSError):
                 pass
         tk.Label(
-            self.janela, text="IMPORTAREST GO",
+            parent, text="IMPORTAREST GO",
             font=("Segoe UI", 20, "bold"),
             bg=COR_BG, fg=COR_PRIMARIA
         ).pack(pady=(24, 8))
+
+    def _on_tab_changed(self, event=None):
+        selected = self._nb.index(self._nb.select())
+        if selected == self._lote_tab_id:
+            self._painel_lote._trigger_load_analysts()
 
     # ──────────────────────────────────────────────────────────────────────────
     # Logging

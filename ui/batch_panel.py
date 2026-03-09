@@ -164,6 +164,19 @@ class PainelLote(tk.Frame):
         """Populate the analyst combobox with the given list of names."""
         self._cmb_analyst["values"] = names
 
+    def _trigger_load_analysts(self):
+        """Load analyst names into the combobox — called lazily when Lote tab is activated.
+
+        Safe to call multiple times; subsequent calls re-populate the combobox.
+        Any SpreadsheetError is silently caught and shown as an error label so the
+        app does not crash when G: drive is unavailable at startup.
+        """
+        try:
+            names = load_analysts()
+            self._load_analysts_into_combobox(names)
+        except SpreadsheetError as exc:
+            self._lbl_count.configure(text=f"Erro ao carregar analistas: {exc}")
+
     def _update_start_state(self, *_):
         """Enable/disable start button based on whether all three fields are set."""
         ok = (
