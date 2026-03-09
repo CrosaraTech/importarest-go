@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planning
-stopped_at: Completed 01-foundation-01-PLAN.md
-last_updated: "2026-03-09T18:29:59.794Z"
-last_activity: 2026-03-09 — Roadmap created, ready for Phase 1 planning
+status: executing
+stopped_at: Completed 01-foundation-02-PLAN.md
+last_updated: "2026-03-09T18:34:51.700Z"
+last_activity: "2026-03-09 — Completed plan 01-01: test infrastructure + config constants"
 progress:
   total_phases: 3
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
+  completed_plans: 2
   percent: 50
 ---
 
@@ -54,6 +54,7 @@ Progress: [█████░░░░░] 50%
 | Plan | Tasks | Files | Duration |
 |------|-------|-------|----------|
 | Phase 01-foundation P01 | 2 | 4 | 2 min |
+| Phase 01-foundation P02 | 2 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -68,6 +69,9 @@ Recent decisions affecting current work:
 - [Architecture]: PROC-03 — dialogo de revisão manual NÃO suprimido no lote; worker pausa via threading.Event, main thread abre dialog via after()
 - [Phase 01-foundation]: Import guard uses try/except + pytestmark skipif to allow pytest collection before services/spreadsheet.py exists
 - [Phase 01-foundation]: 8 test stubs (not 7) — test_missing_analista_header added for complete PLAN-03 header validation coverage
+- [Phase 01-foundation]: MUNICIPIO column discovered dynamically via header_map, not hardcoded — accepts MUNICÍPIO accent variant as fallback
+- [Phase 01-foundation]: GOIÂNIA filter: str(municipio).strip().upper() == 'GOIÂNIA' — accent required, GOIANIA without accent does NOT match per PLAN-02
+- [Phase 01-foundation]: wb.close() in finally block — workbook closed even on exception, prevents file handle leaks on G: drive
 
 ### Pending Todos
 
@@ -81,6 +85,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-09T18:29:59.791Z
-Stopped at: Completed 01-foundation-01-PLAN.md
+Last session: 2026-03-09T18:34:51.697Z
+Stopped at: Completed 01-foundation-02-PLAN.md
 Resume file: None

@@ -12,7 +12,7 @@ This roadmap adds batch NFS-e processing to the existing ImportaREST GO desktop 
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation** - Spreadsheet reader and config constants — isolated, testable, no UI dependencies
+- [x] **Phase 1: Foundation** - Spreadsheet reader and config constants — isolated, testable, no UI dependencies (completed 2026-03-09)
 - [ ] **Phase 2: Batch Orchestrator** - Worker loop, thread-safe manual review dialogs, abort/error handling
 - [ ] **Phase 3: Batch UI and Integration** - Full batch panel with progress controls, app.py Notebook tab
 
@@ -67,6 +67,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 1/2 | In Progress|  |
+| 1. Foundation | 2/2 | Complete   | 2026-03-09 |
 | 2. Batch Orchestrator | 0/TBD | Not started | - |
 | 3. Batch UI and Integration | 0/TBD | Not started | - |
