@@ -1,4 +1,5 @@
 import pytest
+import tkinter as tk
 from openpyxl import Workbook
 
 
@@ -28,3 +29,12 @@ def tmp_xlsx(tmp_path):
     def _factory(rows, headers=None):
         return _make_xlsx(tmp_path, rows, headers)
     return _factory
+
+
+@pytest.fixture(scope="session")
+def tk_root():
+    """Session-scoped Tk root window, hidden. Shared across all batch panel tests."""
+    root = tk.Tk()
+    root.withdraw()
+    yield root
+    root.destroy()
