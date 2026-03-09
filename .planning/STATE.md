@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-foundation-02-PLAN.md
-last_updated: "2026-03-09T18:38:54.007Z"
-last_activity: "2026-03-09 — Completed plan 01-01: test infrastructure + config constants"
+stopped_at: Completed 02-batch-orchestrator-01-PLAN.md
+last_updated: "2026-03-09T19:05:00Z"
+last_activity: "2026-03-09 — Completed plan 02-01: 8 test stubs for BatchOrchestrator (PROC-01 through PROC-04)"
 progress:
   total_phases: 3
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
-  percent: 50
+  total_plans: 3
+  completed_plans: 3
+  percent: 60
 ---
 
 # Project State
@@ -21,32 +21,33 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-09)
 
 **Core value:** Analistas geram arquivos REST de NFS-e com o mínimo de intervenção manual — individualmente ou em lote por competência.
-**Current focus:** Phase 1 — Foundation
+**Current focus:** Phase 2 — Batch Orchestrator
 
 ## Current Position
 
-Phase: 1 of 3 (Foundation)
-Plan: 1 of 2 in current phase (01-01 complete, 01-02 next)
+Phase: 2 of 3 (Batch Orchestrator)
+Plan: 1 of 2 in current phase (02-01 complete, 02-02 next)
 Status: In Progress
-Last activity: 2026-03-09 — Completed plan 01-01: test infrastructure + config constants
+Last activity: 2026-03-09 — Completed plan 02-01: 8 test stubs for BatchOrchestrator (PROC-01 through PROC-04)
 
-Progress: [█████░░░░░] 50%
+Progress: [██████░░░░] 60%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
+- Total plans completed: 3
 - Average duration: 2 min
-- Total execution time: 2 min
+- Total execution time: 5 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-foundation | 1 | 2 min | 2 min |
+| 01-foundation | 2 | 4 min | 2 min |
+| 02-batch-orchestrator | 1 | 1 min | 1 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (2 min)
+- Last 5 plans: 01-01 (2 min), 01-02 (2 min), 02-01 (1 min)
 - Trend: -
 
 *Updated after each plan completion*
@@ -55,6 +56,7 @@ Progress: [█████░░░░░] 50%
 |------|-------|-------|----------|
 | Phase 01-foundation P01 | 2 | 4 | 2 min |
 | Phase 01-foundation P02 | 2 | 1 tasks | 1 files |
+| Phase 02-batch-orchestrator P01 | 1 | 1 | 1 min |
 
 ## Accumulated Context
 
@@ -72,6 +74,9 @@ Recent decisions affecting current work:
 - [Phase 01-foundation]: MUNICIPIO column discovered dynamically via header_map, not hardcoded — accepts MUNICÍPIO accent variant as fallback
 - [Phase 01-foundation]: GOIÂNIA filter: str(municipio).strip().upper() == 'GOIÂNIA' — accent required, GOIANIA without accent does NOT match per PLAN-02
 - [Phase 01-foundation]: wb.close() in finally block — workbook closed even on exception, prevents file handle leaks on G: drive
+- [Phase 02-batch-orchestrator]: Test stubs use pytestmark skipif (not xfail) — matches test_spreadsheet.py pattern established in Phase 1
+- [Phase 02-batch-orchestrator]: FakeProcessor inner class preferred over unittest.mock.patch — captures abrir_tela_manual_fn directly at __init__ for PROC-03 test
+- [Phase 02-batch-orchestrator]: test_abort_stops_after_current_company calls abort() before run() — deterministic, no threading races
 
 ### Pending Todos
 
@@ -85,6 +90,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-09T18:34:51.697Z
-Stopped at: Completed 01-foundation-02-PLAN.md
+Last session: 2026-03-09T19:05:00Z
+Stopped at: Completed 02-batch-orchestrator-01-PLAN.md
 Resume file: None

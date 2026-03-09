@@ -47,7 +47,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Test stubs: 8 failing tests for PROC-01..04 (Wave 1)
+- [x] 02-01-PLAN.md — Test stubs: 8 failing tests for PROC-01..04 (Wave 1)
 - [ ] 02-02-PLAN.md — Implement services/batch_orchestrator.py TDD green (Wave 2)
 
 **Implementation note (PROC-03):** The manual review dialog must work normally in batch mode — it is NOT suppressed. The worker thread signals the main thread via `queue.Queue`; the main thread opens the dialog via `after()` and passes the analyst's response back to the worker via `threading.Event`. This is the prescribed thread-safe pattern and is a hard requirement.
@@ -72,5 +72,5 @@ Phases execute in numeric order: 1 → 2 → 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 2/2 | Complete   | 2026-03-09 |
-| 2. Batch Orchestrator | 0/2 | Not started | - |
+| 2. Batch Orchestrator | 1/2 | In Progress | - |
 | 3. Batch UI and Integration | 0/TBD | Not started | - |

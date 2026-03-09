@@ -24,10 +24,10 @@
 
 ### Processamento
 
-- [ ] **PROC-01**: Sistema processa todas as empresas da analista (GOIÂNIA) em sequência, sem intervenção manual entre elas
-- [ ] **PROC-02**: Quando uma empresa falha, o sistema registra o erro no log e pula automaticamente para a próxima empresa
-- [ ] **PROC-03**: Quando uma nota exige revisão manual durante o lote, o sistema pausa e exibe o diálogo de revisão normalmente — após a analista responder, o lote continua
-- [ ] **PROC-04**: Analista pode clicar em "Abortar" a qualquer momento — sistema para após a empresa atual terminar
+- [x] **PROC-01**: Sistema processa todas as empresas da analista (GOIÂNIA) em sequência, sem intervenção manual entre elas
+- [x] **PROC-02**: Quando uma empresa falha, o sistema registra o erro no log e pula automaticamente para a próxima empresa
+- [x] **PROC-03**: Quando uma nota exige revisão manual durante o lote, o sistema pausa e exibe o diálogo de revisão normalmente — após a analista responder, o lote continua
+- [x] **PROC-04**: Analista pode clicar em "Abortar" a qualquer momento — sistema para após a empresa atual terminar
 
 ### Progresso
 
@@ -74,10 +74,10 @@
 | PLAN-03 | Phase 1 | Complete |
 | PLAN-04 | Phase 1 | Complete |
 | PLAN-05 | Phase 1 | Complete |
-| PROC-01 | Phase 2 | Pending |
-| PROC-02 | Phase 2 | Pending |
-| PROC-03 | Phase 2 | Pending |
-| PROC-04 | Phase 2 | Pending |
+| PROC-01 | Phase 2 | Complete |
+| PROC-02 | Phase 2 | Complete |
+| PROC-03 | Phase 2 | Complete |
+| PROC-04 | Phase 2 | Complete |
 | SELEC-01 | Phase 3 | Pending |
 | SELEC-02 | Phase 3 | Pending |
 | SELEC-03 | Phase 3 | Pending |
