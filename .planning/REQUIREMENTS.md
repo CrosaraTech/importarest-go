@@ -74,14 +74,14 @@
 | PLAN-03 | Phase 1 | Pending |
 | PLAN-04 | Phase 1 | Pending |
 | PLAN-05 | Phase 1 | Pending |
-| SELEC-01 | Phase 3 | Pending |
-| SELEC-02 | Phase 3 | Pending |
-| SELEC-03 | Phase 3 | Pending |
-| SELEC-04 | Phase 3 | Pending |
 | PROC-01 | Phase 2 | Pending |
 | PROC-02 | Phase 2 | Pending |
 | PROC-03 | Phase 2 | Pending |
 | PROC-04 | Phase 2 | Pending |
+| SELEC-01 | Phase 3 | Pending |
+| SELEC-02 | Phase 3 | Pending |
+| SELEC-03 | Phase 3 | Pending |
+| SELEC-04 | Phase 3 | Pending |
 | PROG-01 | Phase 3 | Pending |
 | PROG-02 | Phase 3 | Pending |
 | PROG-03 | Phase 3 | Pending |
@@ -96,3 +96,4 @@
 
 ---
 *Requirements defined: 2026-03-09*
+*Traceability updated: 2026-03-09 — consolidated to 3 phases (coarse granularity)*
