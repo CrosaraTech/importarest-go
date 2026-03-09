@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-batch-orchestrator-01-PLAN.md
-last_updated: "2026-03-09T19:05:00Z"
+stopped_at: Completed 02-batch-orchestrator-02-PLAN.md
+last_updated: "2026-03-09T19:11:39.881Z"
 last_activity: "2026-03-09 — Completed plan 02-01: 8 test stubs for BatchOrchestrator (PROC-01 through PROC-04)"
 progress:
   total_phases: 3
-  completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  completed_phases: 2
+  total_plans: 4
+  completed_plans: 4
   percent: 60
 ---
 
@@ -57,6 +57,7 @@ Progress: [██████░░░░] 60%
 | Phase 01-foundation P01 | 2 | 4 | 2 min |
 | Phase 01-foundation P02 | 2 | 1 tasks | 1 files |
 | Phase 02-batch-orchestrator P01 | 1 | 1 | 1 min |
+| Phase 02-batch-orchestrator P02 | 3 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,9 @@ Recent decisions affecting current work:
 - [Phase 02-batch-orchestrator]: Test stubs use pytestmark skipif (not xfail) — matches test_spreadsheet.py pattern established in Phase 1
 - [Phase 02-batch-orchestrator]: FakeProcessor inner class preferred over unittest.mock.patch — captures abrir_tela_manual_fn directly at __init__ for PROC-03 test
 - [Phase 02-batch-orchestrator]: test_abort_stops_after_current_company calls abort() before run() — deterministic, no threading races
+- [Phase 02-batch-orchestrator]: notes_count = len(result.linhas_dict), never len(result.relatorio) — matches PROC-01 plan constraint
+- [Phase 02-batch-orchestrator]: BatchOrchestrator._abort_event.is_set() checked only at TOP of for-loop — current company always completes before abort
+- [Phase 02-batch-orchestrator]: No Tkinter API in batch_orchestrator.py — all UI interaction via queue.Queue messages to main thread
 
 ### Pending Todos
 
@@ -90,6 +94,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-09T19:05:00Z
-Stopped at: Completed 02-batch-orchestrator-01-PLAN.md
+Last session: 2026-03-09T19:11:39.877Z
+Stopped at: Completed 02-batch-orchestrator-02-PLAN.md
 Resume file: None
