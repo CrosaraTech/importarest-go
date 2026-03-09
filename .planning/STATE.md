@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-batch-orchestrator-02-PLAN.md
-last_updated: "2026-03-09T19:16:38.893Z"
+stopped_at: Completed 03-batch-ui-and-integration-01-PLAN.md
+last_updated: "2026-03-09T19:48:42.350Z"
 last_activity: "2026-03-09 — Completed plan 02-01: 8 test stubs for BatchOrchestrator (PROC-01 through PROC-04)"
 progress:
   total_phases: 3
   completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
+  total_plans: 7
+  completed_plans: 5
   percent: 60
 ---
 
@@ -58,6 +58,7 @@ Progress: [██████░░░░] 60%
 | Phase 01-foundation P02 | 2 | 1 tasks | 1 files |
 | Phase 02-batch-orchestrator P01 | 1 | 1 | 1 min |
 | Phase 02-batch-orchestrator P02 | 3 | 1 tasks | 1 files |
+| Phase 03-batch-ui-and-integration P01 | 2 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -81,6 +82,9 @@ Recent decisions affecting current work:
 - [Phase 02-batch-orchestrator]: notes_count = len(result.linhas_dict), never len(result.relatorio) — matches PROC-01 plan constraint
 - [Phase 02-batch-orchestrator]: BatchOrchestrator._abort_event.is_set() checked only at TOP of for-loop — current company always completes before abort
 - [Phase 02-batch-orchestrator]: No Tkinter API in batch_orchestrator.py — all UI interaction via queue.Queue messages to main thread
+- [Phase 03-batch-ui-and-integration]: tk_root fixture uses scope=session — one Tk root shared across all batch panel tests avoids multiple Tk() instantiation issues
+- [Phase 03-batch-ui-and-integration]: root.withdraw() hides the window for headless test execution on Windows without blank Tk popup
+- [Phase 03-batch-ui-and-integration]: pytestmark skipif (not xfail) — consistent with test_spreadsheet.py and test_batch_orchestrator.py patterns
 
 ### Pending Todos
 
@@ -94,6 +98,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-09T19:11:39.877Z
-Stopped at: Completed 02-batch-orchestrator-02-PLAN.md
+Last session: 2026-03-09T19:48:42.346Z
+Stopped at: Completed 03-batch-ui-and-integration-01-PLAN.md
 Resume file: None
