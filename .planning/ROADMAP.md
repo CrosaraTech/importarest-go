@@ -28,7 +28,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. If the spreadsheet is locked by another user, missing from drive G:, or has an invalid format, the app displays a specific plain-language error message naming the cause
   4. If the spreadsheet columns COD (A) or ANALISTA (D) are not found in row 1, the app rejects the file before attempting to process any data
   5. After an analyst is selected, the app displays the exact count of GOIANIA companies assigned to that analyst
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Config constants + test infrastructure (Wave 1)
+- [ ] 01-02-PLAN.md — Implement services/spreadsheet.py TDD red-green (Wave 2)
 
 ### Phase 2: Batch Orchestrator
 **Goal**: The batch worker can process all companies sequentially, pause correctly for manual review dialogs, and handle errors and aborts without crashing or leaving the analyst uninformed
@@ -63,6 +67,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/TBD | Not started | - |
+| 1. Foundation | 0/2 | Not started | - |
 | 2. Batch Orchestrator | 0/TBD | Not started | - |
 | 3. Batch UI and Integration | 0/TBD | Not started | - |
