@@ -42,6 +42,7 @@ class PainelLote(tk.Frame):
         self._var_analyst = tk.StringVar()
         self._var_vigencia = tk.StringVar()
         self._var_dest = tk.StringVar()
+        self._var_mei = tk.BooleanVar(value=False)
 
         # Trace vars so start button updates automatically
         self._var_vigencia.trace_add("write", self._update_start_state)
@@ -96,8 +97,16 @@ class PainelLote(tk.Frame):
                   activebackground=COR_PRIMARIA_HV, activeforeground="#FFFFFF",
                   relief="flat", cursor="hand2", pady=2, padx=6).pack(side="left")
 
+        tk.Checkbutton(
+            frame_sel, text="Gerar notas MEI (Goiânia)",
+            variable=self._var_mei,
+            font=("Segoe UI", 9), bg=COR_BG, fg=COR_SUBTEXTO,
+            activebackground=COR_BG, activeforeground=COR_SUBTEXTO,
+            selectcolor=COR_BG, anchor="w",
+        ).grid(row=7, column=0, sticky="w", pady=(0, 6))
+
         frame_actions = tk.Frame(frame_sel, bg=COR_BG)
-        frame_actions.grid(row=7, column=0, sticky="w", pady=(0, 4))
+        frame_actions.grid(row=8, column=0, sticky="w", pady=(0, 4))
 
         self._btn_start = tk.Button(
             frame_actions, text="INICIAR LOTE", command=self._start_batch,
@@ -292,7 +301,7 @@ class PainelLote(tk.Frame):
 
         t = threading.Thread(
             target=self._orc.run,
-            args=(companies, vigencia, dest),
+            args=(companies, vigencia, dest, self._var_mei.get()),
             daemon=True,
         )
         t.start()
