@@ -1,5 +1,5 @@
 import tkinter as tk
-from config import COR_BORDA, COR_CARD, COR_TEXTO
+from config import COR_BORDA, COR_CARD, COR_PRIMARIA, COR_TEXTO
 
 try:
     from PIL import Image, ImageDraw, ImageFont, ImageTk as _PILImageTk
@@ -177,4 +177,6 @@ def criar_entry(parent, **kwargs):
         **kwargs
     )
     entry.pack(fill="x", padx=2, pady=2)
+    entry.bind("<FocusIn>", lambda e: frame.configure(bg=COR_PRIMARIA))
+    entry.bind("<FocusOut>", lambda e: frame.configure(bg=COR_BORDA))
     return frame, entry

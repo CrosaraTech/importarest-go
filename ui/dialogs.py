@@ -4,7 +4,9 @@ import urllib.parse
 
 from config import (
     COR_BG, COR_CARD, COR_PRIMARIA, COR_PRIMARIA_HV,
-    COR_SUCESSO, COR_SUBTEXTO, COR_TEXTO, COR_BORDA
+    COR_SUCESSO, COR_SUBTEXTO, COR_TEXTO, COR_BORDA,
+    COR_ERRO_LABEL, COR_DLG_SUB, COR_DESC_BG, COR_DESC_BORDA,
+    COR_MUN_BG, COR_MUN_BORDA, COR_MUN_TEXTO,
 )
 from core.validators import normalize_digits
 from core.txt_builder import montar_linha_txt, montar_linha_txt_n8n
@@ -36,9 +38,9 @@ def pedir_dados_cabecalho(parent_window, im_atual: str, razao_atual: str) -> tup
     tk.Label(hdr, text="📋  Dados do Cabeçalho",
              font=("Segoe UI", 12, "bold"),
              bg=COR_PRIMARIA, fg="#FFFFFF").pack()
-    tk.Label(hdr, text="Campos não encontrados nos XMLs",
+    tk.Label(hdr, text="Campos nao encontrados nos XMLs",
              font=("Segoe UI", 9),
-             bg=COR_PRIMARIA, fg="#FFE8D6").pack()
+             bg=COR_PRIMARIA, fg=COR_DLG_SUB).pack()
 
     card = tk.Frame(dlg, bg=COR_CARD, padx=24, pady=16,
                     highlightbackground=COR_BORDA, highlightthickness=1)
@@ -61,19 +63,19 @@ def pedir_dados_cabecalho(parent_window, im_atual: str, razao_atual: str) -> tup
         frm_razao.pack(fill="x", pady=(3, 12))
 
     lbl_erro = tk.Label(card, text="", font=("Segoe UI", 9),
-                        bg=COR_CARD, fg="#DC3545")
+                        bg=COR_CARD, fg=COR_ERRO_LABEL)
     lbl_erro.pack()
 
     def confirmar(event=None):
         im = ent_im.get().strip() if ent_im else im_atual
         razao = ent_razao.get().strip() if ent_razao else razao_atual
         if falta_im and not im:
-            lbl_erro.configure(text="⚠ Preencha a Inscrição Municipal.")
+            lbl_erro.configure(text="\u26A0 Preencha a Inscricao Municipal.")
             if ent_im:
                 ent_im.focus_set()
             return
         if falta_razao and not razao:
-            lbl_erro.configure(text="⚠ Preencha a Razão Social.")
+            lbl_erro.configure(text="\u26A0 Preencha a Razao Social.")
             if ent_razao:
                 ent_razao.focus_set()
             return
@@ -93,6 +95,7 @@ def pedir_dados_cabecalho(parent_window, im_atual: str, razao_atual: str) -> tup
     btn_canc.pack(side="right")
 
     dlg.bind("<Return>", confirmar)
+    dlg.bind("<Escape>", lambda e: cancelar())
 
     if ent_im:
         ent_im.focus_set()
@@ -132,7 +135,7 @@ def abrir_tela_manual_itemlc(parent_window, dados_base: dict, chave_nfse: str,
         hdr,
         text=f"Nota: {chave_nfse.replace('.xml', '')}",
         font=("Segoe UI", 9),
-        bg=COR_PRIMARIA, fg="#FFE8D6"
+        bg=COR_PRIMARIA, fg=COR_DLG_SUB,
     ).pack()
 
     # Card principal
@@ -152,11 +155,11 @@ def abrir_tela_manual_itemlc(parent_window, dados_base: dict, chave_nfse: str,
              font=("Segoe UI", 9, "bold"), bg=COR_CARD, fg=COR_SUBTEXTO,
              anchor="w").pack(fill="x")
 
-    frame_desc = tk.Frame(card, bg="#FFF8F3", highlightbackground="#F0C090",
+    frame_desc = tk.Frame(card, bg=COR_DESC_BG, highlightbackground=COR_DESC_BORDA,
                           highlightthickness=1)
     frame_desc.pack(fill="x", pady=(4, 12))
     tk.Label(frame_desc, text=descricao_item, wraplength=460, justify="left",
-             font=("Segoe UI", 9), bg="#FFF8F3", fg=COR_TEXTO,
+             font=("Segoe UI", 9), bg=COR_DESC_BG, fg=COR_TEXTO,
              padx=8, pady=6).pack(fill="x")
 
     # Resolve município
@@ -205,11 +208,11 @@ def abrir_tela_manual_itemlc(parent_window, dados_base: dict, chave_nfse: str,
         tk.Label(frame_campos, text="Município da nota:",
                  font=("Segoe UI", 9, "bold"), bg=COR_CARD, fg=COR_SUBTEXTO,
                  anchor="w").grid(row=0, column=0, sticky="w", pady=(0, 2))
-        frame_mun = tk.Frame(frame_campos, bg="#F0F8FF",
-                             highlightbackground="#90C0E0", highlightthickness=1)
+        frame_mun = tk.Frame(frame_campos, bg=COR_MUN_BG,
+                             highlightbackground=COR_MUN_BORDA, highlightthickness=1)
         frame_mun.grid(row=1, column=0, sticky="ew", pady=(0, 10))
         tk.Label(frame_mun, text=municipio_exibir, font=("Segoe UI", 10, "bold"),
-                 bg="#F0F8FF", fg="#1A5276", padx=8, pady=5).pack(fill="x")
+                 bg=COR_MUN_BG, fg=COR_MUN_TEXTO, padx=8, pady=5).pack(fill="x")
 
     if from_n8n:
         frame_campos.columnconfigure(0, weight=1)
@@ -236,13 +239,13 @@ def abrir_tela_manual_itemlc(parent_window, dados_base: dict, chave_nfse: str,
     ent_item.focus_set()
 
     lbl_erro = tk.Label(card, text="", font=("Segoe UI", 9),
-                        bg=COR_CARD, fg="#DC3545")
+                        bg=COR_CARD, fg=COR_ERRO_LABEL)
     lbl_erro.pack(pady=(8, 0))
 
     def confirmar(event=None):
         item_manual = normalize_digits(ent_item.get())[:4]
         if len(item_manual) != 4:
-            lbl_erro.configure(text="⚠ Item LC deve ter 4 dígitos.")
+            lbl_erro.configure(text="\u26A0 Item LC deve ter 4 digitos.")
             ent_item.focus_set()
             return
         if from_n8n:
@@ -250,7 +253,7 @@ def abrir_tela_manual_itemlc(parent_window, dados_base: dict, chave_nfse: str,
         else:
             ddd_manual = normalize_digits(ent_ddd.get())[:2]
             if len(ddd_manual) != 2:
-                lbl_erro.configure(text="⚠ DDD deve ter 2 dígitos.")
+                lbl_erro.configure(text="\u26A0 DDD deve ter 2 digitos.")
                 ent_ddd.focus_set()
                 return
             linha = montar_linha_txt(dados_base, ddd=ddd_manual, item_lc=item_manual)

@@ -34,3 +34,22 @@ COR_SUCESSO_HV  = "#1E7E34"
 COR_TEXTO       = "#2C2C2C"
 COR_SUBTEXTO    = "#6C757D"
 COR_BORDA       = "#E0E0E0"
+
+# Erro / destrutivo
+COR_ERRO        = "#C0392B"
+COR_ERRO_HV     = "#A93226"
+COR_ERRO_LABEL  = "#DC3545"
+
+# Log
+COR_LOG_BG      = "#FAFAFA"
+COR_LOG_OK      = "#1B8A1B"
+COR_LOG_WARN    = "#B8860B"
+COR_LOG_INFO    = "#2471A3"
+
+# Diálogos
+COR_DLG_SUB     = "#FFFFFF"
+COR_DESC_BG     = "#FFF8F3"
+COR_DESC_BORDA  = "#F0C090"
+COR_MUN_BG      = "#F0F8FF"
+COR_MUN_BORDA   = "#90C0E0"
+COR_MUN_TEXTO   = "#1A5276"

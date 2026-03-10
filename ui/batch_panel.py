@@ -4,6 +4,8 @@ ui/batch_panel.py — Batch processing panel.
 PainelLote: tk.Frame subclass encapsulating all batch UI logic —
 selection widgets, progress display, queue poll loop, PROC-03 manual
 review handler, and post-run summary.
+
+Redesigned with CustomTkinter for a modern, premium look.
 """
 import queue
 import threading
@@ -11,6 +13,8 @@ from pathlib import Path
 from tkinter import messagebox, filedialog
 import tkinter as tk
 from tkinter import ttk
+
+import customtkinter as ctk
 
 try:
     from PIL import Image, ImageTk as _PILImageTk
@@ -21,12 +25,31 @@ except ImportError:
 from config import (
     COR_BG, COR_CARD, COR_PRIMARIA, COR_PRIMARIA_HV,
     COR_SUBTEXTO, COR_TEXTO, COR_BORDA,
+    COR_ERRO, COR_ERRO_HV,
+    COR_LOG_BG, COR_LOG_OK, COR_LOG_WARN,
 )
 from services.spreadsheet import load_analysts, get_companies_for_analyst
 from services.spreadsheet import SpreadsheetError
 from services.batch_orchestrator import BatchOrchestrator, BatchSummary
 from ui.dialogs import abrir_tela_manual_itemlc
-from ui.components import criar_botao, CircularProgress
+from ui.components import CircularProgress
+
+
+class _CompatComboBox(ctk.CTkComboBox):
+    """CTkComboBox with dict-style access (``widget["values"]``) for test compat."""
+
+    def __getitem__(self, key):
+        val = self.cget(key)
+        if key == "values":
+            return tuple(val) if val else ()
+        return val
+
+
+class _CompatButton(ctk.CTkButton):
+    """CTkButton with dict-style access (``widget["state"]``) for test compat."""
+
+    def __getitem__(self, key):
+        return self.cget(key)
 
 
 class PainelLote(tk.Frame):
@@ -34,6 +57,8 @@ class PainelLote(tk.Frame):
 
     def __init__(self, parent):
         super().__init__(parent, bg=COR_BG)
+
+        ctk.set_appearance_mode("light")
 
         # Runtime state
         self._companies: list[dict] = []
@@ -59,236 +84,240 @@ class PainelLote(tk.Frame):
         self.after(100, self._poll_queue)
 
     # ------------------------------------------------------------------
-    # UI construction helpers
+    # UI construction
     # ------------------------------------------------------------------
 
-    def _make_card(self, parent, title: str):
-        """Card with orange left accent bar and optional section title.
-        Returns (outer, body). Caller must pack/grid outer."""
-        outer = tk.Frame(parent, bg=COR_BORDA, padx=1, pady=1)
+    def _section_title(self, parent, text: str):
+        """Render a section title with small orange accent line."""
+        bg = parent.cget("bg") if isinstance(parent, tk.Frame) else COR_CARD
+        frame = tk.Frame(parent, bg=bg)
+        frame.pack(fill="x", pady=(0, 10))
 
-        card = tk.Frame(outer, bg=COR_CARD)
-        card.pack(fill="both", expand=True)
-
-        # 4px orange left accent
-        tk.Frame(card, bg=COR_PRIMARIA, width=4).pack(side="left", fill="y")
-
-        body = tk.Frame(card, bg=COR_CARD)
-        body.pack(side="left", fill="both", expand=True, padx=(14, 16), pady=12)
-
-        if title:
-            hdr = tk.Frame(body, bg=COR_CARD)
-            hdr.pack(fill="x", pady=(0, 10))
-            tk.Label(
-                hdr, text=title.upper(),
-                font=("Segoe UI", 8, "bold"),
-                bg=COR_CARD, fg=COR_PRIMARIA, anchor="w",
-            ).pack(side="left")
-            tk.Frame(hdr, bg=COR_BORDA, height=1).pack(
-                side="left", fill="x", expand=True, padx=(8, 0), pady=(4, 0)
-            )
-
-        return outer, body
+        tk.Frame(frame, bg=COR_PRIMARIA, width=3, height=14).pack(
+            side="left", padx=(0, 8),
+        )
+        tk.Label(
+            frame, text=text, font=("Segoe UI", 8, "bold"),
+            bg=bg, fg=COR_TEXTO, anchor="w",
+        ).pack(side="left")
+        tk.Frame(frame, bg=COR_BORDA, height=1).pack(
+            side="left", fill="x", expand=True, padx=(10, 0), pady=(4, 0),
+        )
 
     def _build_ui(self):
-        # ── Header ──────────────────────────────────────────────────────
-        hdr = tk.Frame(self, bg=COR_BG)
-        hdr.pack(fill="x", padx=20, pady=(16, 12))
+        main = tk.Frame(self, bg=COR_BG)
+        main.pack(fill="both", expand=True, padx=24, pady=(16, 20))
+
+        # ── Header ────────────────────────────────────────────────────
+        self._build_header(main)
+        tk.Frame(main, bg=COR_BORDA, height=1).pack(fill="x", pady=(0, 16))
+
+        # ── Two-column content ────────────────────────────────────────
+        content = tk.Frame(main, bg=COR_BG)
+        content.pack(fill="both", expand=True)
+        content.columnconfigure(0, weight=3)
+        content.columnconfigure(1, weight=2, minsize=200)
+        content.rowconfigure(0, weight=1)
+
+        self._build_config_card(content)
+        self._build_progress_card(content)
+        self._build_hidden_log()
+
+    # ── Header ────────────────────────────────────────────────────────
+
+    def _build_header(self, parent):
+        hdr = tk.Frame(parent, bg=COR_BG)
+        hdr.pack(fill="x", pady=(0, 14))
 
         logo_shown = False
         if _PIL_OK:
             try:
                 logo_path = (
-                    Path(__file__).resolve().parent.parent / "assets" / "logo_importarest.png"
+                    Path(__file__).resolve().parent.parent
+                    / "assets" / "logo_importarest.png"
                 )
                 img = Image.open(logo_path)
-                img = img.resize((168, 47), Image.LANCZOS)
+                img = img.resize((240, 67), Image.LANCZOS)
                 logo = _PILImageTk.PhotoImage(img)
                 lbl = tk.Label(hdr, image=logo, bg=COR_BG)
                 lbl.image = logo
-                lbl.pack(side="left", padx=(0, 16))
+                lbl.pack()
                 logo_shown = True
             except (FileNotFoundError, OSError):
                 pass
         if not logo_shown:
             tk.Label(
                 hdr, text="IMPORTAREST GO",
-                font=("Segoe UI", 14, "bold"),
+                font=("Segoe UI", 18, "bold"),
                 bg=COR_BG, fg=COR_PRIMARIA,
-            ).pack(side="left", padx=(0, 16))
+            ).pack()
 
-        # Vertical divider
-        tk.Frame(hdr, bg=COR_BORDA, width=1).pack(side="left", fill="y", padx=(0, 16))
+    # ── Configuration card ────────────────────────────────────────────
 
-        # Title block
-        title_block = tk.Frame(hdr, bg=COR_BG)
-        title_block.pack(side="left")
+    def _build_config_card(self, parent):
+        card = ctk.CTkFrame(
+            parent, fg_color=COR_CARD, corner_radius=12,
+            border_width=1, border_color=COR_BORDA,
+        )
+        card.grid(row=0, column=0, sticky="nsew", padx=(0, 12), pady=(0, 12))
+
+        body = tk.Frame(card, bg=COR_CARD)
+        body.pack(fill="both", expand=True, padx=20, pady=16)
+
+        self._section_title(body, "CONFIGURACAO DO LOTE")
+
+        # ── Analyst selector ──
         tk.Label(
-            title_block, text="Processamento em Lote",
-            font=("Segoe UI", 13, "bold"),
-            bg=COR_BG, fg=COR_TEXTO,
-        ).pack(anchor="w")
-        tk.Label(
-            title_block, text="Importe múltiplas empresas de uma vez",
-            font=("Segoe UI", 9),
-            bg=COR_BG, fg=COR_SUBTEXTO,
-        ).pack(anchor="w")
-
-        # ── Two-column body (config+buttons | progress circle) ───────────
-        body = tk.Frame(self, bg=COR_BG)
-        body.pack(fill="both", expand=True, padx=20)
-        body.columnconfigure(0, weight=3)
-        body.columnconfigure(1, weight=0, minsize=180)
-        body.rowconfigure(2, weight=1)
-
-        # ── LEFT col, row 0: Card Configuração ──────────────────────────
-        outer_cfg, cfg = self._make_card(body, "Configuração do Lote")
-        outer_cfg.grid(row=0, column=0, sticky="ew", padx=(0, 10), pady=(0, 10))
-
-        # Analyst selector
-        tk.Label(
-            cfg, text="Analista", font=("Segoe UI", 9, "bold"),
+            body, text="Analista", font=("Segoe UI", 9, "bold"),
             bg=COR_CARD, fg=COR_SUBTEXTO, anchor="w",
-        ).pack(fill="x")
-        cmb_border = tk.Frame(cfg, bg=COR_BORDA, padx=1, pady=1)
-        cmb_border.pack(fill="x", pady=(2, 0))
-        self._cmb_analyst = ttk.Combobox(
-            cmb_border, textvariable=self._var_analyst,
-            state="readonly", font=("Segoe UI", 10),
+        ).pack(fill="x", pady=(0, 4))
+
+        self._cmb_analyst = _CompatComboBox(
+            body, variable=self._var_analyst,
+            state="readonly", values=[],
+            command=self._on_analyst_selected,
+            font=("Segoe UI", 11),
+            height=34,
+            fg_color=COR_CARD, border_color=COR_BORDA,
+            button_color=COR_PRIMARIA, button_hover_color=COR_PRIMARIA_HV,
+            dropdown_fg_color=COR_CARD, dropdown_hover_color="#FFF0E0",
+            dropdown_text_color=COR_TEXTO, text_color=COR_TEXTO,
+            corner_radius=8,
         )
         self._cmb_analyst.pack(fill="x")
-        self._cmb_analyst.bind("<<ComboboxSelected>>", self._on_analyst_selected)
+        self._cmb_analyst.set("")
 
         self._lbl_count = tk.Label(
-            cfg, text="", font=("Segoe UI", 8, "italic"),
+            body, text="", font=("Segoe UI", 8, "italic"),
             bg=COR_CARD, fg=COR_PRIMARIA, anchor="w",
         )
-        self._lbl_count.pack(anchor="w", pady=(4, 8))
+        self._lbl_count.pack(anchor="w", pady=(4, 10))
 
-        # Vigência + MEI side by side
-        row_vig = tk.Frame(cfg, bg=COR_CARD)
-        row_vig.pack(fill="x", pady=(0, 8))
+        # ── Vigencia + MEI row ──
+        row_vig = tk.Frame(body, bg=COR_CARD)
+        row_vig.pack(fill="x", pady=(0, 12))
 
         col_vig = tk.Frame(row_vig, bg=COR_CARD)
-        col_vig.pack(side="left", padx=(0, 32))
+        col_vig.pack(side="left", padx=(0, 24))
         tk.Label(
-            col_vig, text="Vigência (MMAAAA)", font=("Segoe UI", 9, "bold"),
+            col_vig, text="Vigencia (MMAAAA)",
+            font=("Segoe UI", 9, "bold"),
             bg=COR_CARD, fg=COR_SUBTEXTO,
-        ).pack(anchor="w")
-        vig_border = tk.Frame(col_vig, bg=COR_BORDA, padx=1, pady=1)
-        vig_border.pack(anchor="w", pady=(2, 0))
-        tk.Entry(
-            vig_border, textvariable=self._var_vigencia, width=12,
-            font=("Segoe UI", 10), relief="flat", bg=COR_CARD,
-            fg=COR_TEXTO, insertbackground=COR_TEXTO, bd=0,
-        ).pack(padx=4, pady=3)
+        ).pack(anchor="w", pady=(0, 4))
+        self._ent_vigencia = ctk.CTkEntry(
+            col_vig, textvariable=self._var_vigencia,
+            width=140, height=34,
+            font=("Segoe UI", 11), corner_radius=8,
+            fg_color=COR_CARD, border_color=COR_BORDA,
+            text_color=COR_TEXTO, placeholder_text="MMAAAA",
+        )
+        self._ent_vigencia.pack(anchor="w")
 
         col_mei = tk.Frame(row_vig, bg=COR_CARD)
-        col_mei.pack(side="left", pady=(16, 0))
-        tk.Checkbutton(
-            col_mei, text="Gerar notas MEI (Goiânia)",
+        col_mei.pack(side="left", pady=(18, 0))
+        self._chk_mei = ctk.CTkCheckBox(
+            col_mei, text="Gerar notas MEI (Goiania)",
             variable=self._var_mei,
-            font=("Segoe UI", 9), bg=COR_CARD, fg=COR_SUBTEXTO,
-            activebackground=COR_CARD, activeforeground=COR_TEXTO,
-            selectcolor=COR_CARD, anchor="w", cursor="hand2",
-        ).pack()
+            font=("Segoe UI", 10),
+            fg_color=COR_PRIMARIA, hover_color=COR_PRIMARIA_HV,
+            text_color=COR_SUBTEXTO, corner_radius=4,
+            border_color=COR_BORDA, checkmark_color="#FFFFFF",
+        )
+        self._chk_mei.pack()
 
-        # Destination folder
+        # ── Destination folder ──
         tk.Label(
-            cfg, text="Pasta de destino", font=("Segoe UI", 9, "bold"),
+            body, text="Pasta de destino", font=("Segoe UI", 9, "bold"),
             bg=COR_CARD, fg=COR_SUBTEXTO, anchor="w",
-        ).pack(fill="x")
-        dest_row = tk.Frame(cfg, bg=COR_CARD)
-        dest_row.pack(fill="x", pady=(2, 0))
-        dest_border = tk.Frame(dest_row, bg=COR_BORDA, padx=1, pady=1)
-        dest_border.pack(side="left", fill="x", expand=True, padx=(0, 8))
-        tk.Entry(
-            dest_border, textvariable=self._var_dest,
-            font=("Segoe UI", 9), relief="flat", bg=COR_CARD,
-            state="readonly", fg=COR_TEXTO, bd=0,
-        ).pack(fill="x", padx=4, pady=3)
-        tk.Button(
-            dest_row, text="Escolher  ›",
-            command=self._choose_dest,
-            font=("Segoe UI", 9, "bold"), bg=COR_PRIMARIA, fg="#FFFFFF",
-            activebackground=COR_PRIMARIA_HV, activeforeground="#FFFFFF",
-            relief="flat", cursor="hand2", pady=5, padx=10, bd=0,
+        ).pack(fill="x", pady=(0, 4))
+
+        dest_row = tk.Frame(body, bg=COR_CARD)
+        dest_row.pack(fill="x", pady=(0, 16))
+
+        self._ent_dest = ctk.CTkEntry(
+            dest_row, textvariable=self._var_dest,
+            height=34, font=("Segoe UI", 10), corner_radius=8,
+            fg_color="#F8F8F8", border_color=COR_BORDA,
+            text_color=COR_TEXTO, state="disabled",
+        )
+        self._ent_dest.pack(side="left", fill="x", expand=True, padx=(0, 8))
+
+        ctk.CTkButton(
+            dest_row, text="Escolher", command=self._choose_dest,
+            font=("Segoe UI", 10, "bold"), width=100, height=34,
+            fg_color=COR_PRIMARIA, hover_color=COR_PRIMARIA_HV,
+            text_color="#FFFFFF", corner_radius=8,
         ).pack(side="left")
 
-        # ── LEFT col, row 1: Action buttons ─────────────────────────────
-        btn_frame = tk.Frame(body, bg=COR_BG)
-        btn_frame.grid(row=1, column=0, sticky="ew", padx=(0, 10), pady=(0, 10))
+        # ── Separator + action buttons ──
+        tk.Frame(body, bg=COR_BORDA, height=1).pack(fill="x", pady=(0, 14))
 
-        self._btn_start = criar_botao(
-            btn_frame, "▶  INICIAR LOTE",
-            self._start_batch, COR_PRIMARIA, width=18, font_size=10,
+        btn_row = tk.Frame(body, bg=COR_CARD)
+        btn_row.pack(fill="x")
+
+        self._btn_start = _CompatButton(
+            btn_row, text="\u25B6  INICIAR LOTE",
+            command=self._start_batch,
+            font=("Segoe UI", 11, "bold"), height=42,
+            fg_color=COR_PRIMARIA, hover_color=COR_PRIMARIA_HV,
+            text_color="#FFFFFF", corner_radius=8, state="disabled",
         )
-        self._btn_start.configure(state="disabled")
         self._btn_start.pack(side="left", padx=(0, 10))
 
-        self._btn_abort = tk.Button(
-            btn_frame, text="✕  ABORTAR",
+        self._btn_abort = _CompatButton(
+            btn_row, text="\u2715  ABORTAR",
             command=self._abort,
-            state="disabled", font=("Segoe UI", 10, "bold"),
-            bg="#C0392B", fg="#FFFFFF",
-            activebackground="#A93226", activeforeground="#FFFFFF",
-            relief="flat", cursor="hand2", pady=8, padx=14, bd=0,
-        )
-        self._btn_abort.bind(
-            "<Enter>",
-            lambda e: self._btn_abort.configure(bg="#A93226")
-            if str(self._btn_abort["state"]) == "normal" else None,
-        )
-        self._btn_abort.bind(
-            "<Leave>",
-            lambda e: self._btn_abort.configure(bg="#C0392B")
-            if str(self._btn_abort["state"]) == "normal" else None,
+            font=("Segoe UI", 11, "bold"), height=42,
+            fg_color=COR_ERRO, hover_color=COR_ERRO_HV,
+            text_color="#FFFFFF", corner_radius=8, state="disabled",
         )
         self._btn_abort.pack(side="left")
 
-        # ── RIGHT col, rows 0-1: Card Progresso ─────────────────────────
-        outer_prog, prog = self._make_card(body, "Progresso")
-        outer_prog.grid(row=0, column=1, rowspan=2, sticky="nsew", pady=(0, 10))
+    # ── Progress card ─────────────────────────────────────────────────
 
-        self._pb = CircularProgress(prog, size=110, bg=COR_CARD)
-        self._pb.pack(pady=(0, 10))
+    def _build_progress_card(self, parent):
+        card = ctk.CTkFrame(
+            parent, fg_color=COR_CARD, corner_radius=12,
+            border_width=1, border_color=COR_BORDA,
+        )
+        card.grid(row=0, column=1, sticky="nsew", pady=(0, 12))
+
+        body = tk.Frame(card, bg=COR_CARD)
+        body.pack(fill="both", expand=True, padx=16, pady=16)
+
+        self._pb = CircularProgress(body, size=150, bg=COR_CARD)
+        self._pb.pack(pady=(10, 14))
 
         self._lbl_current = tk.Label(
-            prog, text="—", font=("Segoe UI", 9, "bold"),
-            bg=COR_CARD, fg=COR_TEXTO, anchor="center", wraplength=140,
+            body, text="\u2014", font=("Segoe UI", 10, "bold"),
+            bg=COR_CARD, fg=COR_TEXTO, anchor="center", wraplength=155,
         )
         self._lbl_current.pack(fill="x")
 
         self._lbl_count_prog = tk.Label(
-            prog, text="", font=("Segoe UI", 8),
+            body, text="", font=("Segoe UI", 9),
             bg=COR_CARD, fg=COR_SUBTEXTO, anchor="center",
         )
         self._lbl_count_prog.pack(fill="x", pady=(2, 0))
 
         self._lbl_eta = tk.Label(
-            prog, text="", font=("Segoe UI", 8),
+            body, text="", font=("Segoe UI", 9, "bold"),
             bg=COR_CARD, fg=COR_PRIMARIA, anchor="center",
         )
-        self._lbl_eta.pack(fill="x", pady=(2, 0))
+        self._lbl_eta.pack(fill="x", pady=(4, 0))
 
-        # ── BOTTOM row 2: Card Log ───────────────────────────────────────
-        outer_log, log_body = self._make_card(body, "Log de Processamento")
-        outer_log.grid(row=2, column=0, columnspan=2, sticky="nsew", pady=(0, 16))
+    # ── Hidden log (keeps _txt_log functional for _log / tests) ─────
 
-        self._txt_log = tk.Text(
-            log_body, height=8, font=("Consolas", 8),
-            bg="#FAFAFA", fg=COR_TEXTO, relief="flat",
-            state="disabled", wrap="word", bd=0,
+    def _build_hidden_log(self):
+        self._txt_log = tk.Text(self, height=1, state="disabled")
+        self._txt_log.tag_configure(
+            "ok", foreground=COR_LOG_OK, font=("Consolas", 9, "bold"),
         )
-        sb = ttk.Scrollbar(log_body, orient="vertical", command=self._txt_log.yview)
-        self._txt_log.configure(yscrollcommand=sb.set)
-        sb.pack(side="right", fill="y")
-        self._txt_log.pack(side="left", fill="both", expand=True)
-
-        self._txt_log.tag_configure("ok",      foreground="#1B8A1B", font=("Consolas", 8, "bold"))
-        self._txt_log.tag_configure("error",   foreground="#C0392B", font=("Consolas", 8, "bold"))
-        self._txt_log.tag_configure("skipped", foreground="#B8860B")
-        self._txt_log.tag_configure("info",    foreground=COR_SUBTEXTO)
+        self._txt_log.tag_configure(
+            "error", foreground=COR_ERRO, font=("Consolas", 9, "bold"),
+        )
+        self._txt_log.tag_configure("skipped", foreground=COR_LOG_WARN)
+        self._txt_log.tag_configure("info", foreground=COR_SUBTEXTO)
 
     # ------------------------------------------------------------------
     # Public helper methods (called by tests)
@@ -296,7 +325,7 @@ class PainelLote(tk.Frame):
 
     def _load_analysts_into_combobox(self, names: list[str]):
         """Populate the analyst combobox with the given list of names."""
-        self._cmb_analyst["values"] = names
+        self._cmb_analyst.configure(values=names)
 
     def _trigger_load_analysts(self):
         """Load analyst names into the combobox — called lazily when Lote tab is activated.
@@ -339,9 +368,9 @@ class PainelLote(tk.Frame):
             mins, secs = divmod(int(eta), 60)
             self._lbl_eta.configure(text=f"ETA: ~{mins}m {secs}s")
         else:
-            self._lbl_eta.configure(text="Concluído ✓")
+            self._lbl_eta.configure(text="Concluido \u2713")
 
-        icon = {"ok": "✓", "error": "✗", "skipped": "—"}.get(status, "·")
+        icon = {"ok": "\u2713", "error": "\u2717", "skipped": "\u2014"}.get(status, "\u00B7")
         tag = status if status in ("ok", "error", "skipped") else "info"
         msg = f"{icon} [{cod}]  {detail or f'{notes} nota(s)'}"
         self._log(msg, tag)
@@ -374,19 +403,19 @@ class PainelLote(tk.Frame):
         self._running = False
         self._btn_start.configure(state="normal")
         self._btn_abort.configure(state="disabled")
-        self._lbl_current.configure(text="—")
+        self._lbl_current.configure(text="\u2014")
         self._lbl_count_prog.configure(text="")
         text = self._build_summary_text(summary)
         if summary.errors > 0:
-            messagebox.showwarning("Lote Concluído com Erros", text)
+            messagebox.showwarning("Lote Concluido com Erros", text)
         else:
-            messagebox.showinfo("Lote Concluído", text)
+            messagebox.showinfo("Lote Concluido", text)
 
     # ------------------------------------------------------------------
     # Event handlers
     # ------------------------------------------------------------------
 
-    def _on_analyst_selected(self, event=None):
+    def _on_analyst_selected(self, value=None):
         """Load companies for the selected analyst."""
         name = self._var_analyst.get()
         try:
@@ -394,7 +423,7 @@ class PainelLote(tk.Frame):
             self._companies = companies
             n = len(companies)
             self._lbl_count.configure(
-                text=f"{n} empresa{'s' if n != 1 else ''} em GOIÂNIA"
+                text=f"{n} empresa{'s' if n != 1 else ''} em GOIANIA"
             )
         except SpreadsheetError as exc:
             messagebox.showerror("Erro na Planilha", str(exc))
@@ -414,7 +443,7 @@ class PainelLote(tk.Frame):
         self._txt_log.delete("1.0", tk.END)
         self._txt_log.configure(state="disabled")
         self._lbl_eta.configure(text="")
-        self._lbl_current.configure(text="—")
+        self._lbl_current.configure(text="\u2014")
         self._lbl_count_prog.configure(text="")
         self._pb["value"] = 0
         self._q = queue.Queue()
