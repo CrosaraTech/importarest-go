@@ -9,10 +9,11 @@ from typing import Callable
 from config import BASE_DIR, GOIANIA_DDD, GOIANIA_IBGE_7, GOIANIA_IBGE_6
 from core.xml_parser import eh_evento_cancelamento, detectar_padrao_nfse
 from core.extractor import extrair_dados_python, extrair_cabecalho_info
-from core.validators import normalize_digits, eh_goiania, item_lc_valido
+from core.validators import normalize_digits, eh_goiania, eh_municipio_aceito, item_lc_valido
 from core.txt_builder import montar_linha_txt, montar_cabecalho
 from services.ibge import consulta_cidade_ibge
 from services.n8n_client import chamar_n8n
+from services.spreadsheet import get_company_info
 
 
 class ProcessorResult:
@@ -116,7 +117,7 @@ class WorkflowProcessor:
         notas_vig_errada = self._filtrar_vigencia(linhas_dict, vigencia, emp_cod)
 
         conteudo_final = ""
-        im_tomador_cab, razao_tomador_cab, cabecalho = self._gerar_cabecalho(dict_xmls)
+        im_tomador_cab, razao_tomador_cab, cabecalho = self._gerar_cabecalho(dict_xmls, emp_cod)
 
         if linhas_dict:
             linhas_txt = ([cabecalho] if cabecalho else []) + list(linhas_dict.values())
@@ -606,7 +607,7 @@ class WorkflowProcessor:
         return notas_vig_errada
 
     def _validar_tomador_goiania(self, dict_xmls: dict) -> bool:
-        """Verifica se ao menos uma nota tem tomador de Goiânia."""
+        """Verifica se ao menos uma nota tem tomador de município aceito."""
         mun_encontrados = set()
         for conteudo in dict_xmls.values():
             try:
@@ -615,23 +616,22 @@ class WorkflowProcessor:
                 mun_norm = normalize_digits(mun)
                 if not mun_norm:
                     continue
-                if mun_norm in (GOIANIA_IBGE_7, GOIANIA_IBGE_6):
+                if eh_municipio_aceito(mun_norm):
                     return True
                 mun_encontrados.add(mun_norm)
             except ET.ParseError:
                 continue
         if mun_encontrados:
-            self._log(f"❌ O tomador das notas não é de Goiânia (municípios encontrados: {', '.join(mun_encontrados)}).")
+            self._log(f"❌ O tomador das notas não é de um município aceito (encontrados: {', '.join(mun_encontrados)}).")
             return False
         return True
 
     def _eh_tomador_goiania(self, mun_tomador: str) -> bool:
-        cod = normalize_digits(mun_tomador)
-        return cod in (GOIANIA_IBGE_7, GOIANIA_IBGE_6)
+        return eh_municipio_aceito(mun_tomador)
 
-    def _gerar_cabecalho(self, dict_xmls):
+    def _gerar_cabecalho(self, dict_xmls, emp_cod: str = ""):
         im_tomador = razao_tomador = data_emissao = ""
-        # 1ª passada: ABRASF com tomador de Goiânia e IM
+        # 1ª passada: ABRASF com tomador aceito e IM
         for conteudo in dict_xmls.values():
             try:
                 root = ET.fromstring(conteudo)
@@ -642,7 +642,7 @@ class WorkflowProcessor:
                         break
             except ET.ParseError:
                 continue
-        # 2ª passada: qualquer nota com tomador de Goiânia
+        # 2ª passada: qualquer nota com tomador aceito
         if not im_tomador:
             for conteudo in dict_xmls.values():
                 try:
@@ -657,6 +657,28 @@ class WorkflowProcessor:
                     if not data_emissao and dt:
                         data_emissao = dt
                     if im_tomador and razao_tomador and data_emissao:
+                        break
+                except ET.ParseError:
+                    continue
+        # 3ª passada: fallback da planilha se IM/razão não encontrados no XML
+        if (not im_tomador or not razao_tomador) and emp_cod:
+            try:
+                info = get_company_info(emp_cod)
+                if info:
+                    if not im_tomador and info.get("im"):
+                        im_tomador = info["im"]
+                    if not razao_tomador and info.get("razao"):
+                        razao_tomador = info["razao"]
+            except Exception:
+                pass
+        # Garantir data_emissao mesmo sem tomador aceito
+        if not data_emissao:
+            for conteudo in dict_xmls.values():
+                try:
+                    root = ET.fromstring(conteudo)
+                    _, _, dt, _ = extrair_cabecalho_info(root)
+                    if dt:
+                        data_emissao = dt
                         break
                 except ET.ParseError:
                     continue

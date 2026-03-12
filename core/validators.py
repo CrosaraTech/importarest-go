@@ -1,4 +1,4 @@
-from config import GOIANIA_IBGE_7, GOIANIA_IBGE_6
+from config import GOIANIA_IBGE_7, GOIANIA_IBGE_6, IBGE_ACEITOS
 
 
 def normalize_digits(s: str) -> str:
@@ -16,6 +16,12 @@ def has_value(v) -> bool:
 def eh_goiania(dados) -> bool:
     cod = normalize_digits(dados.get("codigo_municipio") or "")
     return cod in (GOIANIA_IBGE_7, GOIANIA_IBGE_6)
+
+
+def eh_municipio_aceito(cod_municipio: str) -> bool:
+    """Verifica se o código IBGE pertence a um município aceito."""
+    cod = normalize_digits(cod_municipio or "")
+    return cod in IBGE_ACEITOS
 
 
 def item_lc_valido(codigo: str) -> bool:

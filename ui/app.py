@@ -1,9 +1,16 @@
+import ctypes
 import threading
 from pathlib import Path
 from tkinter import messagebox, filedialog, ttk
 import tkinter as tk
 import ttkbootstrap as ttkb
 import customtkinter as ctk
+
+# Windows: set AppUserModelID so the taskbar uses our icon instead of Python's
+try:
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("crosara.importarest")
+except Exception:
+    pass
 
 try:
     from PIL import Image, ImageTk
@@ -39,6 +46,10 @@ class JanelaCrosara:
         self.janela.geometry("900x660")
         self.janela.configure(bg=COR_BG)
         self.janela.resizable(False, False)
+
+        ico = Path(__file__).resolve().parent.parent / "assets" / "logo_importarest.ico"
+        if ico.exists():
+            self.janela.iconbitmap(str(ico))
 
         self._construir_ui()
         self.janela.mainloop()
@@ -170,7 +181,7 @@ class JanelaCrosara:
         # MEI checkbox
         self._var_mei = tk.BooleanVar(value=False)
         ctk.CTkCheckBox(
-            body, text="Gerar notas MEI (Goiania)",
+            body, text="Processar notas MEI tomadas",
             variable=self._var_mei, font=("Segoe UI", 10),
             fg_color=COR_PRIMARIA, hover_color=COR_PRIMARIA_HV,
             text_color=COR_SUBTEXTO, corner_radius=4,

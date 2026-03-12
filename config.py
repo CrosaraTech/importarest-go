@@ -9,13 +9,27 @@ RELATORIO_CSV = r"G:\Drives compartilhados\FISCAL\autmais\REST\Relatorio.csv"
 PLANILHA_EMPRESAS     = Path(r"G:\Drives compartilhados\FISCAL\autmais\RELACAO_EMPRESAS_atualizada.xlsx")
 PLANILHA_COL_COD      = 0   # Coluna A (índice 0-based)
 PLANILHA_COL_ANALISTA = 3   # Coluna D (índice 0-based)
+PLANILHA_COL_IM       = 7   # Coluna H (índice 0-based) — Inscrição Municipal
+PLANILHA_COL_RAZAO    = 1   # Coluna B (índice 0-based) — Nome Empresa
 
 # ==============================================================================
-# GOIÂNIA
+# MUNICÍPIOS ACEITOS (serviços tomados)
 # ==============================================================================
 GOIANIA_IBGE_7 = "5208707"
 GOIANIA_IBGE_6 = "520870"
 GOIANIA_DDD = "62"
+
+MUNICIPIOS_ACEITOS = {
+    "GOIÂNIA":              {"ibge7": "5208707", "ibge6": "520870",  "ddd": "62"},
+    "APARECIDA DE GOIÂNIA": {"ibge7": "5201405", "ibge6": "520140",  "ddd": "62"},
+    "ANÁPOLIS":             {"ibge7": "5201108", "ibge6": "520110",  "ddd": "62"},
+    "BRASÍLIA":             {"ibge7": "5300108", "ibge6": "530010",  "ddd": "61"},
+}
+
+IBGE_ACEITOS = set()
+for _m in MUNICIPIOS_ACEITOS.values():
+    IBGE_ACEITOS.add(_m["ibge7"])
+    IBGE_ACEITOS.add(_m["ibge6"])
 
 # ==============================================================================
 # IBGE API

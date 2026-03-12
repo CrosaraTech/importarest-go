@@ -216,7 +216,7 @@ class PainelLote(tk.Frame):
         col_mei = tk.Frame(row_vig, bg=COR_CARD)
         col_mei.pack(side="left", pady=(18, 0))
         self._chk_mei = ctk.CTkCheckBox(
-            col_mei, text="Gerar notas MEI (Goiania)",
+            col_mei, text="Processar notas MEI tomadas",
             variable=self._var_mei,
             font=("Segoe UI", 10),
             fg_color=COR_PRIMARIA, hover_color=COR_PRIMARIA_HV,
@@ -423,7 +423,7 @@ class PainelLote(tk.Frame):
             self._companies = companies
             n = len(companies)
             self._lbl_count.configure(
-                text=f"{n} empresa{'s' if n != 1 else ''} em GOIANIA"
+                text=f"{n} empresa{'s' if n != 1 else ''} encontrada{'s' if n != 1 else ''}"
             )
         except SpreadsheetError as exc:
             messagebox.showerror("Erro na Planilha", str(exc))

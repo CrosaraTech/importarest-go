@@ -17,7 +17,10 @@ import zipfile
 from openpyxl import load_workbook
 from openpyxl.utils.exceptions import InvalidFileException
 
-from config import PLANILHA_EMPRESAS, PLANILHA_COL_COD, PLANILHA_COL_ANALISTA
+from config import (
+    PLANILHA_EMPRESAS, PLANILHA_COL_COD, PLANILHA_COL_ANALISTA,
+    PLANILHA_COL_IM, PLANILHA_COL_RAZAO, MUNICIPIOS_ACEITOS,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -41,7 +44,7 @@ class SpreadsheetFormatError(SpreadsheetError):
 # ---------------------------------------------------------------------------
 
 def _load_goiania_rows() -> list[dict]:
-    """Abre a planilha, valida cabeçalhos e retorna linhas filtradas para GOIÂNIA.
+    """Abre a planilha, valida cabeçalhos e retorna linhas filtradas para municípios aceitos.
 
     Returns:
         list[dict]: Cada item contém {"cod": str, "analista": str}.
@@ -93,8 +96,9 @@ def _load_goiania_rows() -> list[dict]:
                 f"Cabeçalhos lidos: {list(header_map.keys())}"
             )
 
-        # Itera sobre as linhas de dados filtrando por GOIÂNIA
-        goiania_rows: list[dict] = []
+        _nomes_aceitos = {n.upper() for n in MUNICIPIOS_ACEITOS}
+
+        filtered_rows: list[dict] = []
         for data_row in rows_iter:
             cod = data_row[PLANILHA_COL_COD] if len(data_row) > PLANILHA_COL_COD else None
             if not cod:
@@ -102,14 +106,17 @@ def _load_goiania_rows() -> list[dict]:
             municipio = data_row[col_municipio] if len(data_row) > col_municipio else None
             analista = data_row[PLANILHA_COL_ANALISTA] if len(data_row) > PLANILHA_COL_ANALISTA else None
 
-            # Filtra apenas empresas de GOIÂNIA (com acento preservado)
-            if str(municipio).strip().upper() == "GOIÂNIA":
-                goiania_rows.append({
+            if str(municipio).strip().upper() in _nomes_aceitos:
+                im = data_row[PLANILHA_COL_IM] if len(data_row) > PLANILHA_COL_IM else None
+                razao = data_row[PLANILHA_COL_RAZAO] if len(data_row) > PLANILHA_COL_RAZAO else None
+                filtered_rows.append({
                     "cod": str(cod).strip(),
                     "analista": str(analista).strip() if analista is not None else "",
+                    "im": str(im).strip() if im is not None else "",
+                    "razao": str(razao).strip() if razao is not None else "",
                 })
 
-        return goiania_rows
+        return filtered_rows
 
     except SpreadsheetError:
         raise
@@ -153,6 +160,15 @@ def load_analysts() -> list[str]:
     rows = _load_goiania_rows()
     analysts = sorted({row["analista"] for row in rows if row["analista"]})
     return analysts
+
+
+def get_company_info(cod: str) -> dict | None:
+    """Retorna dados da empresa pelo código (im, razao). None se não encontrada."""
+    rows = _load_goiania_rows()
+    for row in rows:
+        if row["cod"] == cod.strip():
+            return row
+    return None
 
 
 def get_companies_for_analyst(analista: str) -> list[dict]:
