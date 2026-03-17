@@ -12,6 +12,7 @@ Exceções:
 """
 from __future__ import annotations
 
+import unicodedata
 import zipfile
 
 from openpyxl import load_workbook
@@ -96,7 +97,13 @@ def _load_goiania_rows() -> list[dict]:
                 f"Cabeçalhos lidos: {list(header_map.keys())}"
             )
 
-        _nomes_aceitos = {n.upper() for n in MUNICIPIOS_ACEITOS}
+        def _strip_accents(s: str) -> str:
+            return "".join(
+                c for c in unicodedata.normalize("NFD", s)
+                if unicodedata.category(c) != "Mn"
+            )
+
+        _nomes_aceitos = {_strip_accents(n.upper()) for n in MUNICIPIOS_ACEITOS}
 
         filtered_rows: list[dict] = []
         for data_row in rows_iter:
@@ -106,7 +113,8 @@ def _load_goiania_rows() -> list[dict]:
             municipio = data_row[col_municipio] if len(data_row) > col_municipio else None
             analista = data_row[PLANILHA_COL_ANALISTA] if len(data_row) > PLANILHA_COL_ANALISTA else None
 
-            if str(municipio).strip().upper() in _nomes_aceitos:
+            mun_norm = _strip_accents(str(municipio).strip().upper()) if municipio else ""
+            if mun_norm in _nomes_aceitos:
                 im = data_row[PLANILHA_COL_IM] if len(data_row) > PLANILHA_COL_IM else None
                 razao = data_row[PLANILHA_COL_RAZAO] if len(data_row) > PLANILHA_COL_RAZAO else None
                 filtered_rows.append({
