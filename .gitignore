@@ -15,6 +15,7 @@ certificados.json
 
 # Claude Code
 .claude/
+.planning/
 
 # IDE
 .vscode/
