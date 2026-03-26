@@ -1,7 +1,7 @@
 """Tests for GET /health endpoint and FastAPI app startup correctness."""
 import os
 import sys
-import subprocess
+import pathlib
 import pytest
 import httpx
 
@@ -56,25 +56,22 @@ async def test_cors_headers(monkeypatch, tmp_path):
 
 def test_no_g_drive_import_in_api():
     """No file in api/ imports from config.py (which has G: drive paths)."""
-    result = subprocess.run(
-        ["python", "-m", "grep", "-r", "from config import", "api/"],
-        capture_output=True, text=True,
-        cwd="/c/Users/Havai/Desktop/Rest iss.net"
-    )
-    # Alternatively, use a direct file scan approach that works cross-platform
-    import pathlib
-    api_dir = pathlib.Path("/c/Users/Havai/Desktop/Rest iss.net/api")
+    # Use pure Python path scanning — works cross-platform without subprocess grep
+    project_root = pathlib.Path(__file__).parent.parent
+    api_dir = project_root / "api"
     if not api_dir.exists():
         pytest.skip("api/ directory does not exist yet")
 
-    forbidden_patterns = ["from config import", "import config"]
     violations = []
     for py_file in api_dir.rglob("*.py"):
         content = py_file.read_text(encoding="utf-8")
-        for pattern in forbidden_patterns:
-            if pattern in content:
-                # Exclude "from config_web import" — only plain "config" is forbidden
-                if "config_web" not in content.split(pattern)[1].split("\n")[0]:
-                    violations.append(f"{py_file}: contains '{pattern}'")
+        for line in content.splitlines():
+            stripped = line.strip()
+            # Match "from config import ..." but NOT "from config_web import ..."
+            if stripped.startswith("from config import") and "config_web" not in stripped:
+                violations.append(f"{py_file.name}: {stripped!r}")
+            # Match bare "import config" but NOT "import config_web"
+            if stripped == "import config" or stripped.startswith("import config "):
+                violations.append(f"{py_file.name}: {stripped!r}")
 
     assert not violations, f"G: drive import violations found: {violations}"
