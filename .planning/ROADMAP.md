@@ -62,7 +62,11 @@ Plans:
   1. When a low-confidence record is encountered, the job pauses and the poll response includes a review_item with service description, suggested Item LC, and editable fields
   2. Analyst submits a correction via the inline review form and the job resumes processing the remaining notes
   3. If the analyst closes the browser without reviewing, the job times out the review gate, marks the note as skipped, and continues automatically
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Review gate backend: models, threading.Event gate, POST /review endpoint, tests
+- [ ] 03-02-PLAN.md — Lovable spec addendum for review form and end-of-phase verification
 
 ### Phase 4: Output Delivery
 **Goal**: Analysts can download the TXT REST and CSV audit files, with correct byte formatting and per-vigencia splits when applicable
@@ -104,7 +108,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete   | 2026-03-26 |
 | 2. Job Lifecycle | 1/2 | In Progress|  |
-| 3. Manual Review Gate | 0/TBD | Not started | - |
+| 3. Manual Review Gate | 0/2 | Not started | - |
 | 4. Output Delivery | 0/TBD | Not started | - |
 | 5. Batch Mode | 0/TBD | Not started | - |
 | 6. n8n Compatibility and Hardening | 0/TBD | Not started | - |
