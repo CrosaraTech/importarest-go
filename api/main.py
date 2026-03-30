@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from config_web import ALLOWED_ORIGINS
 from api.health import router as health_router
 from api.companies import router as companies_router
+from api.jobs import router as jobs_router
 
 app = FastAPI(
     title="ImportaREST GO API",
@@ -24,9 +25,10 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
     allow_credentials=False,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],
 )
 
 app.include_router(health_router)
 app.include_router(companies_router)
+app.include_router(jobs_router)
