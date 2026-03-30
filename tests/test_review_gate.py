@@ -549,7 +549,7 @@ def test_submit_review_gate_resumes():
         from api.models import ReviewSubmission
         submission = ReviewSubmission(item_lc="0107", ddd="62", action="confirm")
 
-        with patch("api.job_manager.montar_linha_txt", return_value="LINHA_CONFIRMADA"):
+        with patch("core.txt_builder.montar_linha_txt", return_value="LINHA_CONFIRMADA"):
             result = jm.submit_review(job_id, submission)
 
         t.join(timeout=2.0)

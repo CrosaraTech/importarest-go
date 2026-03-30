@@ -16,7 +16,40 @@ Known v1 limitation:
 """
 import threading
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
+
+
+# ---------------------------------------------------------------------------
+# Module-level helpers (no external imports beyond stdlib)
+# ---------------------------------------------------------------------------
+
+
+def _extract_descricao(dados_base: dict) -> str:
+    """Extract service description from dados_base for review display.
+
+    Handles both XML/ABRASF format (discriminacao) and n8n format (descricao_servico).
+    Falls back to empty string if unavailable.
+    """
+    for key in ("discriminacao", "descricao_servico", "descricao", "discriminacao_servico"):
+        val = dados_base.get(key)
+        if val and str(val).strip():
+            # Truncate to 200 chars to keep JSON lean
+            return str(val).strip()[:200]
+    return ""
+
+
+def _extract_municipio(dados_base: dict) -> str:
+    """Extract municipality display name from dados_base.
+
+    Does NOT call services.ibge — returns city_override, cidade, or
+    falls back to raw codigo_municipio so the API layer stays side-effect-free.
+    """
+    for key in ("cidade_override", "cidade", "municipio"):
+        val = dados_base.get(key)
+        if val and str(val).strip():
+            return str(val).strip()
+    # Last resort: return the IBGE code as-is
+    return str(dados_base.get("codigo_municipio", "") or "")
 
 
 class JobManager:
@@ -102,7 +135,13 @@ class JobManager:
         return job_id
 
     def get_status(self, job_id: str) -> dict | None:
-        """Return a copy of the job state dict (without the ProcessorResult object).
+        """Return a copy of the job state dict (without internal/heavy objects).
+
+        Excludes:
+            result         — large ProcessorResult object
+            review_event   — threading.Event (not serializable)
+            review_result  — internal result holder list
+            review_dados_base — raw XML dict (analyst-facing data is in review_item)
 
         Returns None if job_id is unknown.
         """
@@ -110,8 +149,9 @@ class JobManager:
             job = self._jobs.get(job_id)
             if job is None:
                 return None
-            # Shallow copy, exclude heavy result object
-            return {k: v for k, v in job.items() if k != "result"}
+            # Shallow copy, exclude heavy/internal objects
+            _excluded = ("result", "review_event", "review_result", "review_dados_base")
+            return {k: v for k, v in job.items() if k not in _excluded}
 
     def get_result(self, job_id: str):
         """Return the stored ProcessorResult for a completed job, or None.
@@ -123,6 +163,67 @@ class JobManager:
             if job is None:
                 return None
             return job.get("result")
+
+    def submit_review(self, job_id: str, submission) -> dict:
+        """Wake the blocked worker thread with the analyst's review submission.
+
+        Args:
+            job_id:     Job whose review gate is waiting.
+            submission: ReviewSubmission (item_lc, ddd, action).
+
+        Returns:
+            {"accepted": True} on success.
+            {"accepted": False, "reason": "not_waiting"} if job is not in review_needed state.
+
+        Raises:
+            ValueError: if item_lc is not exactly 4 digits, or ddd is required but missing/invalid.
+
+        IMPORTANT: Does NOT set status="running" — the worker thread does that
+        after event.wait() returns. Avoids a race between submit_review and the worker.
+        """
+        from core.validators import normalize_digits
+
+        with self._lock:
+            job = self._jobs.get(job_id)
+            if job is None or job.get("status") != "review_needed":
+                return {"accepted": False, "reason": "not_waiting"}
+
+            event = job.get("review_event")
+            result_holder = job.get("review_result")
+            dados_base = job.get("review_dados_base") or {}
+            from_n8n = (job.get("review_item") or {}).get("from_n8n", False)
+
+            if event is None or result_holder is None:
+                return {"accepted": False, "reason": "not_waiting"}
+
+            # Validate item_lc
+            digits = normalize_digits(submission.item_lc or "")
+            if len(digits) != 4:
+                raise ValueError("item_lc must be exactly 4 digits")
+
+            # Validate ddd when not from_n8n
+            if not from_n8n and submission.action != "skip":
+                ddd_digits = normalize_digits(submission.ddd or "")
+                if len(ddd_digits) != 2:
+                    raise ValueError("ddd must be exactly 2 digits when from_n8n=False")
+            else:
+                ddd_digits = normalize_digits(submission.ddd or "")
+
+            if submission.action == "skip":
+                result_holder[0] = None
+            else:
+                # Build TXT line server-side — dados_base is locked in memory
+                if from_n8n:
+                    from core.txt_builder import montar_linha_txt_n8n
+                    line = montar_linha_txt_n8n(dados_base, item_lc=digits)
+                else:
+                    from core.txt_builder import montar_linha_txt
+                    line = montar_linha_txt(dados_base, ddd=ddd_digits, item_lc=digits)
+                result_holder[0] = line
+
+        # Set the event OUTSIDE the lock to avoid waking the worker while we hold it
+        event.set()
+        return {"accepted": True}
 
     # ------------------------------------------------------------------
     # Internal
@@ -162,11 +263,80 @@ class JobManager:
                         round(int(atual) / int(total) * 100, 1) if int(total) > 0 else 0.0
                     )
 
-        def abrir_tela_manual_fn(*args, **kwargs):
-            # Phase 3 replaces this with a real review gate.
-            # For now, auto-accept: return the first positional arg unchanged
-            # (the AI suggestion) so processing continues without human input.
-            return args[0] if args else None
+        def abrir_tela_manual_fn(dados_base: dict, chave_nfse: str, from_n8n: bool = False):
+            """Blocking review gate — replaces the Phase 2 auto-accept stub.
+
+            Stores review_item in job state, sets status to "review_needed",
+            then blocks on threading.Event.wait(timeout=300).
+
+            On submit_review(): event is set, result_holder[0] contains the
+            formatted TXT line (confirm) or None (skip).
+
+            On timeout: auto-accepts AI suggestion and logs the event.
+
+            IMPORTANT: event.wait() is called OUTSIDE _lock to avoid deadlock.
+            """
+            event = threading.Event()
+            result_holder = [None]
+            timeout_at = (datetime.utcnow() + timedelta(seconds=300)).isoformat() + "Z"
+
+            with self._lock:
+                job = self._jobs.get(job_id)
+                if job is not None:
+                    job["status"] = "review_needed"
+                    job["review_event"] = event
+                    job["review_result"] = result_holder
+                    job["review_dados_base"] = dados_base
+                    job["review_item"] = {
+                        "chave_nfse": chave_nfse,
+                        "descricao": _extract_descricao(dados_base),
+                        "municipio": _extract_municipio(dados_base),
+                        "item_lc_original": dados_base.get("item_lc_original", ""),
+                        "from_n8n": from_n8n,
+                        "suggested_item_lc": (
+                            dados_base.get("item_lc_final")
+                            or dados_base.get("item_lc_original")
+                            or ""
+                        ),
+                        "timeout_at": timeout_at,
+                    }
+
+            # Block here — OUTSIDE _lock so other threads can read/write job state.
+            triggered = event.wait(timeout=300)
+
+            with self._lock:
+                job = self._jobs.get(job_id)
+                if job is not None:
+                    job["status"] = "running"
+                    job["review_item"] = None
+                    job["review_event"] = None
+                    job["review_result"] = None
+                    job["review_dados_base"] = None
+
+            if not triggered:
+                # Timeout — auto-accept the AI suggestion (same behaviour as Phase 2 stub)
+                ai_suggestion = (
+                    dados_base.get("item_lc_final")
+                    or dados_base.get("item_lc_original")
+                    or ""
+                )
+                if from_n8n:
+                    from core.txt_builder import montar_linha_txt_n8n
+                    line = montar_linha_txt_n8n(dados_base, item_lc=ai_suggestion)
+                else:
+                    from core.txt_builder import montar_linha_txt
+                    ddd = dados_base.get("ddd", "") or ""
+                    line = montar_linha_txt(dados_base, ddd=ddd, item_lc=ai_suggestion)
+
+                with self._lock:
+                    job = self._jobs.get(job_id)
+                    if job is not None:
+                        job["recent_logs"].append(f"Auto-aceito por timeout: {chave_nfse}")
+                        if len(job["recent_logs"]) > 20:
+                            job["recent_logs"] = job["recent_logs"][-20:]
+                return line
+
+            return result_holder[0]
 
         # Import config and WorkflowProcessor here (worker thread only).
         # We use importlib to avoid a bare "import config" line that would trip the

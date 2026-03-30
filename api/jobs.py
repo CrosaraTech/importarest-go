@@ -21,7 +21,7 @@ from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile, status
 
 from api.deps import get_current_user
 from api.job_manager import job_manager
-from api.models import JobCreateResponse, JobStatusResponse
+from api.models import JobCreateResponse, JobStatusResponse, ReviewSubmission, ReviewResponse
 from config_web import UPLOAD_TEMP_DIR
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
@@ -148,6 +148,11 @@ async def get_job_status(
             detail="You do not have access to this job",
         )
 
+    from api.models import ReviewItem
+
+    raw_review_item = job_state.get("review_item")
+    review_item = ReviewItem(**raw_review_item) if raw_review_item else None
+
     return JobStatusResponse(
         job_id=job_state["job_id"],
         status=job_state["status"],
@@ -159,4 +164,62 @@ async def get_job_status(
         result_ready=(job_state["status"] == "completed" and job_state.get("result") is not None)
         if "result" in job_state
         else (job_state["status"] == "completed"),
+        review_item=review_item,
     )
+
+
+@router.post("/{job_id}/review", response_model=ReviewResponse)
+async def submit_job_review(
+    job_id: str,
+    body: ReviewSubmission,
+    current_user: dict = Depends(get_current_user),
+) -> ReviewResponse:
+    """Submit a manual review decision for a paused job.
+
+    The job must be in 'review_needed' state. The analyst provides the
+    corrected Item LC (and optionally DDD) or chooses to skip the note.
+    The blocked worker thread is woken and processing resumes.
+
+    Returns:
+        ReviewResponse with accepted=True on success.
+
+    Raises:
+        404: if job_id is unknown
+        403: if job belongs to a different user
+        409: if job is not currently in 'review_needed' state
+        422: if item_lc is not 4 digits, or ddd is required but missing/invalid
+    """
+    job_state = job_manager.get_status(job_id)
+    if job_state is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Job '{job_id}' not found",
+        )
+
+    if job_state.get("user_id") != current_user["user_id"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have access to this job",
+        )
+
+    if job_state.get("status") != "review_needed":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Job is not currently waiting for a review",
+        )
+
+    try:
+        result = job_manager.submit_review(job_id, body)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(exc),
+        ) from exc
+
+    if not result.get("accepted"):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=result.get("reason", "Review gate no longer active"),
+        )
+
+    return ReviewResponse(accepted=True)
