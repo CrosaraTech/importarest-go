@@ -77,7 +77,11 @@ Plans:
   2. Analyst can download the CSV audit report with per-note processing details
   3. When notes fall outside the target vigencia, separate TXT files are generated per period and each is individually downloadable
   4. Results page shows download buttons for TXT and CSV immediately after job completion
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 04-01-PLAN.md — Download endpoints (TXT, CSV, split TXT, file metadata) with TDD unit tests
+- [ ] 04-02-PLAN.md — Byte-fidelity test scaffold, Lovable spec results section, end-of-phase verification
 
 ### Phase 5: Batch Mode
 **Goal**: Analysts can select an analyst name and vigencia to trigger a batch job that processes all companies, with per-company progress and job abort
@@ -109,6 +113,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 1. Foundation | 3/3 | Complete   | 2026-03-26 |
 | 2. Job Lifecycle | 1/2 | In Progress|  |
 | 3. Manual Review Gate | 0/2 | Not started | - |
-| 4. Output Delivery | 0/TBD | Not started | - |
+| 4. Output Delivery | 0/2 | Not started | - |
 | 5. Batch Mode | 0/TBD | Not started | - |
 | 6. n8n Compatibility and Hardening | 0/TBD | Not started | - |
