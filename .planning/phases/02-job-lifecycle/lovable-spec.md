@@ -466,3 +466,302 @@ Generate the following components:
 - No WebSocket push — polling is intentional for v1 simplicity.
 - No job history list — Phase 5 may add this.
 - Single Uvicorn worker (`--workers 1`) — this is intentional, job state is in-memory.
+
+---
+
+<!-- ============================================================ -->
+<!-- PHASE 3 ADDITION — Inline Manual Review Form (FRNT-03)       -->
+<!-- Added after Phase 2 spec was generated in Lovable.           -->
+<!-- Append this section to the existing Lovable project via      -->
+<!-- "Edit with Lovable" or by re-pasting to update components.   -->
+<!-- ============================================================ -->
+
+## 11. Inline Manual Review Form — Phase 3 Addition (FRNT-03)
+
+This section extends the Job Progress Page (`/jobs/:jobId`) with an inline review form that appears when a job pauses for analyst input. All changes are additive — no existing Phase 2 components need to be removed.
+
+---
+
+### 11.1 Polling Behavior Change
+
+Update the `refetchInterval` in the TanStack Query `useQuery` call on the Job Progress page:
+
+```ts
+const { data, queryClient } = useQuery({
+  queryKey: ['job-status', jobId],
+  queryFn: async () => {
+    const res = await apiRequest(`/jobs/${jobId}/status`)
+    if (!res.ok) throw new Error(await res.text())
+    return res.json()
+  },
+  refetchInterval: (data) => {
+    // Stop polling only on terminal states
+    if (data?.status === 'completed' || data?.status === 'failed') return false
+    // Keep polling during review_needed — countdown timer needs live data
+    // and the job may auto-continue after timeout
+    return 2500
+  },
+})
+```
+
+**Key change:** `review_needed` is NOT a terminal state. Polling MUST continue at 2500ms so the countdown timer stays accurate and the UI detects when the job resumes after timeout or submission.
+
+When `data.status === "review_needed"` and `data.review_item` is non-null, render the `ReviewCard` component below the progress section.
+
+---
+
+### 11.2 Updated Status Type
+
+Add `"review_needed"` to the status union and badge color map:
+
+```ts
+// Status type (update existing type/enum)
+type JobStatus = "queued" | "running" | "review_needed" | "completed" | "failed"
+
+// Status badge color map (update existing StatusBadge component)
+const STATUS_BADGE = {
+  queued:        { bg: 'bg-gray-200',   text: 'text-gray-700',   label: 'Na fila' },
+  running:       { bg: 'bg-blue-100',   text: 'text-blue-700',   label: 'Processando' },
+  review_needed: { bg: 'bg-amber-100',  text: 'text-amber-700',  label: 'Aguardando revisao' },
+  completed:     { bg: 'bg-green-100',  text: 'text-green-700',  label: 'Concluido' },
+  failed:        { bg: 'bg-red-100',    text: 'text-red-700',    label: 'Falhou' },
+}
+```
+
+---
+
+### 11.3 Progress Bar Behavior During Review
+
+When `data.status === "review_needed"`, update the progress bar display:
+
+- Keep the progress bar at its current `percent` value (do not reset to 0).
+- Replace the standard fill animation with a **pulsing/breathing animation** to visually indicate the paused state. Use a CSS `@keyframes` pulse that oscillates the fill color opacity between 100% and 60% on a 1.5s loop (do NOT use an indeterminate shimmer — the position value is known).
+- Show text **above** the progress bar: `"Aguardando revisao manual..."` in amber-600, italic.
+
+Example Tailwind class to add to the progress bar fill element when status is `review_needed`:
+
+```
+animate-pulse opacity-80
+```
+
+---
+
+### 11.4 ReviewCard Component
+
+Add a new `ReviewCard` component. Render it in the Job Progress page **below** the progress section when:
+
+```ts
+data?.status === 'review_needed' && data?.review_item != null
+```
+
+**Component interface:**
+
+```ts
+interface ReviewItem {
+  chave_nfse: string
+  descricao: string
+  municipio: string
+  item_lc_original: string
+  from_n8n: boolean
+  suggested_item_lc: string
+  timeout_at: string   // ISO8601 UTC timestamp
+}
+
+interface ReviewCardProps {
+  jobId: string
+  reviewItem: ReviewItem
+  onSubmitted: () => void   // called after successful POST to invalidate query cache
+}
+```
+
+**Layout:** Card style, amber-50 background, amber-200 border, 2px border, rounded-xl, padding 24px. Title: "Revisao Manual Necessaria" in amber-700, bold, 18px, with a warning icon (⚠️) before it.
+
+**Fields (in order):**
+
+1. **Descricao do Servico** (read-only)
+   - Label: "Descricao do Servico"
+   - Input: `<input type="text" readOnly value={reviewItem.descricao} />`
+   - Style: gray-100 background, gray-500 text (visually disabled)
+
+2. **Municipio** (read-only)
+   - Label: "Municipio"
+   - Input: `<input type="text" readOnly value={reviewItem.municipio} />`
+   - Style: gray-100 background, gray-500 text
+
+3. **Sugestao da IA** (read-only hint)
+   - No label — render as an inline hint below the Municipio field
+   - Text: `"Sugestao IA: {reviewItem.suggested_item_lc}"` in blue-600, small (14px), italic
+   - Include a small robot icon (🤖) before the text
+
+4. **Item LC** (required text input)
+   - Label: "Item LC (4 digitos)"
+   - Input: `<input type="text" maxLength={4} pattern="\d{4}" inputMode="numeric" />`
+   - Auto-focused on mount (`autoFocus` attribute)
+   - Pre-fill with `reviewItem.suggested_item_lc` as the default value
+   - Validation: show inline red error "Item LC deve ter exatamente 4 digitos" if not exactly 4 digits on submit attempt
+
+5. **DDD** (conditional — only render when `reviewItem.from_n8n === false`)
+   - Label: "DDD (2 digitos)"
+   - Input: `<input type="text" maxLength={2} pattern="\d{2}" inputMode="numeric" />`
+   - Required when visible — show inline red error "DDD deve ter exatamente 2 digitos" if not exactly 2 digits on submit attempt
+   - Do NOT render this field when `reviewItem.from_n8n === true`
+
+6. **Reference Buttons** (row layout, below the DDD/Item LC inputs):
+   - **"Pesquisar Item LC"** button (secondary, outline style):
+     ```ts
+     window.open(
+       `https://www.google.com/search?q=${encodeURIComponent(
+         reviewItem.item_lc_original + " - codigo item lc " + reviewItem.municipio + " equivalente goiania"
+       )}`,
+       "_blank"
+     )
+     ```
+   - **"LC 116"** anchor link (text link style, opens new tab):
+     ```html
+     <a href="https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp116.htm" target="_blank" rel="noopener">
+       Lei Complementar 116
+     </a>
+     ```
+
+7. **Countdown Timer** (rendered above the action buttons):
+   - Compute remaining seconds:
+     ```ts
+     const [remaining, setRemaining] = useState(() =>
+       Math.max(0, Math.floor((new Date(reviewItem.timeout_at).getTime() - Date.now()) / 1000))
+     )
+
+     useEffect(() => {
+       const interval = setInterval(() => {
+         setRemaining(prev => Math.max(0, prev - 1))
+       }, 1000)
+       return () => clearInterval(interval)
+     }, [])
+     ```
+   - Display format: `"Tempo restante: {Math.floor(remaining / 60)}m {remaining % 60}s"` in amber-700, bold
+   - When `remaining === 0`: replace with `"Tempo esgotado - aceite automatico"` in red-600, bold
+
+8. **Action Buttons** (row, full width, gap-4):
+   - **Confirm button** (primary, orange `#E58A4E`, white text, full-width or flex-1):
+     - Text: "Confirmar"
+     - Disabled + spinner while POST is in-flight
+     - On click:
+       ```ts
+       const body: Record<string, string> = { item_lc: itemLcValue, action: 'confirm' }
+       if (!reviewItem.from_n8n) body.ddd = dddValue
+       await apiRequest(`/jobs/${jobId}/review`, {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify(body),
+       })
+       ```
+   - **Skip button** (secondary, gray, flex-1):
+     - Text: "Pular nota"
+     - On click:
+       ```ts
+       await apiRequest(`/jobs/${jobId}/review`, {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ action: 'skip' }),
+       })
+       ```
+
+---
+
+### 11.5 Post-Submit Behavior
+
+After a successful `POST /jobs/{jobId}/review` (200 response):
+
+1. Call `onSubmitted()` prop — the parent page must invalidate the TanStack Query cache:
+   ```ts
+   queryClient.invalidateQueries({ queryKey: ['job-status', jobId] })
+   ```
+2. Do NOT redirect — the progress page stays open and continues showing job progress.
+3. The ReviewCard will disappear on next poll once `status` changes away from `"review_needed"`.
+
+**Error handling:**
+
+| HTTP Status | Meaning | UI Action |
+|---|---|---|
+| 409 | Timeout race — job already auto-continued | Show toast: "Revisao expirada - nota aceita automaticamente" |
+| 422 | Validation error (item_lc/ddd wrong length) | Show inline field error (should not reach server, frontend validates first) |
+| 403 | Not your job | Show toast: "Acesso negado" |
+| 404 | Job not found | Show toast: "Job nao encontrado" |
+
+Use a toast notification (bottom-right, 4s auto-dismiss) for server-side errors.
+
+---
+
+### 11.6 API Contract — POST /jobs/{jobId}/review
+
+```
+POST /jobs/{jobId}/review
+Authorization: Bearer {supabase_jwt}
+Content-Type: application/json
+
+Request body (confirm):
+{
+  "item_lc": "1401",
+  "ddd": "62",
+  "action": "confirm"
+}
+
+Request body (skip):
+{
+  "action": "skip"
+}
+
+Response 200:
+{
+  "accepted": true
+}
+
+Error responses:
+  404 — Job not found
+  403 — Not your job (job belongs to a different analyst)
+  409 — Job is not waiting for review (already timed out or analyst already submitted)
+  422 — Validation error (item_lc not exactly 4 digits, ddd not exactly 2 digits when required)
+```
+
+---
+
+### 11.7 Updated GET /jobs/{job_id}/status Response
+
+When `status === "review_needed"`, the poll response includes the `review_item` field:
+
+```json
+{
+  "job_id": "abc123def456",
+  "status": "review_needed",
+  "current_note": 12,
+  "total_notes": 47,
+  "percent": 25.53,
+  "recent_logs": ["..."],
+  "errors": [],
+  "result_ready": false,
+  "review_item": {
+    "chave_nfse": "001-2026-00013",
+    "descricao": "Servicos de consultoria em informatica",
+    "municipio": "Goiania",
+    "item_lc_original": "1.05",
+    "from_n8n": false,
+    "suggested_item_lc": "1401",
+    "timeout_at": "2026-03-30T20:05:00Z"
+  }
+}
+```
+
+When `status !== "review_needed"`, `review_item` is `null`.
+
+---
+
+### 11.8 Component Checklist — Phase 3 Additions
+
+Add the following components:
+
+- [ ] `ReviewCard` — Inline review form with all fields, countdown timer, confirm/skip actions
+- [ ] `CountdownTimer` — Self-contained hook/component that decrements every second from `timeout_at`
+
+Update the following existing components:
+
+- [ ] `JobProgress` — Add `ReviewCard` rendering when `status === "review_needed"`, update polling `refetchInterval` to not stop on `review_needed`, add pulsing progress bar state, add `"Aguardando revisao manual..."` text
+- [ ] `StatusBadge` — Add `review_needed` → amber badge mapping
