@@ -362,3 +362,25 @@ async def test_get_status_wrong_owner():
         app.dependency_overrides.clear()
 
     assert response.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_get_status_review_item_null_when_running():
+    """GET /jobs/{id}/status for a running (non-reviewing) job returns review_item=null."""
+    from api.main import app
+    from api.deps import get_current_user
+
+    app.dependency_overrides[get_current_user] = _make_fake_user()
+    try:
+        with patch("api.jobs.job_manager") as mock_jm:
+            mock_jm.get_status.return_value = SAMPLE_JOB_STATUS.copy()
+            async with httpx.AsyncClient(
+                transport=httpx.ASGITransport(app=app), base_url="http://test"
+            ) as client:
+                response = await client.get(f"/jobs/{TEST_JOB_ID}/status")
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["review_item"] is None
