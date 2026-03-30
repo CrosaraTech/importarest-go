@@ -103,7 +103,7 @@ async def create_job(
     analyst_name = current_user.get("analyst_name") or user_id
 
     try:
-        job_manager.create_job(
+        actual_job_id = job_manager.create_job(
             user_id=user_id,
             analyst_name=analyst_name,
             emp_cod=emp_cod,
@@ -117,7 +117,7 @@ async def create_job(
             detail=str(exc),
         ) from exc
 
-    return JobCreateResponse(job_id=job_id, status="queued")
+    return JobCreateResponse(job_id=actual_job_id, status="queued")
 
 
 @router.get("/{job_id}/status", response_model=JobStatusResponse)
