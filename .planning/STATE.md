@@ -3,14 +3,30 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 02-job-lifecycle/02-01-PLAN.md
-last_updated: "2026-03-30T14:31:24.015Z"
+stopped_at: Completed 03-manual-review-gate 03-01-PLAN.md
+last_updated: "2026-03-30T19:38:11.978Z"
 last_activity: 2026-03-30 — Phase 1 Foundation complete; all 3 plans executed, checkpoint approved
 progress:
   total_phases: 6
-  completed_phases: 1
+  completed_phases: 2
+  total_plans: 7
+  completed_plans: 6
+  percent: 86
+---
+
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: completed
+stopped_at: Phase 3 context gathered
+last_updated: "2026-03-30T19:14:16.705Z"
+last_activity: 2026-03-30 — Phase 1 Foundation complete; all 3 plans executed, checkpoint approved
+progress:
+  [█████████░] 86%
+  completed_phases: 2
   total_plans: 5
-  completed_plans: 4
+  completed_plans: 5
   percent: 17
 ---
 
@@ -54,6 +70,7 @@ Progress: [██░░░░░░░░] ~17%
 | Phase 01-foundation P02 | 18min | 2 tasks | 7 files |
 | Phase 01-foundation P03 | 4 | 1 tasks | 3 files |
 | Phase 02-job-lifecycle P01 | 6min | 2 tasks | 5 files |
+| Phase 03-manual-review-gate P01 | 6min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -77,6 +94,9 @@ Recent decisions affecting current work:
 - [Phase 02-job-lifecycle]: importlib.import_module('config') used in worker thread to avoid G-drive import linter violation in api/ modules
 - [Phase 02-job-lifecycle]: Job serialization via _lock around processar() is intentional v1 limitation — safe for single-worker, <5 min jobs
 - [Phase 02-job-lifecycle]: abrir_tela_manual_fn is auto-accept stub in Phase 2; Phase 3 replaces with threading.Event review gate
+- [Phase 03-manual-review-gate]: event.wait(timeout=300) called OUTSIDE _lock to prevent deadlock — worker releases lock before blocking
+- [Phase 03-manual-review-gate]: status=running set by worker after event.wait() returns, NOT by submit_review() — avoids race condition
+- [Phase 03-manual-review-gate]: montar_linha_txt called inside submit_review() with stored dados_base; frontend sends raw item_lc/ddd only
 
 ### Pending Todos
 
@@ -91,6 +111,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-30T14:31:24.012Z
-Stopped at: Completed 02-job-lifecycle/02-01-PLAN.md
+Last session: 2026-03-30T19:38:11.975Z
+Stopped at: Completed 03-manual-review-gate 03-01-PLAN.md
 Resume file: None

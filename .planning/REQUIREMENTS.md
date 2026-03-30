@@ -30,8 +30,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **PROC-01**: Analyst can trigger a single-company processing job that wraps the existing WorkflowProcessor
 - [x] **PROC-02**: Analyst can poll job progress in real-time (X of N notes processed, current status)
-- [ ] **PROC-03**: When AI flags a low-confidence record, the job pauses and the analyst sees an inline review form with service description, suggested Item LC, and editable fields
-- [ ] **PROC-04**: After analyst submits a correction on the review form, the job resumes processing
+- [x] **PROC-03**: When AI flags a low-confidence record, the job pauses and the analyst sees an inline review form with service description, suggested Item LC, and editable fields
+- [x] **PROC-04**: After analyst submits a correction on the review form, the job resumes processing
 - [ ] **PROC-05**: Analyst can trigger a batch job selecting an analyst name and vigencia to process all companies for that analyst
 - [ ] **PROC-06**: Analyst can abort a running job mid-processing
 - [x] **PROC-07**: Processing errors are displayed per-note with reason (parity with desktop error messages)
@@ -106,8 +106,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FILE-04 | Phase 2 | Complete |
 | PROC-01 | Phase 2 | Complete |
 | PROC-02 | Phase 2 | Complete |
-| PROC-03 | Phase 3 | Pending |
-| PROC-04 | Phase 3 | Pending |
+| PROC-03 | Phase 3 | Complete |
+| PROC-04 | Phase 3 | Complete |
 | PROC-05 | Phase 5 | Pending |
 | PROC-06 | Phase 5 | Pending |
 | PROC-07 | Phase 2 | Complete |
