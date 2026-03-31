@@ -80,7 +80,7 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Download endpoints (TXT, CSV, split TXT, file metadata) with TDD unit tests
+- [x] 04-01-PLAN.md — Download endpoints (TXT, CSV, split TXT, file metadata) with TDD unit tests
 - [ ] 04-02-PLAN.md — Byte-fidelity test scaffold, Lovable spec results section, end-of-phase verification
 
 ### Phase 5: Batch Mode
@@ -112,7 +112,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete   | 2026-03-26 |
 | 2. Job Lifecycle | 1/2 | In Progress|  |
-| 3. Manual Review Gate | 0/2 | Not started | - |
-| 4. Output Delivery | 0/2 | Not started | - |
+| 3. Manual Review Gate | 1/2 | In Progress | - |
+| 4. Output Delivery | 1/2 | In Progress | - |
 | 5. Batch Mode | 0/TBD | Not started | - |
 | 6. n8n Compatibility and Hardening | 0/TBD | Not started | - |

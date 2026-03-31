@@ -38,9 +38,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Output
 
-- [ ] **OUTP-01**: Analyst can download the generated TXT REST file in byte-perfect ISS.NET format (20 fields, semicolon delimiter, exact header)
-- [ ] **OUTP-02**: Analyst can download the CSV audit report with per-note processing details
-- [ ] **OUTP-03**: When notes fall outside the target vigencia, separate TXT files are generated and downloadable per period
+- [x] **OUTP-01**: Analyst can download the generated TXT REST file in byte-perfect ISS.NET format (20 fields, semicolon delimiter, exact header)
+- [x] **OUTP-02**: Analyst can download the CSV audit report with per-note processing details
+- [x] **OUTP-03**: When notes fall outside the target vigencia, separate TXT files are generated and downloadable per period
 
 ### Infrastructure
 
@@ -54,7 +54,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **FRNT-01**: Lovable-generated React frontend with file upload form, company/vigencia inputs, and MEI toggle
 - [ ] **FRNT-02**: Processing progress dashboard showing job status, note count, and log messages
 - [ ] **FRNT-03**: Inline manual review form that appears when a job pauses for review
-- [ ] **FRNT-04**: Results page with download buttons for TXT and CSV files
+- [x] **FRNT-04**: Results page with download buttons for TXT and CSV files
 - [ ] **FRNT-05**: Batch processing view with analyst selector, company list, and per-company progress
 
 ## v2 Requirements
@@ -111,9 +111,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PROC-05 | Phase 5 | Pending |
 | PROC-06 | Phase 5 | Pending |
 | PROC-07 | Phase 2 | Complete |
-| OUTP-01 | Phase 4 | Pending |
-| OUTP-02 | Phase 4 | Pending |
-| OUTP-03 | Phase 4 | Pending |
+| OUTP-01 | Phase 4 | Complete |
+| OUTP-02 | Phase 4 | Complete |
+| OUTP-03 | Phase 4 | Complete |
 | INFR-01 | Phase 1 | Complete |
 | INFR-02 | Phase 6 | Pending |
 | INFR-03 | Phase 1 | Complete |
@@ -121,7 +121,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FRNT-01 | Phase 2 | Pending |
 | FRNT-02 | Phase 2 | Pending |
 | FRNT-03 | Phase 3 | Pending |
-| FRNT-04 | Phase 4 | Pending |
+| FRNT-04 | Phase 4 | Complete |
 | FRNT-05 | Phase 5 | Pending |
 
 **Coverage:**

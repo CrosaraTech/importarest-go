@@ -2,32 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
-stopped_at: Completed 03-manual-review-gate 03-01-PLAN.md
-last_updated: "2026-03-30T19:38:11.978Z"
-last_activity: 2026-03-30 — Phase 1 Foundation complete; all 3 plans executed, checkpoint approved
+status: in_progress
+stopped_at: "Completed 04-output-delivery 04-01-PLAN.md"
+last_updated: "2026-03-31T13:45:27Z"
+last_activity: 2026-03-31 — Phase 4 Plan 1 complete; download endpoints delivered
 progress:
   total_phases: 6
-  completed_phases: 2
-  total_plans: 7
-  completed_plans: 6
-  percent: 86
----
-
----
-gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: completed
-stopped_at: Phase 3 context gathered
-last_updated: "2026-03-30T19:14:16.705Z"
-last_activity: 2026-03-30 — Phase 1 Foundation complete; all 3 plans executed, checkpoint approved
-progress:
-  [█████████░] 86%
-  completed_phases: 2
-  total_plans: 5
-  completed_plans: 5
-  percent: 17
+  completed_phases: 3
+  total_plans: 8
+  completed_plans: 8
+  percent: 55
 ---
 
 # Project State
@@ -37,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-26)
 
 **Core value:** Analysts can upload NFS-e XMLs and download byte-perfect REST TXT files for ISS.NET import, with AI-assisted classification and inline manual review.
-**Current focus:** Phase 2 — Job Lifecycle
+**Current focus:** Phase 4 — Output Delivery
 
 ## Current Position
 
-Phase: 1 of 6 (Foundation) — COMPLETE
-Plan: 3 of 3 in current phase
-Status: Phase 1 complete, ready for Phase 2
-Last activity: 2026-03-30 — Phase 1 Foundation complete; all 3 plans executed, checkpoint approved
+Phase: 4 of 6 (Output Delivery)
+Plan: 1 of 1 in current phase
+Status: Phase 4 Plan 1 complete — download endpoints delivered
+Last activity: 2026-03-31 — Completed 04-01-PLAN.md (download endpoints)
 
-Progress: [██░░░░░░░░] ~17%
+Progress: [██████░░░░] ~55%
 
 ## Performance Metrics
 
@@ -71,6 +55,7 @@ Progress: [██░░░░░░░░] ~17%
 | Phase 01-foundation P03 | 4 | 1 tasks | 3 files |
 | Phase 02-job-lifecycle P01 | 6min | 2 tasks | 5 files |
 | Phase 03-manual-review-gate P01 | 6min | 2 tasks | 5 files |
+| Phase 04-output-delivery P01 | 46min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -97,6 +82,10 @@ Recent decisions affecting current work:
 - [Phase 03-manual-review-gate]: event.wait(timeout=300) called OUTSIDE _lock to prevent deadlock — worker releases lock before blocking
 - [Phase 03-manual-review-gate]: status=running set by worker after event.wait() returns, NOT by submit_review() — avoids race condition
 - [Phase 03-manual-review-gate]: montar_linha_txt called inside submit_review() with stored dados_base; frontend sends raw item_lc/ddd only
+- [Phase 04-output-delivery]: _CSV_CABECALHO defined as constant in api/jobs.py — avoids importing services.report (G-drive linter safe in api/ modules)
+- [Phase 04-output-delivery]: Route order: /files, /download/txt, /download/csv, /download/txt/{vigencia} — exact-match routes before parameterized to prevent FastAPI ambiguity
+- [Phase 04-output-delivery]: emp_cod and vigencia read from job_state (not ProcessorResult) — ProcessorResult only contains processing output, not job metadata
+- [Phase 04-output-delivery]: errors count uses row[4] != "OK" (Status column index 4 per _CABECALHO)
 
 ### Pending Todos
 
@@ -111,6 +100,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-30T19:38:11.975Z
-Stopped at: Completed 03-manual-review-gate 03-01-PLAN.md
-Resume file: None
+Last session: 2026-03-31T13:45:27Z
+Stopped at: Completed 04-output-delivery 04-01-PLAN.md
+Resume file: .planning/phases/04-output-delivery/04-01-SUMMARY.md
