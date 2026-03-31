@@ -7,10 +7,13 @@ Exports:
     ReviewItem         — review gate data returned in JobStatusResponse when status="review_needed"
     ReviewSubmission   — body for POST /jobs/{id}/review
     ReviewResponse     — response from POST /jobs/{id}/review
+    FileEntry          — single downloadable file metadata
+    JobSummary         — aggregate processing statistics
+    JobFilesResponse   — response from GET /jobs/{id}/files
 """
 from __future__ import annotations
 
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel
 
@@ -70,3 +73,70 @@ class JobStatusResponse(BaseModel):
     errors: list[str]                # per-note error strings
     result_ready: bool               # True when status == "completed" and result stored
     review_item: Optional[ReviewItem] = None  # populated only when status="review_needed"
+
+
+# ---------------------------------------------------------------------------
+# Download / file-listing models (Phase 4)
+# ---------------------------------------------------------------------------
+
+class FileEntry(BaseModel):
+    """Metadata for a single downloadable file in a completed job."""
+    type: Literal["txt", "csv", "txt_split"]
+    label: str
+    url: str
+    vigencia: str = ""
+
+
+class JobSummary(BaseModel):
+    """Aggregate processing statistics for a completed job."""
+    total: int
+    errors: int
+    skipped: int
+    processing_seconds: Optional[float] = None
+
+
+class JobFilesResponse(BaseModel):
+    """Response from GET /jobs/{id}/files — lists all available downloads."""
+    job_id: str
+    emp_cod: str
+    vigencia: str
+    summary: JobSummary
+    files: list[FileEntry]
+
+
+# ---------------------------------------------------------------------------
+# Batch mode models (Phase 5)
+# ---------------------------------------------------------------------------
+
+class BatchCompanyRow(BaseModel):
+    """Per-company progress row in a batch job status response."""
+    cod: str
+    nome: str
+    status: str        # "pending"|"running"|"completed"|"error"|"skipped"|"aborted"
+    current_note: int
+    total_notes: int
+    elapsed_seconds: float
+    error_detail: str
+
+
+class BatchCreateResponse(BaseModel):
+    """Response from POST /batch — confirms batch job was accepted."""
+    batch_id: str
+    status: str = "running"
+
+
+class BatchStatusResponse(BaseModel):
+    """Response from GET /batch/{id}/status — per-company progress snapshot."""
+    batch_id: str
+    status: str        # "running"|"completed"|"aborted"
+    companies: list[BatchCompanyRow]
+    current_company_cod: Optional[str]
+    eta_seconds: Optional[float]
+    review_item: Optional[ReviewItem] = None
+    review_company_cod: Optional[str] = None
+    summary: Optional[dict] = None
+
+
+class AbortResponse(BaseModel):
+    """Response from POST /jobs/{id}/abort or POST /batch/{id}/abort."""
+    accepted: bool

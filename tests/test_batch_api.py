@@ -27,7 +27,13 @@ from unittest.mock import MagicMock, patch
 
 @pytest.fixture(autouse=True)
 def clean_modules():
-    """Clear cached api/batch_manager modules between tests."""
+    """Clear cached api/batch_manager modules between tests.
+
+    Note: Do NOT clear services.batch_orchestrator here — doing so would
+    break test_batch_orchestrator.py tests that run in the same session
+    (monkeypatch would patch a freshly loaded module while BatchOrchestrator
+    objects hold references to the old module's globals).
+    """
     yield
     for mod in list(sys.modules.keys()):
         if any(
@@ -36,7 +42,6 @@ def clean_modules():
                 "api.batch_manager",
                 "api.job_manager",
                 "api.models",
-                "services.batch_orchestrator",
             )
         ):
             sys.modules.pop(mod, None)

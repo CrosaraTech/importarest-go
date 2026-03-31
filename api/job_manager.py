@@ -99,11 +99,14 @@ class JobManager:
             ValueError: if analyst already has a queued or running job.
         """
         with self._lock:
-            # Enforce one active job per analyst
+            # Enforce one active job per analyst (covers both individual and batch jobs).
+            # If the existing id is NOT in _jobs it belongs to a different registry (e.g.
+            # BatchJobManager) — treat it as active rather than silently allow the conflict.
             existing = self._analyst_jobs.get(analyst_name)
             if existing:
                 existing_status = self._jobs.get(existing, {}).get("status")
-                if existing_status in ("queued", "running"):
+                # existing_status is None when it's a batch job (lives in BatchJobManager)
+                if existing_status in ("queued", "running") or existing_status is None:
                     raise ValueError(
                         f"Analyst '{analyst_name}' already has an active job: {existing}"
                     )
@@ -224,6 +227,24 @@ class JobManager:
         # Set the event OUTSIDE the lock to avoid waking the worker while we hold it
         event.set()
         return {"accepted": True}
+
+    def abort_job(self, job_id: str) -> bool:
+        """Mark an individual job as aborted. Returns False if job not found.
+
+        For jobs in review_needed state, also sets the review_event to unblock
+        the waiting worker thread.
+        """
+        with self._lock:
+            job = self._jobs.get(job_id)
+            if job is None:
+                return False
+            if job["status"] in ("queued", "running", "review_needed"):
+                # Unblock the review gate if waiting
+                event = job.get("review_event")
+                job["status"] = "aborted"
+                if event is not None:
+                    event.set()
+            return True
 
     # ------------------------------------------------------------------
     # Internal
