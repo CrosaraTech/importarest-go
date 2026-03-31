@@ -106,7 +106,10 @@ Plans:
   1. POST /classify passes a request through to the n8n webhook and returns the classification response; existing n8n workflows call it without modification
   2. n8n calls with a 90-second timeout and one retry on failure; a Cloudflare 524 or ReadTimeout falls back to a manual review item rather than crashing the job
   3. A verification checklist passes: byte diff clean, job ownership 403 confirmed, RLS confirmed in Supabase SQL editor, CORS confirmed in browser DevTools with no wildcard credentials
-**Plans**: TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 06-01-PLAN.md — POST /classify proxy endpoint, chamar_n8n() retry logic, v1 hardening checklist
 
 ## Progress
 
@@ -120,4 +123,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 3. Manual Review Gate | 1/2 | In Progress | - |
 | 4. Output Delivery | 2/2 | Complete   | 2026-03-31 |
 | 5. Batch Mode | 3/3 | Complete   | 2026-03-31 |
-| 6. n8n Compatibility and Hardening | 0/TBD | Not started | - |
+| 6. n8n Compatibility and Hardening | 0/1 | Not started | - |
