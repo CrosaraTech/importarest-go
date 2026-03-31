@@ -34,9 +34,11 @@ from pathlib import Path
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Response, UploadFile, status
 
+from api.batch_manager import batch_job_manager
 from api.deps import get_current_user
 from api.job_manager import job_manager
 from api.models import (
+    AbortResponse,
     FileEntry,
     JobCreateResponse,
     JobFilesResponse,
@@ -262,11 +264,38 @@ async def submit_job_review(
         422: if item_lc is not 4 digits, or ddd is required but missing/invalid
     """
     job_state = job_manager.get_status(job_id)
+
     if job_state is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Job '{job_id}' not found",
-        )
+        # Try batch job — POST /jobs/{id}/review also handles batch reviews
+        batch_state = batch_job_manager.get_batch_status(job_id)
+        if batch_state is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Job '{job_id}' not found",
+            )
+        if batch_state.get("user_id") != current_user["user_id"]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have access to this job",
+            )
+        if batch_state.get("review_item") is None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Job is not currently waiting for a review",
+            )
+        try:
+            result = batch_job_manager.submit_review(job_id, body)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=str(exc),
+            ) from exc
+        if not result.get("accepted"):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=result.get("reason", "Review gate no longer active"),
+            )
+        return ReviewResponse(accepted=True)
 
     if job_state.get("user_id") != current_user["user_id"]:
         raise HTTPException(
@@ -295,6 +324,55 @@ async def submit_job_review(
         )
 
     return ReviewResponse(accepted=True)
+
+
+# ---------------------------------------------------------------------------
+# Abort endpoint (Phase 5)
+# ---------------------------------------------------------------------------
+
+@router.post("/{job_id}/abort", response_model=AbortResponse)
+async def abort_job(
+    job_id: str,
+    current_user: dict = Depends(get_current_user),
+) -> AbortResponse:
+    """Abort an individual or batch processing job.
+
+    Tries job_manager first (individual jobs), then batch_job_manager (batch jobs).
+    Checks user ownership before aborting.
+
+    Returns:
+        AbortResponse with accepted=True
+
+    Raises:
+        404: if job_id is unknown in both registries
+        403: if job belongs to a different user
+    """
+    # Try individual job first
+    job_state = job_manager.get_status(job_id)
+    if job_state is not None:
+        if job_state.get("user_id") != current_user["user_id"]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have access to this job",
+            )
+        job_manager.abort_job(job_id)
+        return AbortResponse(accepted=True)
+
+    # Try batch job second
+    batch_state = batch_job_manager.get_batch_status(job_id)
+    if batch_state is not None:
+        if batch_state.get("user_id") != current_user["user_id"]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have access to this job",
+            )
+        batch_job_manager.abort_batch(job_id)
+        return AbortResponse(accepted=True)
+
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"Job '{job_id}' not found",
+    )
 
 
 # ---------------------------------------------------------------------------
