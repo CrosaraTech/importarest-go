@@ -91,7 +91,12 @@ Plans:
   1. Analyst can select an analyst name and vigencia, see the list of matching companies, and trigger a batch job that processes all of them
   2. Batch progress dashboard shows per-company status and note counts updating in real time
   3. Analyst can abort a running job mid-processing; the job stops within the current note and marks remaining notes as aborted
-**Plans**: TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — BatchJobManager class, batch models, abort support, TDD tests
+- [ ] 05-02-PLAN.md — Batch endpoints (POST /batch, GET /batch/{id}/status), abort endpoint, review dispatch, router wiring
+- [ ] 05-03-PLAN.md — Lovable spec batch dashboard section, end-of-phase verification
 
 ### Phase 6: n8n Compatibility and Hardening
 **Goal**: The classification endpoint preserves existing n8n workflow compatibility; operational pitfalls (timeouts, CORS, rate limiting) are verified and mitigated
@@ -114,5 +119,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 2. Job Lifecycle | 1/2 | In Progress|  |
 | 3. Manual Review Gate | 1/2 | In Progress | - |
 | 4. Output Delivery | 2/2 | Complete   | 2026-03-31 |
-| 5. Batch Mode | 0/TBD | Not started | - |
+| 5. Batch Mode | 0/3 | Not started | - |
 | 6. n8n Compatibility and Hardening | 0/TBD | Not started | - |
