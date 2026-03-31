@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 2: Job Lifecycle** - File upload, job creation, WorkflowProcessor wrapping, progress polling
 - [ ] **Phase 3: Manual Review Gate** - Job suspend on low-confidence, inline review form, worker resume
 - [x] **Phase 4: Output Delivery** - Byte-perfect TXT/CSV download and per-vigencia split files (completed 2026-03-31)
-- [ ] **Phase 5: Batch Mode** - Multi-company batch jobs, per-company progress, job abort
+- [x] **Phase 5: Batch Mode** - Multi-company batch jobs, per-company progress, job abort (completed 2026-03-31)
 - [ ] **Phase 6: n8n Compatibility and Hardening** - Classification proxy endpoint, rate limiting, operational verification
 
 ## Phase Details
@@ -91,7 +91,7 @@ Plans:
   1. Analyst can select an analyst name and vigencia, see the list of matching companies, and trigger a batch job that processes all of them
   2. Batch progress dashboard shows per-company status and note counts updating in real time
   3. Analyst can abort a running job mid-processing; the job stops within the current note and marks remaining notes as aborted
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [ ] 05-01-PLAN.md — BatchJobManager class, batch models, abort support, TDD tests
@@ -119,5 +119,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 2. Job Lifecycle | 1/2 | In Progress|  |
 | 3. Manual Review Gate | 1/2 | In Progress | - |
 | 4. Output Delivery | 2/2 | Complete   | 2026-03-31 |
-| 5. Batch Mode | 2/3 | In Progress|  |
+| 5. Batch Mode | 3/3 | Complete   | 2026-03-31 |
 | 6. n8n Compatibility and Hardening | 0/TBD | Not started | - |

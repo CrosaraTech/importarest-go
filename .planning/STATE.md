@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-stopped_at: Completed 05-01-PLAN.md (BatchJobManager and abort support)
-last_updated: "2026-03-31T17:17:15.807Z"
+stopped_at: Completed 05-02-PLAN.md (Batch HTTP endpoints)
+last_updated: "2026-03-31T18:21:51.938Z"
 last_activity: 2026-03-31 — Completed 04-01-PLAN.md (download endpoints)
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 12
-  completed_plans: 11
+  completed_plans: 12
 ---
 
 ---
@@ -71,6 +71,7 @@ Progress: [██████░░░░] ~55%
 | Phase 03-manual-review-gate P01 | 6min | 2 tasks | 5 files |
 | Phase 04-output-delivery P01 | 46min | 2 tasks | 3 files |
 | Phase 05-batch-mode P01 | 6min | 2 tasks | 5 files |
+| Phase 05-batch-mode P02 | 32min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -108,6 +109,9 @@ Recent decisions affecting current work:
 - [Phase 05-batch-mode]: BatchJobManager takes JobManager as constructor arg to share _analyst_jobs registry for one-job-per-analyst enforcement across batch and individual jobs
 - [Phase 05-batch-mode]: JobManager.create_job() raises ValueError when _analyst_jobs entry exists but job not in _jobs (means it is a batch job in another registry)
 - [Phase 05-batch-mode]: ETA formula: avg_elapsed_per_completed_companies * remaining_count (matches desktop batch_panel.py)
+- [Phase 05-batch-mode]: POST /batch uses UPLOAD_TEMP_DIR as job_dir base; batch_id subdir created post-creation; orchestrator skips companies without XML folders
+- [Phase 05-batch-mode]: Dual-registry dispatch for abort and review: try job_manager first, batch_job_manager second — single endpoint for both job types
+- [Phase 05-batch-mode]: POST /jobs/{id}/review fallthrough to batch_job_manager when job_manager returns None — avoids new /batch/{id}/review route
 
 ### Pending Todos
 
@@ -122,6 +126,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-31T17:17:15.802Z
-Stopped at: Completed 05-01-PLAN.md (BatchJobManager and abort support)
+Last session: 2026-03-31T18:21:51.935Z
+Stopped at: Completed 05-02-PLAN.md (Batch HTTP endpoints)
 Resume file: None
