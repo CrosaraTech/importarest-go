@@ -765,3 +765,268 @@ Update the following existing components:
 
 - [ ] `JobProgress` — Add `ReviewCard` rendering when `status === "review_needed"`, update polling `refetchInterval` to not stop on `review_needed`, add pulsing progress bar state, add `"Aguardando revisao manual..."` text
 - [ ] `StatusBadge` — Add `review_needed` → amber badge mapping
+
+---
+
+<!-- ============================================================ -->
+<!-- PHASE 4 ADDITION — Results and Download Section (FRNT-04)    -->
+<!-- Added after Phase 3 spec was generated in Lovable.           -->
+<!-- Append this section to the existing Lovable project via      -->
+<!-- "Edit with Lovable" or by re-pasting to update components.   -->
+<!-- ============================================================ -->
+
+## 12. Results and Download Section — Phase 4 Addition (FRNT-04)
+
+This section extends the Job Progress Page (`/jobs/:jobId`) with a results summary and download buttons that appear when the job completes. All changes are additive — no existing Phase 2 or Phase 3 components need to be removed.
+
+The same progress page transitions to a "completed" state. No navigation to a separate results page occurs — the analyst stays on the same `/jobs/:jobId` route.
+
+---
+
+### 12.1 State Transition: Progress → Results
+
+Update the polling logic in `JobProgress` so that when `result_ready` becomes `true`, the component fetches the file metadata once and renders `ResultsSection` below the progress area.
+
+```ts
+const { data: statusData } = useQuery({
+  queryKey: ['job-status', jobId],
+  queryFn: async () => {
+    const res = await apiRequest(`/jobs/${jobId}/status`)
+    if (!res.ok) throw new Error(await res.text())
+    return res.json()
+  },
+  refetchInterval: (data) => {
+    if (data?.status === 'completed' || data?.status === 'failed') return false
+    return 2500
+  },
+})
+
+// Fetch file metadata once when result_ready=true
+const { data: filesData } = useQuery({
+  queryKey: ['job-files', jobId],
+  queryFn: async () => {
+    const res = await apiRequest(`/jobs/${jobId}/files`)
+    if (!res.ok) throw new Error(await res.text())
+    return res.json()
+  },
+  enabled: statusData?.result_ready === true,
+  staleTime: Infinity,  // don't refetch — file list is stable for a completed job
+})
+```
+
+When `statusData?.result_ready === true` and `filesData` is available, render `ResultsSection` below the existing progress indicators (status badge, progress bar, log stream).
+
+---
+
+### 12.2 ResultsSection Component
+
+**Component:** `ResultsSection`
+
+**Props:**
+
+```ts
+interface FilesData {
+  job_id: string
+  emp_cod: string
+  vigencia: string
+  summary: {
+    total: number
+    errors: number
+    skipped: number
+    processing_seconds: number | null
+  }
+  files: Array<{
+    type: 'txt' | 'csv' | 'txt_split'
+    label: string
+    url: string
+    vigencia?: string
+  }>
+}
+
+interface ResultsSectionProps {
+  jobId: string
+  filesData: FilesData
+  onNewJob: () => void  // called when analyst clicks "Start New Job"
+}
+```
+
+**Data source:** `GET /jobs/{id}/files` returns `FilesData` with summary and file list (fetched once in step 12.1).
+
+---
+
+### 12.3 Summary Card
+
+Render a summary card at the top of `ResultsSection`:
+
+```
+"Processadas {total} notas em {processing_seconds}s — {errors} erros, {skipped} ignoradas"
+```
+
+- If `processing_seconds` is null, omit the time phrase: `"Processadas {total} notas — {errors} erros, {skipped} ignoradas"`
+- If `errors > 0`: render the errors count in **destructive red** (`text-red-600` or the Error color token `#C0392B`)
+- If `errors === 0`: render the full summary in success green (`text-green-700`)
+- Card style: `bg-green-50 border border-green-200 rounded-xl p-4` (or `bg-red-50 border border-red-200` when `errors > 0`)
+
+---
+
+### 12.4 Download Buttons
+
+Below the summary card, render a download buttons section:
+
+**Layout:** Vertical stack with 12px gap. Section title: "Downloads" in bold, 16px, gray-700.
+
+**Main TXT file** (always present — `files.find(f => f.type === 'txt')`):
+
+```tsx
+<a
+  href={`${import.meta.env.VITE_API_URL}${file.url}`}
+  download={file.label}
+  className="btn-primary w-full"  // blue primary button, full width
+>
+  Baixar TXT — {file.label}
+</a>
+```
+
+Style: primary button (use the primary color token — blue `#3498DB` works here as a download action, distinct from the orange submit button).
+
+**CSV report** (always present — `files.find(f => f.type === 'csv')`):
+
+```tsx
+<a
+  href={`${import.meta.env.VITE_API_URL}${file.url}`}
+  download={file.label}
+  className="btn-outline w-full"  // outline/secondary button
+>
+  Baixar CSV — {file.label}
+</a>
+```
+
+Style: outline/secondary button (bordered, transparent background).
+
+**Split TXT files** (conditional — `files.filter(f => f.type === 'txt_split')`):
+
+Only render this subsection if there is at least one `txt_split` entry.
+
+```tsx
+{splitFiles.length > 0 && (
+  <div>
+    <p className="text-sm font-medium text-gray-600 mb-2">Arquivos por vigencia diferente:</p>
+    {splitFiles.map(file => (
+      <a
+        key={file.vigencia}
+        href={`${import.meta.env.VITE_API_URL}${file.url}`}
+        download={file.label}
+        className="btn-outline w-full mb-2"
+      >
+        Baixar TXT — {file.label}
+      </a>
+    ))}
+  </div>
+)}
+```
+
+**Download behavior:** All download buttons use `<a href=... download=...>`. The browser triggers a file download using the `Content-Disposition: attachment` header returned by the API. No custom fetch logic needed.
+
+**Auth note:** Download links must include the JWT. Since `<a href>` does not send custom headers, use one of these approaches:
+- Option A (recommended): Generate a short-lived pre-authenticated URL on the backend (out of scope for now — use Option B for v1).
+- Option B (v1): Intercept click → `fetch()` with `Authorization` header → `URL.createObjectURL()` → programmatic click on a temporary `<a>` element → `URL.revokeObjectURL()`.
+
+```ts
+async function downloadWithAuth(url: string, filename: string) {
+  const res = await apiRequest(url)
+  if (!res.ok) throw new Error(`Download failed: ${res.status}`)
+  const blob = await res.blob()
+  const objectUrl = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = objectUrl
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(objectUrl)
+}
+```
+
+Replace all `<a href=...>` download anchors with `<button onClick={() => downloadWithAuth(file.url, file.label)}>` for correct auth handling.
+
+---
+
+### 12.5 "Start New Job" Button
+
+Below all download buttons:
+
+```tsx
+<button
+  onClick={onNewJob}
+  className="w-full mt-4 btn-secondary"
+>
+  Novo Job
+</button>
+```
+
+**`onNewJob` callback behavior (implement in parent `JobProgress`):**
+
+1. Clear the current `jobId` from component state.
+2. Navigate to `/upload` using React Router: `navigate('/upload')`.
+
+This resets the page to the upload form so the analyst can start a new submission immediately.
+
+---
+
+### 12.6 Updated Section 6.7 — Completed Terminal State
+
+Replace the existing Phase 2 placeholder in Section 6.7 ("On completed") with:
+
+```
+Green checkmark icon + "Processamento concluido com sucesso!"
+Subtitle: "X notas processadas."
+[ResultsSection renders below — see Section 12]
+```
+
+Remove the placeholder comment `(Phase 4 will add download buttons here)`.
+
+---
+
+### 12.7 API Contract — GET /jobs/{id}/files
+
+```
+GET /jobs/{jobId}/files
+Authorization: Bearer {supabase_jwt}
+
+Response 200:
+{
+  "job_id": "abc123def456",
+  "emp_cod": "001",
+  "vigencia": "03/2026",
+  "summary": {
+    "total": 47,
+    "errors": 2,
+    "skipped": 0,
+    "processing_seconds": 14.3
+  },
+  "files": [
+    { "type": "txt",       "label": "001_032026.txt",          "url": "/jobs/abc123def456/download/txt",          "vigencia": "" },
+    { "type": "csv",       "label": "relatorio_001_032026.csv", "url": "/jobs/abc123def456/download/csv",          "vigencia": "" },
+    { "type": "txt_split", "label": "001_022026.txt",           "url": "/jobs/abc123def456/download/txt/022026",   "vigencia": "022026" }
+  ]
+}
+
+Error responses:
+  403 — Not your job
+  404 — Job not found or result unavailable
+  409 — Job is not yet completed
+```
+
+---
+
+### 12.8 Component Checklist — Phase 4 Additions
+
+Add the following components:
+
+- [ ] `ResultsSection` — Summary card + download buttons + "Start New Job" action
+- [ ] `DownloadButton` — Reusable button that performs authenticated fetch → blob → programmatic download
+
+Update the following existing components:
+
+- [ ] `JobProgress` — Add `filesData` query (enabled when `result_ready=true`), render `ResultsSection` when completed, wire `onNewJob` to navigate('/upload')
+- [ ] Section 6.7 completed state — replace placeholder comment with `ResultsSection` reference
