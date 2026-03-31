@@ -1030,3 +1030,425 @@ Update the following existing components:
 
 - [ ] `JobProgress` — Add `filesData` query (enabled when `result_ready=true`), render `ResultsSection` when completed, wire `onNewJob` to navigate('/upload')
 - [ ] Section 6.7 completed state — replace placeholder comment with `ResultsSection` reference
+
+---
+
+<!-- ============================================================ -->
+<!-- PHASE 5 ADDITION — Batch Processing Dashboard (FRNT-05)      -->
+<!-- Added after Phase 4 spec was generated in Lovable.           -->
+<!-- Append this section to the existing Lovable project via      -->
+<!-- "Edit with Lovable" or by re-pasting to update components.   -->
+<!-- ============================================================ -->
+
+## 13. Batch Processing Dashboard — Phase 5 Addition (FRNT-05)
+
+This section adds a new `/batch` route with two views: a batch creation form (`BatchDashboard`) and a per-company progress view (`BatchProgress`). All changes are additive — no existing Phase 2, 3, or 4 components need to be removed.
+
+---
+
+### 13.1 New Route and Navigation
+
+Add the following routes to the app router:
+
+```
+/batch             → BatchDashboard component (batch creation form) — protected
+/batch/:batchId    → BatchProgress component (per-company progress) — protected
+```
+
+Add a navigation item to the sidebar/nav: **"Processamento em Lote"** (links to `/batch`).
+
+---
+
+### 13.2 Updated App Structure
+
+```
+/               → redirect to /upload if authenticated, else to /login
+/login          → Supabase Auth login/signup page
+/upload         → Upload Form (FRNT-01) — protected
+/jobs/:jobId    → Job Progress (FRNT-02) — protected
+/batch          → Batch Dashboard (FRNT-05) — protected
+/batch/:batchId → Batch Progress (FRNT-05) — protected
+```
+
+---
+
+### 13.3 BatchDashboard Component (creation form)
+
+**Route:** `/batch`
+
+**Layout:** Centered form card (max-width 600px), white background, subtle shadow. Header: "Processamento em Lote" in bold, 24px.
+
+**Fields (in order):**
+
+1. **Analyst Name Selector** (required)
+   - Label: "Analista"
+   - Type: `<select>` dropdown populated by fetching `GET /companies` and extracting unique `analista` values
+   - Auto-select the current user's analyst_name if available (from Supabase user metadata or profiles table)
+   - Loading state: "Carregando analistas..."
+   - If no analysts found: "Nenhum analista encontrado."
+
+2. **Vigencia Input** (required)
+   - Label: "Vigencia (MM/AAAA)"
+   - Same pattern as individual job creation: two dropdowns (month + year) or text input with pattern `MM/YYYY`
+   - The value sent to the API must be the string `"MM/YYYY"` (e.g. `"01/2025"`)
+
+3. **Gerar MEI Toggle**
+   - Label: "Gerar MEI"
+   - Type: checkbox or toggle switch
+   - Default: unchecked (false)
+   - Same as individual job creation
+
+4. **Company Preview** (informational, appears after analyst is selected)
+   - Fetch `GET /companies?analyst={selected_analyst}` when analyst selection changes
+   - Display as a simple list: `{cod} — {nome_empresa}` for each company
+   - Label above list: "Empresas que serao processadas ({count}):"
+   - If list is empty: "Nenhuma empresa encontrada para este analista."
+   - This is informational only — not a selection UI
+
+5. **"Iniciar Lote" Button** (primary, orange `#E58A4E`, full width)
+   - Text: "Iniciar Lote"
+   - Disabled while POST is in-flight or required fields are empty
+   - Loading state: spinner + "Iniciando..."
+   - On click:
+     ```ts
+     const res = await apiRequest('/batch', {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({ analyst_name, vigencia, gerar_mei }),
+     })
+     ```
+   - On 200: `{ "batch_id": "abc123def456", "status": "running" }` → navigate to `/batch/{batch_id}`
+   - On 409: show toast: "Ja existe um job ativo para este analista"
+   - On 404: show toast: "Nenhuma empresa encontrada para este analista"
+   - On other errors: show toast: "Erro ao iniciar lote. Tente novamente."
+
+**Individual upload form integration:**
+
+When the analyst has an active batch job, the individual upload form (`/upload`) should show a disabled state with message: "Lote em andamento — aguarde a conclusao do lote antes de enviar arquivos individuais."
+
+---
+
+### 13.4 BatchProgress Component (per-company progress)
+
+**Route:** `/batch/:batchId`
+
+**Layout:** Full-page centered card (max-width 900px), white background. Header: "Lote em Andamento — {analyst_name} / {vigencia}" if available from batch status response.
+
+#### 13.4.1 Polling
+
+Poll `GET /batch/{batchId}/status` every **2500ms** using TanStack Query:
+
+```ts
+const { data } = useQuery({
+  queryKey: ['batch-status', batchId],
+  queryFn: async () => {
+    const res = await apiRequest(`/batch/${batchId}/status`)
+    if (!res.ok) throw new Error(await res.text())
+    return res.json()
+  },
+  refetchInterval: (data) => {
+    if (data?.status === 'completed' || data?.status === 'aborted') return false
+    return 2500
+  },
+})
+```
+
+Stop polling when `data.status === "completed"` or `data.status === "aborted"`.
+
+#### 13.4.2 Per-Company Progress Table
+
+Render a table with the following columns:
+
+| Column | Source | Notes |
+|--------|--------|-------|
+| Empresa | `{cod} — {nome}` | Both fields from company row |
+| Status | status badge | Color-coded per status value |
+| Notas | note count | See formatting below |
+| Tempo | elapsed time | Formatted as "Xm Ys" or "Xs" |
+
+**Status badge color mapping:**
+
+```ts
+const COMPANY_STATUS_BADGE = {
+  pending:   { bg: 'bg-gray-100',   text: 'text-gray-600',   label: 'Pendente' },
+  running:   { bg: 'bg-blue-100',   text: 'text-blue-700',   label: 'Processando', spinner: true },
+  completed: { bg: 'bg-green-100',  text: 'text-green-700',  label: 'Concluido' },
+  error:     { bg: 'bg-red-100',    text: 'text-red-700',    label: 'Erro' },
+  skipped:   { bg: 'bg-yellow-100', text: 'text-yellow-700', label: 'Ignorada' },
+  aborted:   { bg: 'bg-orange-100', text: 'text-orange-700', label: 'Abortada' },
+}
+```
+
+- `error` status: add tooltip on badge showing `error_detail`
+- `skipped` status: add tooltip "Pasta de XMLs nao encontrada"
+- `running` status: show a small spinner icon next to "Processando" text
+
+**Notas column formatting:**
+- For `status === "running"`: show `"{current_note}/{total_notes}"`
+- For `status === "completed"`: show `"{total_notes}"` (just the total)
+- For `status === "pending"`, `"aborted"`, `"skipped"`, `"error"`: show `"—"`
+
+**Tempo column formatting:**
+```ts
+function formatElapsed(seconds: number): string {
+  if (seconds < 60) return `${Math.floor(seconds)}s`
+  const m = Math.floor(seconds / 60)
+  const s = Math.floor(seconds % 60)
+  return `${m}m ${s}s`
+}
+```
+Show `"—"` for pending companies with `elapsed_seconds === 0`.
+
+**Row highlighting:**
+- The row where `cod === data.current_company_cod` (currently processing) should have a subtle light blue background: `bg-blue-50`
+- When `cod === data.review_company_cod` (waiting for review), show `"Revisao Necessaria"` amber badge instead of `"Processando"`:
+  ```ts
+  { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Revisao Necessaria' }
+  ```
+
+#### 13.4.3 ETA Footer
+
+Below the per-company table, render an ETA line:
+
+```ts
+// When eta_seconds is null (no companies completed yet):
+"Calculando estimativa..."  // gray-500, italic
+
+// When eta_seconds is available and batch is running:
+`Tempo estimado restante: ${formatElapsed(data.eta_seconds)}`  // gray-700
+
+// When batch is completed or aborted:
+`Lote concluido em ${formatElapsed(data.summary.elapsed_total_seconds)}`  // green-700, bold
+```
+
+#### 13.4.4 Abort Button
+
+Position: top-right of the progress view (aligned with the card header).
+
+```tsx
+{(data?.status === 'running') && (
+  <button
+    onClick={() => setConfirmAbortOpen(true)}
+    className="btn-outline border-red-500 text-red-600 hover:bg-red-50"
+  >
+    Abortar Lote
+  </button>
+)}
+```
+
+**Confirmation dialog:**
+
+```
+Title: "Abortar lote?"
+Body: "Tem certeza? A empresa atual sera concluida, mas as restantes serao abortadas."
+Buttons: "Cancelar" (secondary) | "Confirmar Abort" (red destructive)
+```
+
+**On confirm:**
+```ts
+await apiRequest(`/jobs/${batchId}/abort`, { method: 'POST' })
+setConfirmAbortOpen(false)
+// Show toast: "Lote sendo abortado..."
+// Polling will update statuses automatically
+```
+
+- Button hidden when `data.status === "completed"` or `data.status === "aborted"`
+
+#### 13.4.5 Summary Section (terminal state)
+
+Show when `data.status === "completed"` or `data.status === "aborted"`:
+
+```tsx
+// Summary stats row
+"Total: {summary.total} empresas  |  Sucesso: {summary.successes}  |  Erros: {summary.errors}  |  Ignoradas: {summary.skipped}"
+
+// If aborted:
+"Lote abortado. {summary.successes} empresas processadas de {summary.total} total."
+```
+
+**Per-company download buttons** (shown for each company with `status === "completed"`):
+
+```ts
+// TXT download:
+downloadWithAuth(`/batch/${batchId}/company/${cod}/download/txt`, `${cod}_lote.txt`)
+
+// CSV download:
+downloadWithAuth(`/batch/${batchId}/company/${cod}/download/csv`, `relatorio_${cod}_lote.csv`)
+```
+
+Use the same `downloadWithAuth` function from Phase 4 (fetch + blob + createObjectURL pattern).
+
+Download URLs:
+- TXT: `/batch/{batch_id}/company/{cod}/download/txt`
+- CSV: `/batch/{batch_id}/company/{cod}/download/csv`
+
+**Note:** If per-company download endpoints are not yet available, render download buttons as disabled with tooltip: "Download disponivel em breve".
+
+---
+
+### 13.5 Review Form Reuse in Batch Mode
+
+When `data.review_item` is non-null in the batch status response, render the Phase 3 `ReviewCard` component below the company table (same component, no modifications needed):
+
+```tsx
+{data?.review_item != null && (
+  <ReviewCard
+    jobId={batchId}
+    reviewItem={data.review_item}
+    onSubmitted={() => {
+      queryClient.invalidateQueries({ queryKey: ['batch-status', batchId] })
+    }}
+  />
+)}
+```
+
+- The review form uses `POST /jobs/{batchId}/review` — exactly the same endpoint as Phase 3
+- After review submission, invalidate the `['batch-status', batchId]` TanStack Query cache key (not `['job-status', ...]`)
+- The company row with `cod === data.review_company_cod` shows "Revisao Necessaria" amber badge
+- Countdown timer behavior is identical to Phase 3
+
+---
+
+### 13.6 Updated Status Types (Phase 5 Additions)
+
+**Batch-level status (new):**
+```ts
+type BatchStatus = "running" | "completed" | "aborted"
+```
+
+**Company-level status (new):**
+```ts
+type CompanyStatus = "pending" | "running" | "completed" | "error" | "skipped" | "aborted"
+```
+
+**Individual job status (updated — add "aborted"):**
+```ts
+// Update existing JobStatus type to include "aborted"
+type JobStatus = "queued" | "running" | "review_needed" | "completed" | "failed" | "aborted"
+
+// Add to StatusBadge color map:
+aborted: { bg: 'bg-orange-100', text: 'text-orange-700', label: 'Abortado' }
+```
+
+---
+
+### 13.7 API Contracts — Phase 5 Reference
+
+#### POST /batch
+
+```
+POST /batch
+Authorization: Bearer {supabase_jwt}
+Content-Type: application/json
+
+Request body:
+{
+  "analyst_name": "ANA BEATRIZ",
+  "vigencia": "01/2025",
+  "gerar_mei": false
+}
+
+Response 200:
+{
+  "batch_id": "abc123def456",
+  "status": "running"
+}
+
+Error responses:
+  404 — No companies found for analyst
+  409 — Analyst already has an active job
+  422 — Missing required fields
+```
+
+#### GET /batch/{id}/status
+
+```
+GET /batch/{batch_id}/status
+Authorization: Bearer {supabase_jwt}
+
+Response 200:
+{
+  "batch_id": "abc123def456",
+  "status": "running",
+  "companies": [
+    {
+      "cod": "001",
+      "nome": "Empresa Exemplo",
+      "status": "completed",
+      "current_note": 15,
+      "total_notes": 15,
+      "elapsed_seconds": 12.3,
+      "error_detail": ""
+    },
+    {
+      "cod": "002",
+      "nome": "Outra Empresa",
+      "status": "running",
+      "current_note": 3,
+      "total_notes": 10,
+      "elapsed_seconds": 4.1,
+      "error_detail": ""
+    }
+  ],
+  "current_company_cod": "002",
+  "eta_seconds": 24.6,
+  "review_item": null,
+  "review_company_cod": null,
+  "summary": null
+}
+
+When completed/aborted, summary is populated:
+{
+  "batch_id": "abc123def456",
+  "status": "completed",
+  "companies": [...],
+  "current_company_cod": null,
+  "eta_seconds": null,
+  "review_item": null,
+  "review_company_cod": null,
+  "summary": {
+    "total": 10,
+    "successes": 9,
+    "errors": 1,
+    "skipped": 0,
+    "aborted": 0,
+    "elapsed_total_seconds": 124.5
+  }
+}
+```
+
+#### POST /jobs/{id}/abort
+
+```
+POST /jobs/{batch_id}/abort
+Authorization: Bearer {supabase_jwt}
+
+Response 200:
+{ "accepted": true }
+
+Error responses:
+  404 — Job not found
+  403 — Not your job
+```
+
+#### POST /jobs/{id}/review (reused from Phase 3)
+
+Same endpoint and body shape as Phase 3. See Section 11.6 for full contract.
+
+---
+
+### 13.8 Component Checklist — Phase 5 Additions
+
+Add the following components:
+
+- [ ] `BatchDashboard` — Analyst selector, vigencia input, MEI toggle, company preview, "Iniciar Lote" button
+- [ ] `BatchProgress` — Polling, per-company table, ETA footer, abort button, summary section
+- [ ] `CompanyStatusBadge` — Colored pill for company-level status with tooltip support
+
+Update the following existing components:
+
+- [ ] `App` (router) — Add `/batch` and `/batch/:batchId` routes
+- [ ] Navigation/sidebar — Add "Processamento em Lote" nav item
+- [ ] `UploadForm` — Show disabled state with message when analyst has active batch job
+- [ ] `StatusBadge` — Add `"aborted"` → orange badge mapping
+- [ ] `ReviewCard` — No changes needed; reused as-is in batch context
