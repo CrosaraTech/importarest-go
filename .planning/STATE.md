@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-stopped_at: "Checkpoint: Task 2 human-verify for 05-03 (Phase 5 end-of-phase verification)"
-last_updated: "2026-03-31T17:12:54.457Z"
+stopped_at: Completed 05-01-PLAN.md (BatchJobManager and abort support)
+last_updated: "2026-03-31T17:17:15.807Z"
 last_activity: 2026-03-31 — Completed 04-01-PLAN.md (download endpoints)
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 12
-  completed_plans: 10
+  completed_plans: 11
 ---
 
 ---
@@ -70,6 +70,7 @@ Progress: [██████░░░░] ~55%
 | Phase 02-job-lifecycle P01 | 6min | 2 tasks | 5 files |
 | Phase 03-manual-review-gate P01 | 6min | 2 tasks | 5 files |
 | Phase 04-output-delivery P01 | 46min | 2 tasks | 3 files |
+| Phase 05-batch-mode P01 | 6min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -104,6 +105,9 @@ Recent decisions affecting current work:
 - [Phase 04-output-delivery]: Download buttons use fetch+blob+createObjectURL pattern (not plain anchor) to support JWT Authorization header in Lovable frontend
 - [Phase 05-batch-mode]: Phase 5 spec is a self-contained addendum (Section 13) — no modifications to Sections 1-12 of lovable-spec.md
 - [Phase 05-batch-mode]: ReviewCard reused as-is for batch; queryClient cache key changes from ['job-status', jobId] to ['batch-status', batchId]
+- [Phase 05-batch-mode]: BatchJobManager takes JobManager as constructor arg to share _analyst_jobs registry for one-job-per-analyst enforcement across batch and individual jobs
+- [Phase 05-batch-mode]: JobManager.create_job() raises ValueError when _analyst_jobs entry exists but job not in _jobs (means it is a batch job in another registry)
+- [Phase 05-batch-mode]: ETA formula: avg_elapsed_per_completed_companies * remaining_count (matches desktop batch_panel.py)
 
 ### Pending Todos
 
@@ -118,6 +122,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-31T17:12:44.897Z
-Stopped at: Checkpoint: Task 2 human-verify for 05-03 (Phase 5 end-of-phase verification)
+Last session: 2026-03-31T17:17:15.802Z
+Stopped at: Completed 05-01-PLAN.md (BatchJobManager and abort support)
 Resume file: None
