@@ -1,7 +1,6 @@
-"""Tests for BatchJobManager and abort support (Phase 5, Plan 01).
+"""Tests for BatchJobManager, abort support, and HTTP endpoints (Phase 5).
 
-All tests operate directly on manager classes — no HTTP layer.
-Covers:
+Manager-level tests (Plan 01):
 - test_create_batch_job_returns_id
 - test_create_batch_conflict_with_individual
 - test_create_individual_conflict_with_batch
@@ -13,11 +12,34 @@ Covers:
 - test_abort_individual_job
 - test_abort_individual_unknown
 - test_eta_calculation
+
+HTTP endpoint tests (Plan 02):
+POST /batch:
+- test_post_batch_requires_auth
+- test_post_batch_creates_job
+- test_post_batch_conflict_409
+- test_post_batch_missing_fields
+
+GET /batch/{id}/status:
+- test_get_batch_status_shape
+- test_get_batch_status_not_found
+- test_get_batch_status_wrong_owner
+
+POST /jobs/{id}/abort:
+- test_abort_individual_job_200
+- test_abort_batch_job_200
+- test_abort_not_found_404
+- test_abort_wrong_owner_403
+- test_abort_preserves_completed
+
+POST /jobs/{id}/review dispatch:
+- test_review_dispatch_to_batch
 """
 import sys
 import threading
 import pytest
-from unittest.mock import MagicMock, patch
+import httpx
+from unittest.mock import AsyncMock, MagicMock, patch
 
 
 # ---------------------------------------------------------------------------
@@ -293,3 +315,468 @@ def test_eta_calculation():
 
     assert status["eta_seconds"] is not None
     assert status["eta_seconds"] == pytest.approx(30.0, abs=0.1)
+
+
+# ===========================================================================
+# HTTP Endpoint tests (Plan 02)
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# Constants
+# ---------------------------------------------------------------------------
+
+TEST_USER_ID = "user-uuid-batch-test"
+TEST_EMAIL = "batch-test@crosara.com.br"
+TEST_ANALYST_NAME = "ANA BEATRIZ"
+TEST_BATCH_ID = "batchabc12345"
+TEST_JOB_ID = "jobxyz654321"
+
+SAMPLE_BATCH_STATUS = {
+    "batch_id": TEST_BATCH_ID,
+    "status": "running",
+    "companies": [
+        {
+            "cod": "001",
+            "nome": "Empresa A",
+            "status": "completed",
+            "current_note": 5,
+            "total_notes": 5,
+            "elapsed_seconds": 10.0,
+            "error_detail": "",
+        },
+        {
+            "cod": "002",
+            "nome": "Empresa B",
+            "status": "pending",
+            "current_note": 0,
+            "total_notes": 0,
+            "elapsed_seconds": 0.0,
+            "error_detail": "",
+        },
+    ],
+    "current_company_cod": "002",
+    "eta_seconds": 10.0,
+    "review_item": None,
+    "review_company_cod": None,
+    "summary": None,
+    "user_id": TEST_USER_ID,
+}
+
+SAMPLE_INDIVIDUAL_JOB_STATUS = {
+    "job_id": TEST_JOB_ID,
+    "status": "running",
+    "current_note": 2,
+    "total_notes": 10,
+    "percent": 20.0,
+    "recent_logs": [],
+    "errors": [],
+    "user_id": TEST_USER_ID,
+    "analyst_name": TEST_ANALYST_NAME,
+    "emp_cod": "001",
+    "vigencia": "2025-01",
+    "created_at": "2026-01-01T00:00:00",
+}
+
+
+# ---------------------------------------------------------------------------
+# Fixtures
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(autouse=True)
+def patch_env_http(monkeypatch, tmp_path):
+    """Set required env vars and clear cached modules for HTTP endpoint tests."""
+    monkeypatch.setenv("SUPABASE_URL", "https://test.supabase.co")
+    monkeypatch.setenv("SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test")
+    monkeypatch.setenv("SUPABASE_SECRET_KEY", "sb_secret_test")
+    monkeypatch.setenv("SUPABASE_JWT_SECRET", "test-secret-key-32-chars-minimum!!")
+    monkeypatch.setenv("UPLOAD_TEMP_DIR", str(tmp_path / "uploads"))
+    monkeypatch.setenv("ALLOWED_ORIGINS", "http://localhost:5173")
+    for mod in list(sys.modules.keys()):
+        if any(
+            mod.startswith(prefix)
+            for prefix in (
+                "config_web",
+                "api.deps",
+                "api.supabase_client",
+                "api.companies",
+                "api.jobs",
+                "api.batch",
+                "api.main",
+                "api.models",
+                "api.job_manager",
+                "api.batch_manager",
+            )
+        ):
+            sys.modules.pop(mod, None)
+
+
+def _make_fake_user(user_id: str = TEST_USER_ID, analyst_name: str = TEST_ANALYST_NAME):
+    """Return an async override for get_current_user dependency."""
+    async def _fake_get_current_user():
+        return {
+            "user_id": user_id,
+            "email": TEST_EMAIL,
+            "analyst_name": analyst_name,
+        }
+    return _fake_get_current_user
+
+
+# ---------------------------------------------------------------------------
+# POST /batch endpoint tests
+# ---------------------------------------------------------------------------
+
+@pytest.mark.asyncio
+async def test_post_batch_requires_auth():
+    """POST /batch without Authorization header returns 401 or 403."""
+    from api.main import app
+
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app), base_url="http://test"
+    ) as client:
+        response = await client.post("/batch", json={
+            "analyst_name": TEST_ANALYST_NAME,
+            "vigencia": "2025-01",
+            "gerar_mei": False,
+        })
+
+    assert response.status_code in (401, 403)
+
+
+@pytest.mark.asyncio
+async def test_post_batch_creates_job():
+    """POST /batch with valid body returns 200 with batch_id and status='running'."""
+    from api.main import app
+    from api.deps import get_current_user
+
+    app.dependency_overrides[get_current_user] = _make_fake_user()
+    try:
+        mock_supabase = MagicMock()
+        mock_supabase.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+            {"cod": "001", "nome": "Empresa A"},
+            {"cod": "002", "nome": "Empresa B"},
+        ]
+        with patch("api.batch.get_supabase_admin", return_value=mock_supabase):
+            with patch("api.batch.batch_job_manager") as mock_bjm:
+                mock_bjm.create_batch_job.return_value = TEST_BATCH_ID
+                async with httpx.AsyncClient(
+                    transport=httpx.ASGITransport(app=app), base_url="http://test"
+                ) as client:
+                    response = await client.post("/batch", json={
+                        "analyst_name": TEST_ANALYST_NAME,
+                        "vigencia": "2025-01",
+                        "gerar_mei": False,
+                    })
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 200
+    body = response.json()
+    assert "batch_id" in body
+    assert body["status"] == "running"
+    mock_bjm.create_batch_job.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_post_batch_conflict_409():
+    """POST /batch when analyst already has an active job returns 409."""
+    from api.main import app
+    from api.deps import get_current_user
+
+    app.dependency_overrides[get_current_user] = _make_fake_user()
+    try:
+        mock_supabase = MagicMock()
+        mock_supabase.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+            {"cod": "001", "nome": "Empresa A"},
+        ]
+        with patch("api.batch.get_supabase_admin", return_value=mock_supabase):
+            with patch("api.batch.batch_job_manager") as mock_bjm:
+                mock_bjm.create_batch_job.side_effect = ValueError("Analyst already has active batch job")
+                async with httpx.AsyncClient(
+                    transport=httpx.ASGITransport(app=app), base_url="http://test"
+                ) as client:
+                    response = await client.post("/batch", json={
+                        "analyst_name": TEST_ANALYST_NAME,
+                        "vigencia": "2025-01",
+                        "gerar_mei": False,
+                    })
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 409
+
+
+@pytest.mark.asyncio
+async def test_post_batch_missing_fields():
+    """POST /batch without analyst_name returns 422."""
+    from api.main import app
+    from api.deps import get_current_user
+
+    app.dependency_overrides[get_current_user] = _make_fake_user()
+    try:
+        async with httpx.AsyncClient(
+            transport=httpx.ASGITransport(app=app), base_url="http://test"
+        ) as client:
+            response = await client.post("/batch", json={
+                "vigencia": "2025-01",
+                "gerar_mei": False,
+            })
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# GET /batch/{id}/status endpoint tests
+# ---------------------------------------------------------------------------
+
+@pytest.mark.asyncio
+async def test_get_batch_status_shape():
+    """GET /batch/{id}/status returns BatchStatusResponse shape with companies list."""
+    from api.main import app
+    from api.deps import get_current_user
+
+    app.dependency_overrides[get_current_user] = _make_fake_user()
+    try:
+        with patch("api.batch.batch_job_manager") as mock_bjm:
+            mock_bjm.get_batch_status.return_value = SAMPLE_BATCH_STATUS.copy()
+            async with httpx.AsyncClient(
+                transport=httpx.ASGITransport(app=app), base_url="http://test"
+            ) as client:
+                response = await client.get(f"/batch/{TEST_BATCH_ID}/status")
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["batch_id"] == TEST_BATCH_ID
+    assert "status" in body
+    assert "companies" in body
+    assert isinstance(body["companies"], list)
+    assert len(body["companies"]) == 2
+    assert "eta_seconds" in body
+
+
+@pytest.mark.asyncio
+async def test_get_batch_status_not_found():
+    """GET /batch/nonexistent/status returns 404."""
+    from api.main import app
+    from api.deps import get_current_user
+
+    app.dependency_overrides[get_current_user] = _make_fake_user()
+    try:
+        with patch("api.batch.batch_job_manager") as mock_bjm:
+            mock_bjm.get_batch_status.return_value = None
+            async with httpx.AsyncClient(
+                transport=httpx.ASGITransport(app=app), base_url="http://test"
+            ) as client:
+                response = await client.get("/batch/nonexistent/status")
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_get_batch_status_wrong_owner():
+    """GET /batch/{id}/status for another user's batch returns 403."""
+    from api.main import app
+    from api.deps import get_current_user
+
+    app.dependency_overrides[get_current_user] = _make_fake_user(user_id="user-A")
+    other_user_batch = {**SAMPLE_BATCH_STATUS, "user_id": "user-B"}
+    try:
+        with patch("api.batch.batch_job_manager") as mock_bjm:
+            mock_bjm.get_batch_status.return_value = other_user_batch
+            async with httpx.AsyncClient(
+                transport=httpx.ASGITransport(app=app), base_url="http://test"
+            ) as client:
+                response = await client.get(f"/batch/{TEST_BATCH_ID}/status")
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 403
+
+
+# ---------------------------------------------------------------------------
+# POST /jobs/{id}/abort endpoint tests
+# ---------------------------------------------------------------------------
+
+@pytest.mark.asyncio
+async def test_abort_individual_job_200():
+    """POST /jobs/{id}/abort on individual job returns 200 accepted=true."""
+    from api.main import app
+    from api.deps import get_current_user
+
+    app.dependency_overrides[get_current_user] = _make_fake_user()
+    try:
+        with patch("api.jobs.job_manager") as mock_jm:
+            with patch("api.jobs.batch_job_manager") as mock_bjm:
+                mock_jm.get_status.return_value = SAMPLE_INDIVIDUAL_JOB_STATUS.copy()
+                mock_jm.abort_job.return_value = True
+                async with httpx.AsyncClient(
+                    transport=httpx.ASGITransport(app=app), base_url="http://test"
+                ) as client:
+                    response = await client.post(f"/jobs/{TEST_JOB_ID}/abort")
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["accepted"] is True
+    mock_jm.abort_job.assert_called_once_with(TEST_JOB_ID)
+
+
+@pytest.mark.asyncio
+async def test_abort_batch_job_200():
+    """POST /jobs/{batch_id}/abort on batch job returns 200 accepted=true."""
+    from api.main import app
+    from api.deps import get_current_user
+
+    app.dependency_overrides[get_current_user] = _make_fake_user()
+    try:
+        with patch("api.jobs.job_manager") as mock_jm:
+            with patch("api.jobs.batch_job_manager") as mock_bjm:
+                # job_manager has no record of this ID
+                mock_jm.get_status.return_value = None
+                mock_bjm.get_batch_status.return_value = SAMPLE_BATCH_STATUS.copy()
+                mock_bjm.abort_batch.return_value = True
+                async with httpx.AsyncClient(
+                    transport=httpx.ASGITransport(app=app), base_url="http://test"
+                ) as client:
+                    response = await client.post(f"/jobs/{TEST_BATCH_ID}/abort")
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["accepted"] is True
+    mock_bjm.abort_batch.assert_called_once_with(TEST_BATCH_ID)
+
+
+@pytest.mark.asyncio
+async def test_abort_not_found_404():
+    """POST /jobs/nonexistent/abort returns 404."""
+    from api.main import app
+    from api.deps import get_current_user
+
+    app.dependency_overrides[get_current_user] = _make_fake_user()
+    try:
+        with patch("api.jobs.job_manager") as mock_jm:
+            with patch("api.jobs.batch_job_manager") as mock_bjm:
+                mock_jm.get_status.return_value = None
+                mock_bjm.get_batch_status.return_value = None
+                async with httpx.AsyncClient(
+                    transport=httpx.ASGITransport(app=app), base_url="http://test"
+                ) as client:
+                    response = await client.post("/jobs/nonexistent_id/abort")
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_abort_wrong_owner_403():
+    """POST /jobs/{id}/abort for another user's job returns 403."""
+    from api.main import app
+    from api.deps import get_current_user
+
+    app.dependency_overrides[get_current_user] = _make_fake_user(user_id="user-A")
+    other_user_job = {**SAMPLE_INDIVIDUAL_JOB_STATUS, "user_id": "user-B"}
+    try:
+        with patch("api.jobs.job_manager") as mock_jm:
+            with patch("api.jobs.batch_job_manager") as mock_bjm:
+                mock_jm.get_status.return_value = other_user_job
+                async with httpx.AsyncClient(
+                    transport=httpx.ASGITransport(app=app), base_url="http://test"
+                ) as client:
+                    response = await client.post(f"/jobs/{TEST_JOB_ID}/abort")
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_abort_preserves_completed():
+    """After aborting batch, completed companies remain accessible in status."""
+    from api.main import app
+    from api.deps import get_current_user
+
+    app.dependency_overrides[get_current_user] = _make_fake_user()
+    completed_batch = {
+        **SAMPLE_BATCH_STATUS,
+        "status": "aborted",
+        "companies": [
+            {
+                "cod": "001", "nome": "Empresa A", "status": "completed",
+                "current_note": 5, "total_notes": 5, "elapsed_seconds": 10.0, "error_detail": "",
+            },
+            {
+                "cod": "002", "nome": "Empresa B", "status": "aborted",
+                "current_note": 0, "total_notes": 0, "elapsed_seconds": 0.0, "error_detail": "",
+            },
+        ],
+    }
+    try:
+        with patch("api.batch.batch_job_manager") as mock_bjm:
+            mock_bjm.get_batch_status.return_value = completed_batch
+            async with httpx.AsyncClient(
+                transport=httpx.ASGITransport(app=app), base_url="http://test"
+            ) as client:
+                response = await client.get(f"/batch/{TEST_BATCH_ID}/status")
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "aborted"
+    completed = [c for c in body["companies"] if c["status"] == "completed"]
+    assert len(completed) == 1
+    assert completed[0]["cod"] == "001"
+
+
+# ---------------------------------------------------------------------------
+# POST /jobs/{id}/review dispatch test
+# ---------------------------------------------------------------------------
+
+@pytest.mark.asyncio
+async def test_review_dispatch_to_batch():
+    """POST /jobs/{batch_id}/review dispatches to batch_job_manager when job_manager returns None."""
+    from api.main import app
+    from api.deps import get_current_user
+
+    app.dependency_overrides[get_current_user] = _make_fake_user()
+    batch_state_with_review = {
+        **SAMPLE_BATCH_STATUS,
+        "review_item": {
+            "chave_nfse": "key-abc-123",
+            "descricao": "Servico X",
+            "municipio": "Goiania",
+            "item_lc_original": "0105",
+            "from_n8n": False,
+            "suggested_item_lc": "0105",
+            "timeout_at": "2026-12-31T00:00:00Z",
+        },
+    }
+    try:
+        with patch("api.jobs.job_manager") as mock_jm:
+            with patch("api.jobs.batch_job_manager") as mock_bjm:
+                mock_jm.get_status.return_value = None
+                mock_bjm.get_batch_status.return_value = batch_state_with_review
+                mock_bjm.submit_review.return_value = {"accepted": True}
+                async with httpx.AsyncClient(
+                    transport=httpx.ASGITransport(app=app), base_url="http://test"
+                ) as client:
+                    response = await client.post(
+                        f"/jobs/{TEST_BATCH_ID}/review",
+                        json={"item_lc": "0105", "ddd": "62", "action": "confirm"},
+                    )
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["accepted"] is True
+    mock_bjm.submit_review.assert_called_once()

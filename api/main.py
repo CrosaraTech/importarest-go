@@ -10,6 +10,7 @@ from config_web import ALLOWED_ORIGINS
 from api.health import router as health_router
 from api.companies import router as companies_router
 from api.jobs import router as jobs_router
+from api.batch import router as batch_router
 
 app = FastAPI(
     title="ImportaREST GO API",
@@ -32,3 +33,4 @@ app.add_middleware(
 app.include_router(health_router)
 app.include_router(companies_router)
 app.include_router(jobs_router)
+app.include_router(batch_router)
