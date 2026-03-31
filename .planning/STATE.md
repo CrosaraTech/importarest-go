@@ -3,6 +3,21 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
+stopped_at: "Checkpoint 04-02 Task 3: end-of-phase human verification"
+last_updated: "2026-03-31T14:55:13.278Z"
+last_activity: 2026-03-31 — Completed 04-01-PLAN.md (download endpoints)
+progress:
+  total_phases: 6
+  completed_phases: 4
+  total_plans: 9
+  completed_plans: 9
+---
+
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: in_progress
 stopped_at: "Completed 04-output-delivery 04-01-PLAN.md"
 last_updated: "2026-03-31T13:45:27Z"
 last_activity: 2026-03-31 — Phase 4 Plan 1 complete; download endpoints delivered
@@ -86,6 +101,8 @@ Recent decisions affecting current work:
 - [Phase 04-output-delivery]: Route order: /files, /download/txt, /download/csv, /download/txt/{vigencia} — exact-match routes before parameterized to prevent FastAPI ambiguity
 - [Phase 04-output-delivery]: emp_cod and vigencia read from job_state (not ProcessorResult) — ProcessorResult only contains processing output, not job metadata
 - [Phase 04-output-delivery]: errors count uses row[4] != "OK" (Status column index 4 per _CABECALHO)
+- [Phase 04-output-delivery]: Byte-fidelity tests use pytest.skip (not xfail) so they appear as SKIPPED not FAILED until fixtures arrive
+- [Phase 04-output-delivery]: Download buttons use fetch+blob+createObjectURL pattern (not plain anchor) to support JWT Authorization header in Lovable frontend
 
 ### Pending Todos
 
@@ -100,6 +117,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-31T13:45:27Z
-Stopped at: Completed 04-output-delivery 04-01-PLAN.md
-Resume file: .planning/phases/04-output-delivery/04-01-SUMMARY.md
+Last session: 2026-03-31T14:51:21.518Z
+Stopped at: Checkpoint 04-02 Task 3: end-of-phase human verification
+Resume file: None

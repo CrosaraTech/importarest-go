@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation** - Config isolation, Supabase setup, company data migration, and analyst auth (completed 2026-03-26)
 - [ ] **Phase 2: Job Lifecycle** - File upload, job creation, WorkflowProcessor wrapping, progress polling
 - [ ] **Phase 3: Manual Review Gate** - Job suspend on low-confidence, inline review form, worker resume
-- [ ] **Phase 4: Output Delivery** - Byte-perfect TXT/CSV download and per-vigencia split files
+- [x] **Phase 4: Output Delivery** - Byte-perfect TXT/CSV download and per-vigencia split files (completed 2026-03-31)
 - [ ] **Phase 5: Batch Mode** - Multi-company batch jobs, per-company progress, job abort
 - [ ] **Phase 6: n8n Compatibility and Hardening** - Classification proxy endpoint, rate limiting, operational verification
 
@@ -77,7 +77,7 @@ Plans:
   2. Analyst can download the CSV audit report with per-note processing details
   3. When notes fall outside the target vigencia, separate TXT files are generated per period and each is individually downloadable
   4. Results page shows download buttons for TXT and CSV immediately after job completion
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 04-01-PLAN.md — Download endpoints (TXT, CSV, split TXT, file metadata) with TDD unit tests
@@ -113,6 +113,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 1. Foundation | 3/3 | Complete   | 2026-03-26 |
 | 2. Job Lifecycle | 1/2 | In Progress|  |
 | 3. Manual Review Gate | 1/2 | In Progress | - |
-| 4. Output Delivery | 1/2 | In Progress | - |
+| 4. Output Delivery | 2/2 | Complete   | 2026-03-31 |
 | 5. Batch Mode | 0/TBD | Not started | - |
 | 6. n8n Compatibility and Hardening | 0/TBD | Not started | - |
