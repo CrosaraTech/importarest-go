@@ -55,7 +55,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **FRNT-02**: Processing progress dashboard showing job status, note count, and log messages
 - [ ] **FRNT-03**: Inline manual review form that appears when a job pauses for review
 - [x] **FRNT-04**: Results page with download buttons for TXT and CSV files
-- [ ] **FRNT-05**: Batch processing view with analyst selector, company list, and per-company progress
+- [x] **FRNT-05**: Batch processing view with analyst selector, company list, and per-company progress
 
 ## v2 Requirements
 
@@ -122,7 +122,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FRNT-02 | Phase 2 | Pending |
 | FRNT-03 | Phase 3 | Pending |
 | FRNT-04 | Phase 4 | Complete |
-| FRNT-05 | Phase 5 | Pending |
+| FRNT-05 | Phase 5 | Complete |
 
 **Coverage:**
 - v1 requirements: 29 total

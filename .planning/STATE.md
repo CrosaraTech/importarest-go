@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-stopped_at: "Checkpoint 04-02 Task 3: end-of-phase human verification"
-last_updated: "2026-03-31T14:55:13.278Z"
+stopped_at: "Checkpoint: Task 2 human-verify for 05-03 (Phase 5 end-of-phase verification)"
+last_updated: "2026-03-31T17:12:54.457Z"
 last_activity: 2026-03-31 — Completed 04-01-PLAN.md (download endpoints)
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 9
-  completed_plans: 9
+  total_plans: 12
+  completed_plans: 10
 ---
 
 ---
@@ -18,15 +18,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-stopped_at: "Completed 04-output-delivery 04-01-PLAN.md"
-last_updated: "2026-03-31T13:45:27Z"
-last_activity: 2026-03-31 — Phase 4 Plan 1 complete; download endpoints delivered
+stopped_at: Phase 5 context gathered
+last_updated: "2026-03-31T16:44:29.583Z"
+last_activity: 2026-03-31 — Completed 04-01-PLAN.md (download endpoints)
 progress:
   total_phases: 6
-  completed_phases: 3
-  total_plans: 8
-  completed_plans: 8
-  percent: 55
+  completed_phases: 4
+  total_plans: 9
+  completed_plans: 9
 ---
 
 # Project State
@@ -103,6 +102,8 @@ Recent decisions affecting current work:
 - [Phase 04-output-delivery]: errors count uses row[4] != "OK" (Status column index 4 per _CABECALHO)
 - [Phase 04-output-delivery]: Byte-fidelity tests use pytest.skip (not xfail) so they appear as SKIPPED not FAILED until fixtures arrive
 - [Phase 04-output-delivery]: Download buttons use fetch+blob+createObjectURL pattern (not plain anchor) to support JWT Authorization header in Lovable frontend
+- [Phase 05-batch-mode]: Phase 5 spec is a self-contained addendum (Section 13) — no modifications to Sections 1-12 of lovable-spec.md
+- [Phase 05-batch-mode]: ReviewCard reused as-is for batch; queryClient cache key changes from ['job-status', jobId] to ['batch-status', batchId]
 
 ### Pending Todos
 
@@ -117,6 +118,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-31T14:51:21.518Z
-Stopped at: Checkpoint 04-02 Task 3: end-of-phase human verification
+Last session: 2026-03-31T17:12:44.897Z
+Stopped at: Checkpoint: Task 2 human-verify for 05-03 (Phase 5 end-of-phase verification)
 Resume file: None
