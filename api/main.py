@@ -11,6 +11,7 @@ from api.health import router as health_router
 from api.companies import router as companies_router
 from api.jobs import router as jobs_router
 from api.batch import router as batch_router
+from api.classify import router as classify_router
 
 app = FastAPI(
     title="ImportaREST GO API",
@@ -34,3 +35,4 @@ app.include_router(health_router)
 app.include_router(companies_router)
 app.include_router(jobs_router)
 app.include_router(batch_router)
+app.include_router(classify_router)
