@@ -58,7 +58,12 @@ def _load_goiania_rows() -> list[dict]:
     wb = None
     try:
         wb = load_workbook(path, read_only=True, data_only=True)
-        ws = wb.active
+        # A planilha tem múltiplas abas ('Base' com empresas, 'E-mails' com analistas).
+        # Precisamos explicitamente da aba 'Base' — wb.active pode apontar para outra.
+        if "Base" in wb.sheetnames:
+            ws = wb["Base"]
+        else:
+            ws = wb.active
 
         # Lê a primeira linha como cabeçalho
         rows_iter = ws.iter_rows(values_only=True)
@@ -122,6 +127,7 @@ def _load_goiania_rows() -> list[dict]:
                     "analista": str(analista).strip() if analista is not None else "",
                     "im": str(im).strip() if im is not None else "",
                     "razao": str(razao).strip() if razao is not None else "",
+                    "municipio": str(municipio).strip() if municipio is not None else "",
                 })
 
         return filtered_rows

@@ -15,8 +15,17 @@ def _sanitizar_numero_end(numero_end: str, endereco: str):
     return num[:10], endereco
 
 
-def montar_linha_txt(dados, ddd: str, item_lc: str) -> str:
-    modelo = "2" if eh_goiania(dados) else "4"
+def montar_linha_txt(dados, ddd: str, item_lc: str, empresa_ibge: str = "") -> str:
+    # Modelo: 2 = prestador MESMO municipio da empresa tomadora, 4 = fora.
+    # Fallback (empresa_ibge vazio): usa eh_goiania (legado).
+    ibge_prest = normalize_digits(dados.get("codigo_municipio", ""))
+    ibge_emp = normalize_digits(empresa_ibge or "")
+    if ibge_emp:
+        # compara pelos 6 primeiros digitos (IBGE 6 = municipio, 7 = com DV)
+        mesmo_mun = bool(ibge_prest) and ibge_prest[:6] == ibge_emp[:6]
+    else:
+        mesmo_mun = eh_goiania(dados)  # legado sem empresa_ibge
+    modelo = "2" if mesmo_mun else "4"
     numero = sanitizar_campo(dados.get("numero", ""))
     vlr_doc = sanitizar_campo(dados.get("vlr_doc", ""))
     vlr_trib = sanitizar_campo(dados.get("vlr_trib", ""))
@@ -30,12 +39,21 @@ def montar_linha_txt(dados, ddd: str, item_lc: str) -> str:
     data_pagamento = dt
     cnpj = sanitizar_campo(dados.get("cnpj_p", ""))
     razao = sanitizar_campo(dados.get("razao_p", ""))
-    im = sanitizar_campo(dados.get("im_p", "")) if eh_goiania(dados) else ""
+    im = sanitizar_campo(dados.get("im_p", "")) if mesmo_mun else ""
     imposto_retido = imposto_retido_norm(dados.get("iss_ret", "2"), dados.get("iss_ret_origem", "abrasf"))
     codigo_mun = dados.get("codigo_municipio", "")
-    cidade = sanitizar_campo(dados.get("cidade_override", "") or consulta_cidade_ibge(codigo_mun) or "")
+    # Resolução em cascata da cidade:
+    # 1) cidade_override (ViaCEP local ou n8n) — preferido
+    # 2) IBGE pelo codigo_municipio (extraído do XML)
+    # 3) IBGE pelo local_prestacao (mais confiável que codigo_municipio)
+    cidade = sanitizar_campo(
+        dados.get("cidade_override", "")
+        or consulta_cidade_ibge(codigo_mun)
+        or consulta_cidade_ibge(dados.get("local_prestacao", ""))
+        or ""
+    )
     uf = normalizar_uf(dados.get("uf", ""))
-    tributado_no_municipio = "1" if eh_goiania(dados) else "0"
+    tributado_no_municipio = "1" if mesmo_mun else "0"
     unidade_economica = "0"
     cep = sanitizar_campo(dados.get("cep", ""))
     endereco = sanitizar_campo(dados.get("endereco", ""))
@@ -47,11 +65,17 @@ def montar_linha_txt(dados, ddd: str, item_lc: str) -> str:
     if item_lc:
         item_lc = item_lc.zfill(4)
 
+    local_prestacao = normalize_digits(dados.get("local_prestacao", ""))
+    optante_sn_mei = str(dados.get("optante_sn_mei", "1") or "1")
+    if optante_sn_mei not in ("1", "2", "3"):
+        optante_sn_mei = "1"
+
     return (
         f"{modelo};{numero};{vlr_trib};{vlr_doc};{aliq};"
         f"{data_emissao};{data_pagamento};{cnpj};{razao};{im};"
         f"{imposto_retido};{cep};{endereco};{numero_end};{bairro};"
-        f"{cidade};{uf};{ddd};{tributado_no_municipio};{item_lc};{unidade_economica}"
+        f"{cidade};{uf};{ddd};{tributado_no_municipio};{item_lc};{unidade_economica};"
+        f"{local_prestacao};{optante_sn_mei};"
     )
 
 
@@ -86,11 +110,17 @@ def montar_linha_txt_n8n(dados, item_lc: str) -> str:
     if item_lc:
         item_lc = item_lc.zfill(4)
 
+    local_prestacao = normalize_digits(dados.get("local_prestacao", ""))
+    optante_sn_mei = str(dados.get("optante_sn_mei", "1") or "1")
+    if optante_sn_mei not in ("1", "2", "3"):
+        optante_sn_mei = "1"
+
     return (
         f"{modelo};{numero};{vlr_trib};{vlr_doc};{aliq};"
         f"{data_emissao};{data_pagamento};{cnpj};{razao};{im};"
         f"{imposto_retido};{cep};{endereco};{numero_end};{bairro};"
-        f"{cidade};{uf};{ddd};{trib_mun};{item_lc};{unidade_econ}"
+        f"{cidade};{uf};{ddd};{trib_mun};{item_lc};{unidade_econ};"
+        f"{local_prestacao};{optante_sn_mei};"
     )
 
 
@@ -105,8 +135,14 @@ def montar_cabecalho(im_tomador: str, razao_tomador: str, data_emissao: str) -> 
     agora = datetime.now()
     data_formatada = f"{agora.day}/{agora.month}/{agora.year}"
     hora_formatada = agora.strftime("%H:%M")
+
+    # ISSNet rejeita IM com pontuação (ex: "304.415-7"). Tira tudo que não é dígito.
+    im_clean = normalize_digits(im_tomador)
+    # Razão social pode ter espaços duplos vindos da planilha; normaliza pra um.
+    razao_clean = " ".join((razao_tomador or "").split())
+
     return (
-        f"{im_tomador};{mes};{ano};"
-        f"{hora_formatada} {data_formatada}{razao_tomador};"
+        f"{im_clean};{mes};{ano};"
+        f"{hora_formatada} {data_formatada}{razao_clean};"
         f"1;EXPORTACAO DECLARACAO ELETRONICA-ONLINE-NOTA CONTROL"
     )

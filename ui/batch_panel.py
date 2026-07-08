@@ -9,8 +9,9 @@ Redesigned with CustomTkinter for a modern, premium look.
 """
 import queue
 import threading
+from datetime import date
 from pathlib import Path
-from tkinter import messagebox, filedialog
+from tkinter import messagebox
 import tkinter as tk
 from tkinter import ttk
 
@@ -70,12 +71,14 @@ class PainelLote(tk.Frame):
 
         # StringVars
         self._var_analyst = tk.StringVar()
-        self._var_vigencia = tk.StringVar()
+        self._var_vigencia = tk.StringVar(value=self._vigencia_padrao())
         self._var_dest = tk.StringVar()
         self._var_mei = tk.BooleanVar(value=False)
 
         # Trace vars so start button updates automatically
         self._var_vigencia.trace_add("write", self._update_start_state)
+        self._var_vigencia.trace_add("write", self._refresh_dest)
+        self._var_analyst.trace_add("write", self._refresh_dest)
         self._var_dest.trace_add("write", self._update_start_state)
 
         self._build_ui()
@@ -86,6 +89,35 @@ class PainelLote(tk.Frame):
     # ------------------------------------------------------------------
     # UI construction
     # ------------------------------------------------------------------
+
+    @staticmethod
+    def _vigencia_padrao() -> str:
+        """Retorna o mês anterior ao atual em formato MMAAAA.
+
+        Em junho/2026 retorna '052026' (vigência de maio/2026 — a competência
+        normalmente declarada no início do mês seguinte).
+        """
+        hoje = date.today()
+        if hoje.month == 1:
+            mes, ano = 12, hoje.year - 1
+        else:
+            mes, ano = hoje.month - 1, hoje.year
+        return f"{mes:02d}{ano}"
+
+    def _toggle_vigencia_editavel(self):
+        """Alterna o entry de vigência entre read-only e editável."""
+        if not hasattr(self, "_ent_vigencia"):
+            return
+        atual = self._ent_vigencia.cget("state")
+        if str(atual) in ("readonly", "disabled"):
+            self._ent_vigencia.configure(state="normal")
+            self._btn_vigencia.configure(text="Restaurar padrão")
+            self._ent_vigencia.focus_set()
+        else:
+            # Restaura o padrão e volta a travar.
+            self._var_vigencia.set(self._vigencia_padrao())
+            self._ent_vigencia.configure(state="readonly")
+            self._btn_vigencia.configure(text="Mudar vigência")
 
     def _section_title(self, parent, text: str):
         """Render a section title with small orange accent line."""
@@ -204,14 +236,26 @@ class PainelLote(tk.Frame):
             font=("Segoe UI", 9, "bold"),
             bg=COR_CARD, fg=COR_SUBTEXTO,
         ).pack(anchor="w", pady=(0, 4))
+        vig_row = tk.Frame(col_vig, bg=COR_CARD)
+        vig_row.pack(anchor="w")
         self._ent_vigencia = ctk.CTkEntry(
-            col_vig, textvariable=self._var_vigencia,
+            vig_row, textvariable=self._var_vigencia,
             width=140, height=34,
             font=("Segoe UI", 11), corner_radius=8,
             fg_color=COR_CARD, border_color=COR_BORDA,
             text_color=COR_TEXTO, placeholder_text="MMAAAA",
+            state="readonly",
         )
-        self._ent_vigencia.pack(anchor="w")
+        self._ent_vigencia.pack(side="left")
+        self._btn_vigencia = ctk.CTkButton(
+            vig_row, text="Mudar vigência",
+            command=self._toggle_vigencia_editavel,
+            width=120, height=34, corner_radius=8,
+            font=("Segoe UI", 10),
+            fg_color=COR_SUBTEXTO, hover_color=COR_BORDA,
+            text_color="#FFFFFF",
+        )
+        self._btn_vigencia.pack(side="left", padx=(8, 0))
 
         col_mei = tk.Frame(row_vig, bg=COR_CARD)
         col_mei.pack(side="left", pady=(18, 0))
@@ -225,9 +269,9 @@ class PainelLote(tk.Frame):
         )
         self._chk_mei.pack()
 
-        # ── Destination folder ──
+        # ── Destination folder (auto: ~/Downloads/Rest{analista}-{vigencia}) ──
         tk.Label(
-            body, text="Pasta de destino", font=("Segoe UI", 9, "bold"),
+            body, text="Pasta de destino (automatica)", font=("Segoe UI", 9, "bold"),
             bg=COR_CARD, fg=COR_SUBTEXTO, anchor="w",
         ).pack(fill="x", pady=(0, 4))
 
@@ -240,14 +284,7 @@ class PainelLote(tk.Frame):
             fg_color="#F8F8F8", border_color=COR_BORDA,
             text_color=COR_TEXTO, state="disabled",
         )
-        self._ent_dest.pack(side="left", fill="x", expand=True, padx=(0, 8))
-
-        ctk.CTkButton(
-            dest_row, text="Escolher", command=self._choose_dest,
-            font=("Segoe UI", 10, "bold"), width=100, height=34,
-            fg_color=COR_PRIMARIA, hover_color=COR_PRIMARIA_HV,
-            text_color="#FFFFFF", corner_radius=8,
-        ).pack(side="left")
+        self._ent_dest.pack(side="left", fill="x", expand=True)
 
         # ── Separator + action buttons ──
         tk.Frame(body, bg=COR_BORDA, height=1).pack(fill="x", pady=(0, 14))
@@ -431,11 +468,18 @@ class PainelLote(tk.Frame):
             self._lbl_count.configure(text="")
         self._update_start_state()
 
-    def _choose_dest(self):
-        """Open a directory chooser and store the selected path."""
-        path = filedialog.askdirectory(title="Selecionar pasta de destino")
-        if path:
-            self._var_dest.set(path)
+    def _refresh_dest(self, *_):
+        """Auto-set destination to ~/Downloads/Rest{analista}-{vigencia}."""
+        analyst = self._var_analyst.get().strip()
+        vigencia = self._var_vigencia.get().strip()
+        if not analyst or not vigencia:
+            self._var_dest.set("")
+            return
+        safe_analyst = "".join(
+            c for c in analyst if c not in '<>:"/\\|?*'
+        ).strip()
+        folder = Path.home() / "Downloads" / f"Rest{safe_analyst}-{vigencia}"
+        self._var_dest.set(str(folder))
 
     def _start_batch(self):
         """Start the batch in a daemon thread with a fresh queue."""
@@ -455,11 +499,13 @@ class PainelLote(tk.Frame):
 
         vigencia = self._var_vigencia.get()
         dest = Path(self._var_dest.get())
+        dest.mkdir(parents=True, exist_ok=True)
         companies = self._companies
 
         t = threading.Thread(
             target=self._orc.run,
-            args=(companies, vigencia, dest, self._var_mei.get()),
+            args=(companies, vigencia, dest, self._var_mei.get(),
+                  self._var_analyst.get()),
             daemon=True,
         )
         t.start()
@@ -495,12 +541,17 @@ class PainelLote(tk.Frame):
         elif kind == "counter":
             pass  # optional detail — not surfaced in v1
         elif kind == "manual_review":
-            _, dados_base, chave_nfse, from_n8n, event, result_holder = msg
+            # Backward-compat: aceita formato antigo (6 itens) e novo (8 com cod/razao)
+            if len(msg) >= 8:
+                _, dados_base, chave_nfse, from_n8n, event, result_holder, cod_emp, razao_emp = msg
+            else:
+                _, dados_base, chave_nfse, from_n8n, event, result_holder = msg
+                cod_emp, razao_emp = "", ""
             self.after(
                 0,
                 lambda d=dados_base, c=chave_nfse, f=from_n8n,
-                       e=event, r=result_holder:
-                self._handle_manual_review(d, c, f, e, r),
+                       e=event, r=result_holder, ce=cod_emp, re_=razao_emp:
+                self._handle_manual_review(d, c, f, e, r, ce, re_),
             )
         elif kind == "company_done":
             _, cod, status, notes, elapsed, detail = msg
@@ -510,11 +561,13 @@ class PainelLote(tk.Frame):
             self._on_batch_done(summary)
 
     def _handle_manual_review(self, dados_base, chave_nfse, from_n8n,
-                               event, result_holder):
+                               event, result_holder,
+                               empresa_cod: str = "", empresa_razao: str = ""):
         """Open the manual review dialog from the main thread and signal worker."""
         try:
             result = abrir_tela_manual_itemlc(
-                self.winfo_toplevel(), dados_base, chave_nfse, from_n8n
+                self.winfo_toplevel(), dados_base, chave_nfse, from_n8n,
+                empresa_cod=empresa_cod, empresa_razao=empresa_razao,
             )
             result_holder[0] = result
         finally:

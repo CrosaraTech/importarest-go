@@ -1,11 +1,241 @@
 import tkinter as tk
-from config import COR_BORDA, COR_CARD, COR_PRIMARIA, COR_TEXTO
+from config import (
+    COR_BG, COR_BORDA, COR_BORDA_LEVE, COR_CARD, COR_CARD_HOVER,
+    COR_GOLD, COR_GOLD_CLARO, COR_PRIMARIA, COR_SUBTEXTO, COR_TEXTO,
+    FONT_BODY, FONT_DISPLAY,
+)
 
 try:
     from PIL import Image, ImageDraw, ImageFont, ImageTk as _PILImageTk
     _PIL_OK = True
 except ImportError:
     _PIL_OK = False
+
+
+# ============================================================================
+# Helpers visuais (inspirados na estetica Soraluna)
+# ============================================================================
+
+def eyebrow(parent, text: str, *, bg: str | None = None) -> tk.Frame:
+    """Linha-acento + texto pequeno em caixa alta dourada.
+
+    Uso: cabeca de cada secao. Renderiza:
+        ─── TITULO DA SECAO
+    """
+    bg = bg or _bg_of(parent)
+    f = tk.Frame(parent, bg=bg)
+    tk.Frame(f, bg=COR_GOLD, width=26, height=1).pack(side="left", padx=(0, 10), pady=4)
+    tk.Label(
+        f, text=text.upper(),
+        font=(FONT_BODY, 9, "bold"),
+        fg=COR_GOLD, bg=bg,
+        anchor="w",
+    ).pack(side="left")
+    return f
+
+
+def hero_title(parent, principal: str, italico: str = "", *,
+               size: int = 32, bg: str | None = None) -> tk.Frame:
+    """Titulo grande em serif (Georgia) com palavra opcional em italico dourado."""
+    bg = bg or _bg_of(parent)
+    f = tk.Frame(parent, bg=bg)
+    tk.Label(
+        f, text=principal,
+        font=(FONT_DISPLAY, size),
+        fg=COR_TEXTO, bg=bg,
+    ).pack(side="left")
+    if italico:
+        tk.Label(
+            f, text=" " + italico,
+            font=(FONT_DISPLAY, size, "italic"),
+            fg=COR_GOLD_CLARO, bg=bg,
+        ).pack(side="left")
+    return f
+
+
+def subtitle(parent, text: str, *, bg: str | None = None) -> tk.Label:
+    """Texto secundario sob o hero — em sans, cor subtexto."""
+    bg = bg or _bg_of(parent)
+    return tk.Label(
+        parent, text=text,
+        font=(FONT_BODY, 10),
+        fg=COR_SUBTEXTO, bg=bg,
+        anchor="w", justify="left",
+    )
+
+
+def pill(parent, text: str, *, fg: str = None, bg_pill: str = None) -> tk.Label:
+    """Badge arredondado para status (Pronto, Processando, Erro)."""
+    return tk.Label(
+        parent, text=f"  {text}  ",
+        font=(FONT_BODY, 9, "bold"),
+        fg=fg or COR_GOLD_CLARO,
+        bg=bg_pill or COR_BG,
+        padx=4, pady=2,
+    )
+
+
+def divider(parent, *, color: str = None, padding: tuple = (12, 12),
+            bg: str | None = None) -> tk.Frame:
+    """Linha horizontal sutil — separa secoes."""
+    bg = bg or _bg_of(parent)
+    wrap = tk.Frame(parent, bg=bg)
+    tk.Frame(wrap, bg=color or COR_BORDA_LEVE, height=1).pack(
+        fill="x", pady=padding,
+    )
+    return wrap
+
+
+def card_frame(parent, *, bg: str | None = None) -> tk.Frame:
+    """Container com fundo elevado + borda sutil — padrao 'card' Soraluna."""
+    return tk.Frame(
+        parent,
+        bg=bg or COR_CARD,
+        highlightbackground=COR_BORDA,
+        highlightthickness=1,
+    )
+
+
+def municipios_chips(parent, municipios: list[str], *,
+                     prefix: str = "Municípios atendidos") -> tk.Frame:
+    """Mostra os municípios da aba como CHIPS bem visíveis.
+
+    Layout:
+        MUNICÍPIOS ATENDIDOS   [ Goiânia ]  [ Aparecida ]  [ Anápolis ]
+    """
+    wrap = tk.Frame(parent, bg=_bg_of(parent))
+    tk.Label(
+        wrap, text=prefix.upper(),
+        font=(FONT_BODY, 8, "bold"),
+        fg=COR_GOLD, bg=_bg_of(parent),
+    ).pack(side="left", padx=(0, 12))
+    for nome in municipios:
+        chip = tk.Frame(
+            wrap,
+            bg=COR_CARD,
+            highlightbackground=COR_GOLD,
+            highlightthickness=1,
+        )
+        chip.pack(side="left", padx=(0, 6), pady=2)
+        tk.Label(
+            chip, text=f"  {nome}  ",
+            font=(FONT_BODY, 9, "bold"),
+            fg=COR_GOLD_CLARO, bg=COR_CARD,
+            padx=6, pady=3,
+        ).pack()
+    return wrap
+
+
+def hero_compacto(parent, eyebrow_text: str, titulo: str,
+                  italico: str, subtit: str) -> tk.Frame:
+    """Hero compacto em UMA linha — eyebrow gold + título serif + subtítulo.
+
+    Visual:
+        ─── ABA · TITULO    Geração X.    sub · sub · sub
+    Ocupa ~60px de altura em vez dos ~280px dos 3 cards do hero_card.
+    """
+    card = tk.Frame(
+        parent, bg=COR_CARD,
+        highlightbackground=COR_BORDA_LEVE, highlightthickness=1,
+    )
+    inner = tk.Frame(card, bg=COR_CARD)
+    inner.pack(fill="x", padx=18, pady=10)
+
+    # Linha 1: eyebrow + título lado a lado
+    linha1 = tk.Frame(inner, bg=COR_CARD)
+    linha1.pack(fill="x")
+    tk.Frame(linha1, bg=COR_GOLD, width=20, height=1).pack(
+        side="left", padx=(0, 8), pady=10,
+    )
+    tk.Label(
+        linha1, text=eyebrow_text.upper(),
+        font=(FONT_BODY, 8, "bold"),
+        fg=COR_GOLD, bg=COR_CARD,
+    ).pack(side="left", padx=(0, 14))
+    tk.Label(
+        linha1, text=titulo,
+        font=(FONT_DISPLAY, 18),
+        fg=COR_TEXTO, bg=COR_CARD,
+    ).pack(side="left")
+    if italico:
+        tk.Label(
+            linha1, text=" " + italico,
+            font=(FONT_DISPLAY, 18, "italic"),
+            fg=COR_GOLD_CLARO, bg=COR_CARD,
+        ).pack(side="left")
+
+    # Linha 2: subtítulo (pequeno)
+    tk.Label(
+        inner, text=subtit,
+        font=(FONT_BODY, 9),
+        fg=COR_SUBTEXTO, bg=COR_CARD,
+        anchor="w", justify="left",
+    ).pack(anchor="w", pady=(2, 0))
+
+    return card
+
+
+def hero_card(parent, kind: str, eyebrow_text: str = "",
+              titulo: str = "", italico: str = "", subtit: str = "",
+              *, size: int = 30) -> tk.Frame:
+    """Hero composto por 3 mini-cards empilhados, todos alinhados (mesma
+    largura via fill='x'), cada um com fundo elevado e borda sutil.
+
+    kind:
+        "eyebrow" -> renderiza eyebrow_text (linha gold + uppercase)
+        "title"   -> renderiza titulo + italico em serif
+        "subtitle"-> renderiza subtit em sans
+
+    Wraps individuais ficam consistentes em padding e borda.
+    """
+    card = tk.Frame(
+        parent,
+        bg=COR_CARD,
+        highlightbackground=COR_BORDA_LEVE,
+        highlightthickness=1,
+    )
+    inner = tk.Frame(card, bg=COR_CARD)
+    inner.pack(fill="x", padx=18, pady=10)
+
+    if kind == "eyebrow":
+        tk.Frame(inner, bg=COR_GOLD, width=26, height=1).pack(
+            side="left", padx=(0, 10), pady=4,
+        )
+        tk.Label(
+            inner, text=eyebrow_text.upper(),
+            font=(FONT_BODY, 9, "bold"),
+            fg=COR_GOLD, bg=COR_CARD,
+            anchor="w",
+        ).pack(side="left")
+    elif kind == "title":
+        tk.Label(
+            inner, text=titulo,
+            font=(FONT_DISPLAY, size),
+            fg=COR_TEXTO, bg=COR_CARD,
+        ).pack(side="left")
+        if italico:
+            tk.Label(
+                inner, text=" " + italico,
+                font=(FONT_DISPLAY, size, "italic"),
+                fg=COR_GOLD_CLARO, bg=COR_CARD,
+            ).pack(side="left")
+    elif kind == "subtitle":
+        tk.Label(
+            inner, text=subtit,
+            font=(FONT_BODY, 10),
+            fg=COR_SUBTEXTO, bg=COR_CARD,
+            anchor="w", justify="left",
+        ).pack(side="left")
+
+    return card
+
+
+def _bg_of(widget) -> str:
+    """Lê o bg de um widget tkinter — gracefully cai pra COR_BG."""
+    try:
+        return widget.cget("bg") or COR_BG
+    except tk.TclError:
+        return COR_BG
 
 # Fontes do sistema para o percentual
 _FONT_PATHS = [

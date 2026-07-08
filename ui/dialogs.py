@@ -1,9 +1,11 @@
+import os
+import tempfile
 import tkinter as tk
 import webbrowser
 import urllib.parse
 
 from config import (
-    COR_BG, COR_CARD, COR_PRIMARIA, COR_PRIMARIA_HV,
+    COR_BG, COR_CARD, COR_PRIMARIA,
     COR_SUCESSO, COR_SUBTEXTO, COR_TEXTO, COR_BORDA,
     COR_ERRO_LABEL, COR_DLG_SUB, COR_DESC_BG, COR_DESC_BORDA,
     COR_MUN_BG, COR_MUN_BORDA, COR_MUN_TEXTO,
@@ -107,7 +109,9 @@ def pedir_dados_cabecalho(parent_window, im_atual: str, razao_atual: str) -> tup
 
 
 def abrir_tela_manual_itemlc(parent_window, dados_base: dict, chave_nfse: str,
-                              from_n8n: bool = False) -> str | None:
+                              from_n8n: bool = False,
+                              empresa_cod: str = "",
+                              empresa_razao: str = "") -> str | None:
     """
     Abre diálogo de preenchimento manual de Item LC (e DDD quando aplicável).
 
@@ -115,7 +119,14 @@ def abrir_tela_manual_itemlc(parent_window, dados_base: dict, chave_nfse: str,
     """
     janela_manual = tk.Toplevel(parent_window)
     janela_manual.title("Preenchimento Manual")
-    janela_manual.geometry("540x560" if from_n8n else "540x520")
+    altura_extra = 40 if (empresa_cod or empresa_razao) else 0
+    _qtd_tags = sum(1 for k in ("c_trib_nac", "x_trib_nac", "x_nbs")
+                    if (dados_base.get(k) or "").strip())
+    if _qtd_tags:
+        # Cada tag ocupa ~32px; reserva folga + cabecalho do bloco
+        altura_extra += 24 + _qtd_tags * 36
+    base_altura = 560 if from_n8n else 520
+    janela_manual.geometry(f"540x{base_altura + altura_extra}")
     janela_manual.configure(bg=COR_BG)
     janela_manual.grab_set()
     janela_manual.resizable(False, False)
@@ -131,12 +142,88 @@ def abrir_tela_manual_itemlc(parent_window, dados_base: dict, chave_nfse: str,
         font=("Segoe UI", 13, "bold"),
         bg=COR_PRIMARIA, fg="#FFFFFF"
     ).pack()
-    tk.Label(
-        hdr,
-        text=f"Nota: {chave_nfse.replace('.xml', '')}",
-        font=("Segoe UI", 9),
-        bg=COR_PRIMARIA, fg=COR_DLG_SUB,
-    ).pack()
+
+    nota_label_txt = chave_nfse.replace('.xml', '')
+    xml_content = (dados_base.get("_xml_content") or "").strip()
+
+    if xml_content:
+        nota_frame = tk.Frame(hdr, bg=COR_PRIMARIA)
+        nota_frame.pack()
+        tk.Label(
+            nota_frame, text="Nota: ",
+            font=("Segoe UI", 9), bg=COR_PRIMARIA, fg=COR_DLG_SUB,
+        ).pack(side="left")
+
+        def _abrir_xml(_event=None):
+            try:
+                safe_prefix = "".join(
+                    c if c.isalnum() or c in "-_" else "_"
+                    for c in nota_label_txt
+                )[:40] or "nota"
+                fd, tmp_path = tempfile.mkstemp(
+                    prefix=f"nota_{safe_prefix}_", suffix=".xml"
+                )
+                with os.fdopen(fd, "w", encoding="utf-8") as f:
+                    f.write(xml_content)
+                webbrowser.open(f"file:///{tmp_path.replace(os.sep, '/')}")
+            except OSError:
+                pass
+
+        lbl_link = tk.Label(
+            nota_frame, text=f"{nota_label_txt}  🔗",
+            font=("Segoe UI", 9, "underline"),
+            bg=COR_PRIMARIA, fg="#FFFFFF", cursor="hand2",
+        )
+        lbl_link.pack(side="left")
+        lbl_link.bind("<Button-1>", _abrir_xml)
+    else:
+        tk.Label(
+            hdr,
+            text=f"Nota: {nota_label_txt}",
+            font=("Segoe UI", 9),
+            bg=COR_PRIMARIA, fg=COR_DLG_SUB,
+        ).pack()
+
+    # Faixa de identificacao da empresa (codigo - razao social)
+    if empresa_cod or empresa_razao:
+        cod_txt = (empresa_cod or "").strip()
+        razao_txt = (empresa_razao or "").strip()
+        if cod_txt and razao_txt:
+            empresa_label = f"{cod_txt} - {razao_txt}"
+        else:
+            empresa_label = cod_txt or razao_txt
+        faixa = tk.Frame(janela_manual, bg=COR_MUN_BG,
+                         highlightbackground=COR_MUN_BORDA, highlightthickness=1)
+        faixa.pack(fill="x", padx=16, pady=(12, 0))
+        tk.Label(
+            faixa, text="Empresa", font=("Segoe UI", 8, "bold"),
+            bg=COR_MUN_BG, fg=COR_SUBTEXTO, anchor="w",
+        ).pack(fill="x", padx=10, pady=(6, 0))
+        tk.Label(
+            faixa, text=empresa_label, font=("Segoe UI", 12, "bold"),
+            bg=COR_MUN_BG, fg=COR_MUN_TEXTO, anchor="w",
+            wraplength=500, justify="left",
+        ).pack(fill="x", padx=10, pady=(0, 6))
+
+    # Emitente da nota (prestador) — discreto, abaixo da faixa de empresa
+    _emit_razao = (dados_base.get("razao_social") or "").strip()
+    _emit_cnpj = normalize_digits(dados_base.get("cpf_cnpj") or "")
+    if _emit_razao or _emit_cnpj:
+        if len(_emit_cnpj) == 14:
+            _emit_cnpj_fmt = (
+                f"{_emit_cnpj[:2]}.{_emit_cnpj[2:5]}.{_emit_cnpj[5:8]}/"
+                f"{_emit_cnpj[8:12]}-{_emit_cnpj[12:]}"
+            )
+        else:
+            _emit_cnpj_fmt = _emit_cnpj
+        if _emit_razao and _emit_cnpj_fmt:
+            _emit_text = f"Emitente: {_emit_razao} · {_emit_cnpj_fmt}"
+        else:
+            _emit_text = f"Emitente: {_emit_razao or _emit_cnpj_fmt}"
+        tk.Label(
+            janela_manual, text=_emit_text, font=("Segoe UI", 8),
+            bg=COR_BG, fg=COR_SUBTEXTO, anchor="w", wraplength=500, justify="left",
+        ).pack(fill="x", padx=18, pady=(2, 0))
 
     # Card principal
     card = tk.Frame(janela_manual, bg=COR_CARD, padx=24, pady=16,
@@ -151,16 +238,62 @@ def abrir_tela_manual_itemlc(parent_window, dados_base: dict, chave_nfse: str,
     else:
         descricao_item = (dados_base.get("descricao") or "").strip() or _item_orig or "—"
 
+    def _pesquisar_item_lc(texto: str):
+        consulta = f"{texto.strip()} Item LC"
+        url = f"https://www.google.com/search?q={urllib.parse.quote(consulta)}"
+        webbrowser.open_new_tab(url)
+
+    def _criar_botao_pesquisa(parent, valor: str):
+        """Cria um botao pequeno e discreto que pesquisa '{valor} Item LC' no Google."""
+        return tk.Button(
+            parent, text="🔍",
+            font=("Segoe UI", 8), bg=COR_DESC_BG, fg=COR_PRIMARIA,
+            activebackground=COR_DESC_BORDA, activeforeground=COR_PRIMARIA,
+            relief="flat", cursor="hand2", bd=0, padx=6, pady=0,
+            command=lambda v=valor: _pesquisar_item_lc(v),
+        )
+
     tk.Label(card, text="Descrição do serviço extraída da nota:",
              font=("Segoe UI", 9, "bold"), bg=COR_CARD, fg=COR_SUBTEXTO,
              anchor="w").pack(fill="x")
 
     frame_desc = tk.Frame(card, bg=COR_DESC_BG, highlightbackground=COR_DESC_BORDA,
                           highlightthickness=1)
-    frame_desc.pack(fill="x", pady=(4, 12))
-    tk.Label(frame_desc, text=descricao_item, wraplength=460, justify="left",
+    frame_desc.pack(fill="x", pady=(4, 8))
+    tk.Label(frame_desc, text=descricao_item, wraplength=420, justify="left",
              font=("Segoe UI", 9), bg=COR_DESC_BG, fg=COR_TEXTO,
-             padx=8, pady=6).pack(fill="x")
+             padx=8, pady=6).pack(side="left", fill="x", expand=True)
+    if descricao_item and descricao_item != "—":
+        _criar_botao_pesquisa(frame_desc, descricao_item).pack(
+            side="right", padx=(0, 6), pady=4, anchor="ne",
+        )
+
+    # Tags adicionais do XML (cTribNac, xTribNac, xNBS) — quando houver, ajudam
+    # o operador a classificar o Item LC correto.
+    _tags_extra = [
+        ("cTribNac", (dados_base.get("c_trib_nac") or "").strip()),
+        ("xTribNac", (dados_base.get("x_trib_nac") or "").strip()),
+        ("xNBS",     (dados_base.get("x_nbs") or "").strip()),
+    ]
+    _tags_visiveis = [(rotulo, valor) for rotulo, valor in _tags_extra if valor]
+    if _tags_visiveis:
+        frame_tags = tk.Frame(card, bg=COR_DESC_BG,
+                              highlightbackground=COR_DESC_BORDA, highlightthickness=1)
+        frame_tags.pack(fill="x", pady=(0, 12))
+        for rotulo, valor in _tags_visiveis:
+            linha = tk.Frame(frame_tags, bg=COR_DESC_BG)
+            linha.pack(fill="x", padx=8, pady=3)
+            tk.Label(
+                linha, text=f"<{rotulo}>", font=("Consolas", 9, "bold"),
+                bg=COR_DESC_BG, fg=COR_PRIMARIA, anchor="nw", width=12,
+            ).pack(side="left", anchor="n")
+            _criar_botao_pesquisa(linha, valor).pack(
+                side="right", anchor="ne", padx=(4, 0),
+            )
+            tk.Label(
+                linha, text=valor, font=("Segoe UI", 9), wraplength=370,
+                justify="left", bg=COR_DESC_BG, fg=COR_TEXTO, anchor="w",
+            ).pack(side="left", fill="x", expand=True)
 
     # Resolve município
     municipio_exibir = (dados_base.get("municipio") or "").strip()
@@ -175,11 +308,6 @@ def abrir_tela_manual_itemlc(parent_window, dados_base: dict, chave_nfse: str,
     def abrir_link(event):
         webbrowser.open_new("https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp116.htm")
 
-    def pesquisar_descricao():
-        texto = f"{_item_orig} - codigo item lc {municipio_exibir} equivalente goiania"
-        url = f"https://www.google.com/search?q={urllib.parse.quote(texto)}"
-        webbrowser.open_new_tab(url)
-
     frame_link = tk.Frame(card, bg=COR_CARD)
     frame_link.pack(fill="x", pady=(0, 12))
     tk.Label(frame_link, text="Consulte a LC 116/2003:",
@@ -189,15 +317,6 @@ def abrir_tela_manual_itemlc(parent_window, dados_base: dict, chave_nfse: str,
                         fg=COR_PRIMARIA, bg=COR_CARD, cursor="hand2")
     lbl_link.pack(side="left")
     lbl_link.bind("<Button-1>", abrir_link)
-
-    btn_copiar = tk.Button(
-        frame_link, text="Pesquisar Item LC",
-        font=("Segoe UI", 8), bg=COR_PRIMARIA, fg="#FFFFFF",
-        relief="flat", cursor="hand2", command=pesquisar_descricao,
-        activebackground=COR_PRIMARIA_HV, activeforeground="#FFFFFF",
-        pady=2, padx=6, bd=0,
-    )
-    btn_copiar.pack(side="left", padx=(8, 0))
 
     tk.Frame(card, bg=COR_BORDA, height=1).pack(fill="x", pady=8)
 

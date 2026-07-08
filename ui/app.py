@@ -1,4 +1,5 @@
 import ctypes
+import sys
 import threading
 from pathlib import Path
 from tkinter import messagebox, filedialog, ttk
@@ -19,15 +20,22 @@ except ImportError:
     _PIL_OK = False
 
 from config import (
+    __version__,
     COR_BG, COR_CARD, COR_PRIMARIA, COR_PRIMARIA_HV,
     COR_SUCESSO, COR_SUCESSO_HV, COR_SUBTEXTO, COR_BORDA,
+    COR_TEXTO, COR_GOLD, COR_BORDA_LEVE,
+    FONT_DISPLAY, FONT_BODY,
 )
+from services import updater
 from core.txt_builder import montar_cabecalho
 from services.processor import WorkflowProcessor
 from services.report import gravar_relatorio
+from services.spreadsheet import get_company_info, SpreadsheetError
 from ui.components import CircularProgress
 from ui.dialogs import abrir_tela_manual_itemlc, pedir_dados_cabecalho
 from ui.batch_panel import PainelLote
+from ui.all_analysts_panel import PainelTodasAnalistas
+from ui.dmste_panel import PainelDmste
 
 
 class JanelaCrosara:
@@ -38,46 +46,160 @@ class JanelaCrosara:
         self._notas_vig_errada = {}
         self._im_tomador_cab = ""
         self._razao_tomador_cab = ""
+        self._cnpj_tomador_cab = ""
         self._emp_cod = ""
         self._vigencia = ""
 
-        self.janela = ttkb.Window(themename="litera")
-        self.janela.title("Importador de NFS-e \u2013 REST")
-        self.janela.geometry("900x660")
+        # Tema dark sobrio \u2014 substitui o claro "litera" antigo.
+        self.janela = ttkb.Window(themename="darkly")
+        self.janela.title("ImportaREST  \u00b7  Crosara Contabilidade")
+        self.janela.geometry("980x900")
+        self.janela.minsize(900, 700)
         self.janela.configure(bg=COR_BG)
-        self.janela.resizable(False, False)
+        # Resizable pra caber em telas menores (1366x768 etc).
+        self.janela.resizable(True, True)
 
-        ico = Path(__file__).resolve().parent.parent / "assets" / "logo_importarest.ico"
+        # PyInstaller: assets are inside _internal/; dev: relative to ui/app.py
+        if getattr(sys, 'frozen', False):
+            base = Path(sys._MEIPASS)
+        else:
+            base = Path(__file__).resolve().parent.parent
+        ico = base / "assets" / "logo_importarest.ico"
         if ico.exists():
             self.janela.iconbitmap(str(ico))
 
         self._construir_ui()
+        # Thread background verifica atualizacao no GitHub Releases.
+        threading.Thread(target=self._verificar_update, daemon=True).start()
         self.janela.mainloop()
+
+    def _verificar_update(self):
+        """Consulta release. Se ha versao nova, agenda dialog na main thread."""
+        tag, url = updater.check_and_prepare()
+        if not tag or not url:
+            return
+        self.janela.after(0, lambda: self._perguntar_update(tag, url))
+
+    def _perguntar_update(self, tag: str, url: str):
+        resp = messagebox.askyesno(
+            "Nova versao disponivel",
+            f"Versao {tag} disponivel (voce esta na v{__version__}).\n\n"
+            "Atualizar agora?\n\n"
+            "O programa vai fechar, baixar e reabrir automaticamente.",
+        )
+        if not resp:
+            return
+        from pathlib import Path as _Path
+        import tempfile as _tempfile
+        tmp_zip = _Path(_tempfile.gettempdir()) / f"ImportaREST-{tag}.zip"
+        # Baixa em thread pra nao travar UI
+        threading.Thread(
+            target=self._baixar_e_aplicar,
+            args=(url, tmp_zip),
+            daemon=True,
+        ).start()
+
+    def _baixar_e_aplicar(self, url: str, dest):
+        ok = updater.download_zip(url, dest)
+        if not ok:
+            self.janela.after(0, lambda: messagebox.showerror(
+                "Erro", "Falha ao baixar atualizacao. Verifique sua conexao."))
+            return
+        # Dispara .bat e mata processo
+        updater.apply_update(dest)
 
     # ──────────────────────────────────────────────────────────────────────────
     # Construção da UI
     # ──────────────────────────────────────────────────────────────────────────
 
     def _construir_ui(self):
-        nb = ttk.Notebook(self.janela)
+        # ── Topbar: marca + tagline ───────────────────────────────────────
+        topbar = tk.Frame(self.janela, bg=COR_CARD, height=70)
+        topbar.pack(side="top", fill="x")
+        topbar.pack_propagate(False)
+
+        brand_wrap = tk.Frame(topbar, bg=COR_CARD)
+        brand_wrap.pack(side="left", padx=24, pady=14)
+        # Letra "●" decorativa em gold + nome em serif
+        tk.Label(
+            brand_wrap, text="●", font=(FONT_BODY, 12),
+            fg=COR_GOLD, bg=COR_CARD,
+        ).pack(side="left", padx=(0, 10))
+        tk.Label(
+            brand_wrap, text="ImportaREST",
+            font=(FONT_DISPLAY, 18),
+            fg=COR_TEXTO, bg=COR_CARD,
+        ).pack(side="left")
+        tk.Label(
+            brand_wrap, text="  ·  ",
+            font=(FONT_BODY, 11),
+            fg=COR_BORDA, bg=COR_CARD,
+        ).pack(side="left")
+        tk.Label(
+            brand_wrap, text="Crosara Contabilidade",
+            font=(FONT_BODY, 10, "italic"),
+            fg=COR_SUBTEXTO, bg=COR_CARD,
+        ).pack(side="left")
+
+        tk.Label(
+            topbar, text=f"v{__version__}",
+            font=(FONT_BODY, 9),
+            fg=COR_GOLD, bg=COR_CARD,
+        ).pack(side="right", padx=24)
+
+        # Linha de separação fina
+        tk.Frame(self.janela, bg=COR_BORDA_LEVE, height=1).pack(fill="x")
+
+        # ── Notebook (abas estilizadas) ───────────────────────────────────
+        style = ttk.Style()
+        style.theme_use("darkly")  # alinhar com a janela
+        style.configure(
+            "Soraluna.TNotebook",
+            background=COR_BG,
+            borderwidth=0,
+            tabmargins=(20, 12, 20, 0),
+        )
+        style.configure(
+            "Soraluna.TNotebook.Tab",
+            padding=(22, 10),
+            font=(FONT_BODY, 10, "bold"),
+            background=COR_BG,
+            foreground=COR_SUBTEXTO,
+            borderwidth=0,
+        )
+        style.map(
+            "Soraluna.TNotebook.Tab",
+            background=[("selected", COR_BG), ("active", COR_BG)],
+            foreground=[("selected", COR_GOLD), ("active", COR_TEXTO)],
+        )
+
+        # Progressbar — barra laranja sobre trough escuro.
+        style.configure(
+            "Crosara.Horizontal.TProgressbar",
+            background=COR_PRIMARIA,
+            troughcolor=COR_BG,
+            bordercolor=COR_BORDA_LEVE,
+            lightcolor=COR_PRIMARIA,
+            darkcolor=COR_PRIMARIA,
+            thickness=10,
+        )
+
+        nb = ttk.Notebook(self.janela, style="Soraluna.TNotebook")
         nb.pack(fill="both", expand=True)
 
-        tab_individual = tk.Frame(nb, bg=COR_BG)
-        nb.add(tab_individual, text="Individual")
+        tab_issnet = tk.Frame(nb, bg=COR_BG)
+        nb.add(tab_issnet, text="  ISSNet  ")
 
-        tab_lote = tk.Frame(nb, bg=COR_BG)
-        nb.add(tab_lote, text="Lote")
+        tab_megasoft = tk.Frame(nb, bg=COR_BG)
+        nb.add(tab_megasoft, text="  MegaSoft  ")
 
-        self._construir_aba_individual(tab_individual)
+        self._painel_issnet = PainelTodasAnalistas(tab_issnet)
+        self._painel_issnet.pack(fill="both", expand=True)
 
-        self._painel_lote = PainelLote(tab_lote)
-        self._painel_lote.pack(fill="both", expand=True)
+        self._painel_megasoft = PainelDmste(tab_megasoft)
+        self._painel_megasoft.pack(fill="both", expand=True)
 
-        # Lazy load: only call load_analysts when Lote tab is first activated
-        # Prevents G: drive crash at startup if drive is unavailable
-        nb.bind("<<NotebookTabChanged>>", self._on_tab_changed)
         self._nb = nb
-        self._lote_tab_id = nb.index(tab_lote)
 
     # ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -306,6 +428,7 @@ class JanelaCrosara:
             self._notas_vig_errada = result.notas_vig_errada
             self._im_tomador_cab = result.im_tomador_cab
             self._razao_tomador_cab = result.razao_tomador_cab
+            self._cnpj_tomador_cab = result.cnpj_tomador_cab
             self.conteudo_final = result.conteudo_final
 
             # Pedir dados faltantes do cabeçalho ao usuário
@@ -358,7 +481,11 @@ class JanelaCrosara:
 
     def _abrir_tela_manual_wrapper(self, dados_base: dict, chave_nfse: str,
                                    from_n8n: bool = False) -> str | None:
-        return abrir_tela_manual_itemlc(self.janela, dados_base, chave_nfse, from_n8n)
+        return abrir_tela_manual_itemlc(
+            self.janela, dados_base, chave_nfse, from_n8n,
+            empresa_cod=self._emp_cod or "",
+            empresa_razao=self._lookup_razao(self._emp_cod),
+        )
 
     def _completar_cabecalho(self):
         """Verifica se há campos faltantes no cabeçalho e pergunta ao usuário."""
@@ -402,8 +529,31 @@ class JanelaCrosara:
         except Exception as e:
             self.log(f"\u26a0\ufe0f Erro ao salvar relat\u00f3rio: {e}")
 
+    def _lookup_razao(self, cod: str) -> str:
+        """Busca razao social na planilha pelo codigo. Retorna '' em caso de falha."""
+        if not cod:
+            return ""
+        try:
+            info = get_company_info(cod)
+        except SpreadsheetError:
+            return ""
+        if not info:
+            return ""
+        razao = info.get("razao", "") or ""
+        return "".join(c for c in razao if c not in '<>:"/\\|?*\r\n\t').strip()
+
     def salvar_arquivo_txt(self):
-        nome_padrao = f"{self._emp_cod}_{self._vigencia}"
+        razao_emp = self._lookup_razao(self._emp_cod).replace(" ", "_")
+        cnpj_part = (self._cnpj_tomador_cab or "").strip()
+        # Suffix começa com '_' e une cnpj + razão quando presentes.
+        # Resultado final do nome: {cod}{suffix}_{vigencia}.txt
+        suffix_parts = []
+        if cnpj_part:
+            suffix_parts.append(cnpj_part)
+        if razao_emp:
+            suffix_parts.append(razao_emp)
+        suffix = ("_" + "_".join(suffix_parts)) if suffix_parts else ""
+        nome_padrao = f"{self._emp_cod}{suffix}_{self._vigencia}"
         arquivo_path = filedialog.asksaveasfilename(
             initialfile=nome_padrao,
             defaultextension=".txt",
@@ -431,7 +581,7 @@ class JanelaCrosara:
                     cab_extra = montar_cabecalho(im_tom, razao_tom, dt_iso)
                     partes_extra = ([cab_extra] if cab_extra else []) + linhas_erradas
                     conteudo_extra = "\n".join(partes_extra)
-                    nome_extra = f"{self._emp_cod}_{vig_errada}.txt"
+                    nome_extra = f"{self._emp_cod}{suffix}_{vig_errada}.txt"
                     path_extra = pasta_destino / nome_extra
                     with open(path_extra, "w", encoding="utf-8") as f:
                         f.write(conteudo_extra)
@@ -466,6 +616,7 @@ class JanelaCrosara:
         self._notas_vig_errada = {}
         self._im_tomador_cab = ""
         self._razao_tomador_cab = ""
+        self._cnpj_tomador_cab = ""
         self.ent_codigo.delete(0, tk.END)
         self.ent_vigencia.delete(0, tk.END)
         self.progress["value"] = 0

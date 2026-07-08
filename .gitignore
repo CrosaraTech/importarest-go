@@ -5,6 +5,9 @@ __pycache__/
 dist/
 build/
 *.spec
+# build.spec e installer.spec ficam versionados (build reprodutivel).
+!build.spec
+!installer.spec
 
 # Dados sensíveis
 certificados.json

@@ -11,18 +11,19 @@ def extrair_dados_python(xml_string):
         root = ET.fromstring(xml_string)
         padrao = detectar_padrao_nfse(root)
 
+        # Municipio do PRESTADOR (usado para decidir modelo=2/4 vs empresa tomadora).
+        # NUNCA cair em Tomador/MunicipioIncidencia/cLocPrestacao — sao locais
+        # diferentes e vazam IM+modelo errado no TXT ISSNet.
         codigo_municipio = find_text(root, [
-            ".//{*}OrgaoGerador//{*}CodigoMunicipio",
-            ".//{*}InfNfse//{*}OrgaoGerador//{*}CodigoMunicipio",
+            # ABRASF 2.04
             ".//{*}PrestadorServico//{*}Endereco//{*}CodigoMunicipio",
-            ".//{*}TomadorServico//{*}Endereco//{*}CodigoMunicipio",
-            ".//{*}Servico//{*}MunicipioIncidencia",
-            ".//{*}MunicipioIncidencia",
-            ".//{*}cLocIncid",
-            ".//{*}cLocEmi",
-            ".//{*}cLocPrestacao",
-            ".//{*}CodigoMunicipio",
-            ".//{*}cMun",
+            ".//{*}Prestador//{*}Endereco//{*}CodigoMunicipio",
+            # NFS-e Nacional (SPED) — emitente
+            ".//{*}emit//{*}enderNac//{*}cMun",
+            ".//{*}emit//{*}enderNac//{*}CodigoMunicipio",
+            # OrgaoGerador = municipio emissor da NFSe (fallback razoavel — prestador)
+            ".//{*}InfNfse//{*}OrgaoGerador//{*}CodigoMunicipio",
+            ".//{*}OrgaoGerador//{*}CodigoMunicipio",
         ], default="")
 
         _cep_raw = find_text(root, [
@@ -57,6 +58,14 @@ def extrair_dados_python(xml_string):
             ".//{*}infNFSe//{*}nNFSe",
             ".//{*}nNFSe",
             ".//{*}nDFSe",
+            ".//{*}nDPS",
+        ], default="")
+
+        # Número alternativo (nDPS) — usado quando o número principal estoura
+        # o limite de caracteres do portal DMST-e (>9 dígitos).
+        numero_dps = find_text(root, [
+            ".//{*}infDPS//{*}nDPS",
+            ".//{*}DPS//{*}infDPS//{*}nDPS",
             ".//{*}nDPS",
         ], default="")
 
@@ -167,12 +176,24 @@ def extrair_dados_python(xml_string):
             ".//{*}xTribMun",
         ], default="").strip()
 
-        descricao_servico = find_text(root, [
+        xnbs = find_text(root, [
+            ".//{*}cServ//{*}xNBS",
+            ".//{*}xNBS",
+        ], default="").strip()
+
+        x_desc_serv_raw = find_text(root, [
+            ".//{*}cServ//{*}xDescServ",
+            ".//{*}xDescServ",
+        ], default="").strip()
+
+        discriminacao_raw = find_text(root, [
             ".//{*}Servico//{*}Discriminacao",
             ".//{*}Discriminacao",
-            ".//{*}xDescServ",
-            ".//{*}cServ//{*}xDescServ",
         ], default="").strip()
+
+        # Mantém prioridade legada (Discriminacao > xDescServ) para descricao_servico,
+        # mas as tags brutas vao para o dict separadamente.
+        descricao_servico = discriminacao_raw or x_desc_serv_raw
 
         ctribnac = normalize_digits(ctribnac)
         item_lc_final = ""
@@ -196,8 +217,16 @@ def extrair_dados_python(xml_string):
             else:
                 item_lc_final = normalize_digits(ctribnac)
 
-        if item_lc_final and not item_lc_valido(item_lc_final):
-            item_lc_final = ""
+        # Grupo 99 (Servicos sem incidencia ISSQN/ICMS) — categoria oficial
+        # da NFS-e Nacional. item_lc_valido() rejeita (so aceita 01-40) mas
+        # portal ISSNet aceita "9901". Preserva 9901 pra evitar chamada IA
+        # desnecessaria no fast-path map_only.
+        if item_lc_final:
+            _digitos = normalize_digits(item_lc_final)
+            if _digitos.startswith("99"):
+                item_lc_final = "9901"
+            elif not item_lc_valido(item_lc_final):
+                item_lc_final = ""
 
         # Descrição do serviço: prefere xTribNac (se útil) > xTribMun > Discriminação
         _xtribnac_util = xtribnac if not _xtribnac_vetado else ""
@@ -240,6 +269,27 @@ def extrair_dados_python(xml_string):
             ".//{*}infDPS//{*}id",
         ], default="").replace("URN:prop:SefazNacional:nfse:id:", "").strip()
 
+        # Chave NFS-e completa (50 dígitos do atributo Id de infNFSe).
+        # Usada para construir o link de consulta no portal nacional.
+        _inf_nfse = root.find(".//{*}infNFSe")
+        chave_nfse_id = ""
+        if _inf_nfse is not None:
+            _id_attr = _inf_nfse.get("Id", "")
+            if _id_attr.startswith("NFS"):
+                chave_nfse_id = _id_attr[3:].strip()
+            else:
+                chave_nfse_id = _id_attr.strip()
+
+        # Valor de deduções — usado pelo DMST-e e portais municipais.
+        # Cai para "0.00" quando o XML não traz.
+        valor_deducoes = find_text(root, [
+            ".//{*}Servico//{*}Valores//{*}ValorDeducoes",
+            ".//{*}ValoresNfse//{*}ValorDeducoes",
+            ".//{*}ValorDeducoes",
+            ".//{*}valores//{*}vDed",
+            ".//{*}vDed",
+        ], default="").strip() or "0.00"
+
         reg_ap_trib_sn = find_text(root, [
             ".//{*}infDPS//{*}regApTribSN",
             ".//{*}DPS//{*}infDPS//{*}regApTribSN",
@@ -250,7 +300,60 @@ def extrair_dados_python(xml_string):
             ".//{*}RegimeEspecialTributacao",
             ".//{*}Nfse//{*}InfNfse//{*}RegimeEspecialTributacao",
         ], default="")
-        eh_mei = (reg_ap_trib_sn.strip() == "3") or (regime_esp_trib.strip() == "5")
+        # Extrai opSimpNac aqui (e não mais abaixo) porque também precisamos
+        # dele para identificar MEI no padrão Nacional (opSimpNac=2 = MEI).
+        _op_simp_nac = find_text(root, [
+            ".//{*}prest//{*}regTrib//{*}opSimpNac",
+            ".//{*}regTrib//{*}opSimpNac",
+            ".//{*}opSimpNac",
+        ], default="").strip()
+        eh_mei_raw = (
+            reg_ap_trib_sn.strip() == "3"
+            or regime_esp_trib.strip() == "5"
+            or _op_simp_nac == "2"   # Nacional: opSimpNac=2 → MEI
+        )
+        # Veto: LTDA/S.A./EIRELI/etc não podem ser MEI (MEI é só Empresário Individual).
+        # Alguns prestadores preenchem RegimeEspecialTributacao=5 errado para ME/EPP do
+        # Simples Nacional; usamos a razão social como desempate robusto.
+        _razao_upper = (razao_p or "").upper()
+        _formas_nao_mei = (" LTDA", " S/A", " S.A.", " S A ", " S.A ", " SA ",
+                            "EIRELI", " S/S", "EPP", " ME EPP")
+        _eh_pessoa_juridica = any(f in f" {_razao_upper} " for f in _formas_nao_mei)
+        eh_mei = eh_mei_raw and not _eh_pessoa_juridica
+
+        # Local de prestação do serviço (código IBGE 7 dígitos) — campo novo do ISSNet.
+        # Prioriza onde o serviço foi efetivamente prestado / incidência do ISS.
+        local_prestacao = find_text(root, [
+            ".//{*}Servico//{*}MunicipioIncidencia",
+            ".//{*}MunicipioIncidencia",
+            ".//{*}locPrest//{*}cLocPrestacao",
+            ".//{*}cLocPrestacao",
+            ".//{*}cLocIncid",
+            ".//{*}Servico//{*}CodigoMunicipio",
+        ], default="")
+        local_prestacao = normalize_digits(local_prestacao)
+
+        # Optante Simples Nacional / MEI — campo novo do ISSNet (1/2/3).
+        # ABRASF: OptanteSimplesNacional (1=sim, 2=não)
+        # Nacional: opSimpNac (1=Não, 2=MEI, 3=ME/EPP)
+        # (_op_simp_nac já extraído acima junto com eh_mei)
+        _optante_abrasf = find_text(root, [
+            ".//{*}OptanteSimplesNacional",
+        ], default="").strip()
+        # Mapeia para o código do ISSNet:
+        #   "3" → MEI
+        #   "2" → Simples Nacional (não-MEI)
+        #   "1" → Não Optante (explícito no XML)
+        #   ""  → XML não trouxe info; enriquecimento posterior pode preencher.
+        if eh_mei:
+            optante_sn_mei = "3"
+        elif _optante_abrasf == "1" or _op_simp_nac in ("2", "3"):
+            # opSimpNac=2 só cai aqui se eh_mei foi vetado por LTDA — trata como SN comum
+            optante_sn_mei = "2"
+        elif _optante_abrasf == "2" or _op_simp_nac == "1":
+            optante_sn_mei = "1"
+        else:
+            optante_sn_mei = ""
 
         dados = {
             "padrao": padrao,
@@ -268,16 +371,31 @@ def extrair_dados_python(xml_string):
             "dt_fmt": dt_fmt,
             "item_lc_final": item_lc_final,
             "descricao_servico": descricao_servico,
+            "x_desc_serv": x_desc_serv_raw,
+            "discriminacao": discriminacao_raw,
+            "c_trib_nac": ctribnac,
+            "x_trib_nac": xtribnac,
+            "x_trib_mun": xtribmun,
+            "x_nbs": xnbs,
             "cep": cep,
             "endereco": endereco,
             "numero_end": numero_end,
             "bairro": bairro,
             "chave_nfse": chave_nfse,
+            "chave_nfse_id": chave_nfse_id,
+            "valor_deducoes": valor_deducoes,
+            "numero_dps": numero_dps,
             "eh_mei": eh_mei,
+            "local_prestacao": local_prestacao,
+            "optante_sn_mei": optante_sn_mei,
         }
 
         if padrao == "desconhecido":
             return "desconhecido", dados
+
+        # NAO ha fallback para local_prestacao: sao coisas diferentes.
+        # local_prestacao = onde servico foi prestado; codigo_municipio = onde prestador esta.
+        # Se prestador SC atende em Aparecida, cair em local_prestacao vaza modelo=2 errado.
 
         obrigatorios = ["numero", "vlr_doc", "cnpj_p", "dt_fmt", "codigo_municipio"]
         faltando = [c for c in obrigatorios if not has_value(dados.get(c))]
@@ -304,6 +422,13 @@ def extrair_cabecalho_info(root):
         ".//{*}toma//{*}xNome",
     ], default="")
 
+    cnpj_tomador = find_text(root, [
+        ".//{*}TomadorServico//{*}IdentificacaoTomador//{*}CpfCnpj//{*}Cnpj",
+        ".//{*}TomadorServico//{*}IdentificacaoTomador//{*}Cnpj",
+        ".//{*}toma//{*}CNPJ",
+    ], default="")
+    cnpj_tomador = normalize_digits(cnpj_tomador)
+
     mun_tomador = find_text(root, [
         ".//{*}DeclaracaoPrestacaoServico//{*}InfDeclaracaoPrestacaoServico//{*}TomadorServico//{*}Endereco//{*}CodigoMunicipio",
         ".//{*}TomadorServico//{*}Endereco//{*}CodigoMunicipio",
@@ -319,4 +444,4 @@ def extrair_cabecalho_info(root):
         ".//{*}dhEmi",
     ], default="")
 
-    return im_tomador, razao_tomador, data_emissao, mun_tomador
+    return im_tomador, razao_tomador, data_emissao, mun_tomador, cnpj_tomador

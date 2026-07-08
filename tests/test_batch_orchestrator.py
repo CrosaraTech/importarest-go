@@ -79,10 +79,11 @@ def test_run_processes_all_companies(tmp_path, monkeypatch):
 
     class FakeProcessor:
         def __init__(self, log_fn, progress_fn, contador_fn,
-                     abrir_tela_manual_fn, gerar_mei=False):
+                     abrir_tela_manual_fn, gerar_mei=False,
+                     marcar_baixadas=False):
             pass
 
-        def processar(self, cod, vigencia):
+        def processar(self, cod, vigencia, empresa_ibge=""):
             call_log.append(cod)
             return _fake_result()
 
@@ -112,10 +113,11 @@ def test_company_error_continues_loop(tmp_path, monkeypatch):
 
     class FakeProcessor:
         def __init__(self, log_fn, progress_fn, contador_fn,
-                     abrir_tela_manual_fn, gerar_mei=False):
+                     abrir_tela_manual_fn, gerar_mei=False,
+                     marcar_baixadas=False):
             self._cod_capture = None
 
-        def processar(self, cod, vigencia):
+        def processar(self, cod, vigencia, empresa_ibge=""):
             call_log.append(cod)
             if cod == "001":
                 raise Exception("simulated failure on 001")
@@ -155,10 +157,11 @@ def test_manual_review_queue_event_protocol(tmp_path, monkeypatch):
 
     class FakeProcessor:
         def __init__(self, log_fn, progress_fn, contador_fn,
-                     abrir_tela_manual_fn, gerar_mei=False):
+                     abrir_tela_manual_fn, gerar_mei=False,
+                     marcar_baixadas=False):
             self._fn = abrir_tela_manual_fn
 
-        def processar(self, cod, vigencia):
+        def processar(self, cod, vigencia, empresa_ibge=""):
             # Trigger the manual review callback, which should put a message on
             # the queue and block until event.set() is called.
             result = self._fn({"dado": "x"}, "chave_" + cod, from_n8n=True)
@@ -192,8 +195,9 @@ def test_manual_review_queue_event_protocol(tmp_path, monkeypatch):
 
     assert manual_msg is not None, "Expected 'manual_review' message on queue"
 
-    # manual_review tuple: ("manual_review", dados_base, chave_nfse, from_n8n, event, result_holder)
-    _, dados_base, chave_nfse, from_n8n, event, result_holder = manual_msg
+    # manual_review tuple: ("manual_review", dados_base, chave_nfse, from_n8n,
+    #                       event, result_holder, empresa_cod, empresa_razao)
+    _, dados_base, chave_nfse, from_n8n, event, result_holder, *_extra = manual_msg
 
     assert isinstance(dados_base, dict), "dados_base must be a dict"
     assert isinstance(chave_nfse, str), "chave_nfse must be a str"
@@ -222,10 +226,11 @@ def test_abort_stops_after_current_company(tmp_path, monkeypatch):
 
     class FakeProcessor:
         def __init__(self, log_fn, progress_fn, contador_fn,
-                     abrir_tela_manual_fn, gerar_mei=False):
+                     abrir_tela_manual_fn, gerar_mei=False,
+                     marcar_baixadas=False):
             pass
 
-        def processar(self, cod, vigencia):
+        def processar(self, cod, vigencia, empresa_ibge=""):
             call_log.append(cod)
             return _fake_result()
 
@@ -260,10 +265,11 @@ def test_none_result_is_skipped(tmp_path, monkeypatch):
 
     class FakeProcessor:
         def __init__(self, log_fn, progress_fn, contador_fn,
-                     abrir_tela_manual_fn, gerar_mei=False):
+                     abrir_tela_manual_fn, gerar_mei=False,
+                     marcar_baixadas=False):
             pass
 
-        def processar(self, cod, vigencia):
+        def processar(self, cod, vigencia, empresa_ibge=""):
             return None  # no folder found
 
     monkeypatch.setattr(
@@ -300,10 +306,11 @@ def test_txt_saved_to_dest_folder(tmp_path, monkeypatch):
 
     class FakeProcessor:
         def __init__(self, log_fn, progress_fn, contador_fn,
-                     abrir_tela_manual_fn, gerar_mei=False):
+                     abrir_tela_manual_fn, gerar_mei=False,
+                     marcar_baixadas=False):
             pass
 
-        def processar(self, cod, vigencia):
+        def processar(self, cod, vigencia, empresa_ibge=""):
             return _fake_result(conteudo=expected_content)
 
     monkeypatch.setattr(
@@ -333,10 +340,11 @@ def test_overflow_vig_txt_saved(tmp_path, monkeypatch):
 
     class FakeProcessor:
         def __init__(self, log_fn, progress_fn, contador_fn,
-                     abrir_tela_manual_fn, gerar_mei=False):
+                     abrir_tela_manual_fn, gerar_mei=False,
+                     marcar_baixadas=False):
             pass
 
-        def processar(self, cod, vigencia):
+        def processar(self, cod, vigencia, empresa_ibge=""):
             return _fake_result(
                 conteudo="",  # no primary content
                 linhas_dict={},
@@ -372,10 +380,11 @@ def test_batch_summary_counts(tmp_path, monkeypatch):
 
     class FakeProcessor:
         def __init__(self, log_fn, progress_fn, contador_fn,
-                     abrir_tela_manual_fn, gerar_mei=False):
+                     abrir_tela_manual_fn, gerar_mei=False,
+                     marcar_baixadas=False):
             self._cod = None  # stored below
 
-        def processar(self, cod, vigencia):
+        def processar(self, cod, vigencia, empresa_ibge=""):
             if cod == "error_co":
                 raise Exception("forced error")
             if cod == "skip_cod":
