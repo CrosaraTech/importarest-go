@@ -3,7 +3,7 @@ from pathlib import Path
 # ==============================================================================
 # VERSAO E AUTO-UPDATE
 # ==============================================================================
-__version__ = "1.16"
+__version__ = "1.17"
 GITHUB_REPO = "CrosaraTech/importarest-go"
 INSTALL_DIR = r"C:\ImportaREST"
 

@@ -1,6 +1,7 @@
 """Auto-update: consulta GitHub Releases, baixa zip, dispara updater.bat."""
 import json
 import os
+import ssl
 import subprocess
 import sys
 import tempfile
@@ -8,6 +9,12 @@ import urllib.request
 from pathlib import Path
 
 from config import __version__, GITHUB_REPO, INSTALL_DIR
+
+try:
+    import certifi
+    _SSL_CTX = ssl.create_default_context(cafile=certifi.where())
+except ImportError:
+    _SSL_CTX = ssl.create_default_context()
 
 GITHUB_API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
 _UA = f"ImportaREST/{__version__}"
@@ -42,7 +49,7 @@ def check_latest_release(timeout: int = 8):
                 "User-Agent": _UA,
             },
         )
-        with urllib.request.urlopen(req, timeout=timeout) as r:
+        with urllib.request.urlopen(req, timeout=timeout, context=_SSL_CTX) as r:
             data = json.loads(r.read().decode("utf-8"))
     except Exception:
         return None, None
@@ -68,7 +75,7 @@ def download_zip(url: str, dest: Path, timeout: int = 120,
     """Baixa URL para dest. Retorna True em sucesso."""
     try:
         req = urllib.request.Request(url, headers={"User-Agent": _UA})
-        with urllib.request.urlopen(req, timeout=timeout) as r, open(dest, "wb") as f:
+        with urllib.request.urlopen(req, timeout=timeout, context=_SSL_CTX) as r, open(dest, "wb") as f:
             total = int(r.headers.get("Content-Length", "0") or 0)
             baixado = 0
             while True:

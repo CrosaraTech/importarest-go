@@ -12,6 +12,7 @@ import ctypes
 import json
 import os
 import shutil
+import ssl
 import subprocess
 import sys
 import tempfile
@@ -20,6 +21,12 @@ import urllib.request
 import zipfile
 from pathlib import Path
 from tkinter import messagebox, ttk
+
+try:
+    import certifi
+    _SSL_CTX = ssl.create_default_context(cafile=certifi.where())
+except ImportError:
+    _SSL_CTX = ssl.create_default_context()
 
 GITHUB_REPO = "CrosaraTech/importarest-go"
 GITHUB_API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
@@ -48,7 +55,7 @@ def _fetch_release():
         GITHUB_API_URL,
         headers={"Accept": "application/vnd.github+json", "User-Agent": _UA},
     )
-    with urllib.request.urlopen(req, timeout=15) as r:
+    with urllib.request.urlopen(req, timeout=15, context=_SSL_CTX) as r:
         data = json.loads(r.read().decode("utf-8"))
     tag = data.get("tag_name", "") or ""
     url = ""
@@ -66,7 +73,7 @@ def _fetch_release():
 
 def _download(url: str, dest: Path, progress_cb=None) -> None:
     req = urllib.request.Request(url, headers={"User-Agent": _UA})
-    with urllib.request.urlopen(req, timeout=120) as r, open(dest, "wb") as f:
+    with urllib.request.urlopen(req, timeout=120, context=_SSL_CTX) as r, open(dest, "wb") as f:
         total = int(r.headers.get("Content-Length", "0") or 0)
         baixado = 0
         while True:

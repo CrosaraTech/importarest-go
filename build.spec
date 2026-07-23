@@ -48,6 +48,7 @@ a = Analysis(
         'openpyxl',
         'requests',
         'dotenv',
+        'certifi',
         'tkinter',
         'tkinter.ttk',
         'tkinter.messagebox',

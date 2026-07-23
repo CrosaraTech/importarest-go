@@ -24,6 +24,7 @@ a = Analysis(
         'tkinter',
         'tkinter.ttk',
         'tkinter.messagebox',
+        'certifi',
     ],
     hookspath=[],
     hooksconfig={},
@@ -31,7 +32,7 @@ a = Analysis(
     excludes=[
         'numpy', 'pandas', 'matplotlib', 'PIL',
         'customtkinter', 'ttkbootstrap',
-        'openpyxl', 'requests',
+        'openpyxl',
     ],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
