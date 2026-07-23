@@ -74,39 +74,20 @@ class JanelaCrosara:
         self.janela.mainloop()
 
     def _verificar_update(self):
-        """Consulta release. Se ha versao nova, agenda dialog na main thread."""
+        """Consulta release, baixa zip em background e agenda apply no proximo
+        restart escrevendo marker. Sem dialog — atualizacao silenciosa."""
         tag, url = updater.check_and_prepare()
         if not tag or not url:
-            return
-        self.janela.after(0, lambda: self._perguntar_update(tag, url))
-
-    def _perguntar_update(self, tag: str, url: str):
-        resp = messagebox.askyesno(
-            "Nova versao disponivel",
-            f"Versao {tag} disponivel (voce esta na v{__version__}).\n\n"
-            "Atualizar agora?\n\n"
-            "O programa vai fechar, baixar e reabrir automaticamente.",
-        )
-        if not resp:
             return
         from pathlib import Path as _Path
         import tempfile as _tempfile
         tmp_zip = _Path(_tempfile.gettempdir()) / f"ImportaREST-{tag}.zip"
-        # Baixa em thread pra nao travar UI
-        threading.Thread(
-            target=self._baixar_e_aplicar,
-            args=(url, tmp_zip),
-            daemon=True,
-        ).start()
-
-    def _baixar_e_aplicar(self, url: str, dest):
-        ok = updater.download_zip(url, dest)
+        ok = updater.download_zip(url, tmp_zip)
         if not ok:
-            self.janela.after(0, lambda: messagebox.showerror(
-                "Erro", "Falha ao baixar atualizacao. Verifique sua conexao."))
             return
-        # Dispara .bat e mata processo
-        updater.apply_update(dest)
+        # Marca update pendente. Sera aplicado no proximo startup
+        # (ANTES da UI abrir) via updater.check_pending_update().
+        updater.marcar_update_pendente(tmp_zip, tag)
 
     # ──────────────────────────────────────────────────────────────────────────
     # Construção da UI

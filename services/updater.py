@@ -12,6 +12,10 @@ from config import __version__, GITHUB_REPO, INSTALL_DIR
 GITHUB_API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
 _UA = f"ImportaREST/{__version__}"
 
+# Marker de update pendente — baixado numa sessao, aplicado na proxima.
+_appdata = os.environ.get("LOCALAPPDATA") or os.path.expanduser("~/.cache")
+UPDATE_MARKER = Path(_appdata) / "ImportaREST" / "update_pending.json"
+
 
 def _parse_version(v: str):
     v = (v or "").strip().lstrip("vV")
@@ -174,3 +178,58 @@ def check_and_prepare():
     if not tag or not url or not is_newer(tag):
         return None, None
     return tag, url
+
+
+def marcar_update_pendente(zip_path: Path, tag: str) -> None:
+    """Escreve marker apontando pro zip baixado. Aplicado no proximo startup."""
+    try:
+        UPDATE_MARKER.parent.mkdir(parents=True, exist_ok=True)
+        UPDATE_MARKER.write_text(
+            json.dumps({"zip_path": str(zip_path), "tag": tag, "for_version": tag}),
+            encoding="utf-8",
+        )
+    except OSError:
+        pass
+
+
+def check_pending_update() -> bool:
+    """Se marker existe e zip valido, aplica update (mata processo).
+    Chamar ANTES de abrir a UI no main.py.
+
+    Retorna True se disparou update (nao volta), False se nada a fazer.
+    """
+    if not UPDATE_MARKER.exists():
+        return False
+    try:
+        data = json.loads(UPDATE_MARKER.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        _limpar_marker()
+        return False
+
+    zip_path = Path(data.get("zip_path", ""))
+    tag = data.get("tag", "")
+
+    # Se a versao atual ja e igual ou maior, ignora (rollback ou instalacao manual)
+    if tag and not is_newer(tag):
+        _limpar_marker()
+        try:
+            if zip_path.exists():
+                zip_path.unlink()
+        except OSError:
+            pass
+        return False
+
+    if not zip_path.exists():
+        _limpar_marker()
+        return False
+
+    _limpar_marker()
+    apply_update(zip_path)
+    return True  # nao alcanca (apply_update chama sys.exit)
+
+
+def _limpar_marker() -> None:
+    try:
+        UPDATE_MARKER.unlink()
+    except OSError:
+        pass
