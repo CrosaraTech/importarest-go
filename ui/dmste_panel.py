@@ -30,7 +30,7 @@ from ui.editor_arquivo import abrir_editor_arquivo, COLUNAS_DMSTE
 
 EMPRESAS_DMSTE = [
     {"cod": "1553", "razao": "LIMA MAT",                          "municipio": "VIANOPOLIS"},
-    {"cod": "1552", "razao": "MINEIRA MATERIAIS",                 "municipio": "VIANOPOLIS"},
+    {"cod": "1595", "razao": "MINEIRA MATERIAIS",                 "municipio": "VIANOPOLIS"},
     {"cod": "1419", "razao": "SUPERMERCADO PRATTICO LTDA",        "municipio": "CRIXAS"},
     {"cod": "1112", "razao": "AM ATENDIMENTO HOSPITALAR LTDA",    "municipio": "JUSSARA"},
 ]
