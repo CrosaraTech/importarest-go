@@ -8,7 +8,6 @@ Thread-safety notes:
     _lock protects _batches dict writes and per-company state updates.
     Batch orchestrator runs in a dedicated threading.Thread.
     Review gate follows the same Phase 3 pattern: event.wait() OUTSIDE _lock.
-    cfg.BASE_DIR swap uses try/finally to guarantee restoration.
 
 Anti-patterns explicitly avoided:
     - Do NOT hold self._lock during event.wait() — deadlock risk
@@ -19,7 +18,7 @@ Anti-patterns explicitly avoided:
 import queue
 import threading
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from services.batch_orchestrator import BatchOrchestrator
@@ -142,7 +141,10 @@ class BatchJobManager:
                 "user_id": user_id,
                 "analyst_name": analyst_name,
                 "vigencia": vigencia,
-                "created_at": datetime.utcnow(),
+                # utcnow() esta depreciado. now(timezone.utc).replace(tzinfo=None) devolve o
+                # mesmo datetime naive em UTC, preservando o formato ISO ja exposto pela API
+                # (sem sufixo +00:00, que quebraria o contrato com o frontend).
+                "created_at": datetime.now(timezone.utc).replace(tzinfo=None),
             }
 
             # Register in shared analyst_jobs so individual job creation is blocked
@@ -305,18 +307,16 @@ class BatchJobManager:
 
         Starts BatchOrchestrator.run() in a nested thread, then consumes
         queue messages to update per-company state.
+
+        NOTA: o swap de cfg.BASE_DIR foi removido — o processor agora consulta
+        a API Autmais diretamente e nao le mais notas do disco. job_dir e
+        mantido como diretorio de saida do batch.
         """
-        import importlib
-        cfg = importlib.import_module("config")
         from pathlib import Path
 
-        original_base_dir = cfg.BASE_DIR
         job_dir_path = Path(str(job_dir))
 
         try:
-            with self._lock:
-                cfg.BASE_DIR = job_dir_path
-
             # Start orchestrator in a nested thread (orc.run() is blocking)
             orc_thread = threading.Thread(
                 target=orc.run,
@@ -346,7 +346,6 @@ class BatchJobManager:
                     batch["status"] = "error"
                     batch["summary"] = {"error": str(exc)}
         finally:
-            cfg.BASE_DIR = original_base_dir
             # Clear analyst slot
             with self._lock:
                 batch = self._batches.get(batch_id)
@@ -409,7 +408,7 @@ class BatchJobManager:
 
         elif msg_type == "manual_review":
             _, dados_base, chave_nfse, from_n8n, event, result_holder = msg
-            timeout_at = (datetime.utcnow() + timedelta(seconds=300)).isoformat() + "Z"
+            timeout_at = (datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(seconds=300)).isoformat() + "Z"
 
             with self._lock:
                 batch = self._batches.get(batch_id)

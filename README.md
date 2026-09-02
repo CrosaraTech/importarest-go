@@ -166,7 +166,7 @@ importarest-go/
 │   └── editor_arquivo.py            # Editor de arquivo TXT gerado
 │
 ├── api/                             # Backend FastAPI (fluxo web em construção)
-├── tests/                           # 132 testes (pytest)
+├── tests/                           # 136 testes (pytest)
 └── n8n/                             # Workflow N8N exportado + diagramas
     ├── workflow.json                # Workflow importável
     ├── workflow_completo.png        # Diagrama do pipeline principal
@@ -283,7 +283,7 @@ O arquivo [`n8n/workflow.json`](n8n/workflow.json) pode ser importado direto no 
 
 ### Requisitos
 
-- **Python 3.11** ou superior
+- **Python 3.12** ou superior (testado em 3.12.10)
 - **Windows 10/11**
 - Credenciais Autmais (login/senha do usuário de serviço)
 
@@ -292,10 +292,16 @@ O arquivo [`n8n/workflow.json`](n8n/workflow.json) pode ser importado direto no 
 ```bash
 git clone https://github.com/CrosaraTech/importarest-go.git
 cd importarest-go
-python -m venv venv
-venv\Scripts\activate
-pip install ttkbootstrap customtkinter Pillow requests openpyxl python-dotenv fastapi uvicorn pytest
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt -r requirements-dev.txt
 ```
+
+As dependencias ficam em `requirements.txt` (execucao) e `requirements-dev.txt`
+(testes e build), com versoes fixadas. Nao instale pacotes soltos: se a
+lista sair de sincronia com o codigo, a suite passa a falhar por ambiente
+e deixa de detectar regressao de verdade.
+
 
 ### Configuração
 
@@ -329,7 +335,15 @@ python main.py
 pytest
 ```
 
-Suite atual: **132 testes** cobrindo batch orchestrator, review gate, extração, download endpoints e classify.
+Suite atual: **136 testes** — 128 passando e 8 pulados, cobrindo batch
+orchestrator, review gate, extração, download endpoints e classify.
+
+Os 8 pulados sao os de fidelidade byte a byte
+(`tests/test_byte_fidelity.py`). Eles so rodam quando existirem arquivos de
+referencia em `tests/fixtures/<municipio>/expected/` — um TXT e um CSV ja
+aceitos pelo portal de cada municipio (goiania, aparecida, anapolis,
+brasilia), junto dos XMLs que os geraram. Enquanto faltarem, a garantia de
+que o TXT sai identico ao esperado nao tem cobertura automatica.
 
 ---
 

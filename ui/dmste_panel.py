@@ -1,6 +1,6 @@
 """ui/dmste_panel.py — Painel "DMST-e".
 
-Aba dedicada a gerar CSVs DMST-e para 5 empresas hardcoded em cidades fora
+Aba dedicada a gerar CSVs DMST-e para 6 empresas hardcoded em cidades fora
 das aceitas pelo ISSNet (Vianópolis, Crixás, Jussara, Trindade).
 """
 from __future__ import annotations
@@ -33,11 +33,13 @@ EMPRESAS_DMSTE = [
     {"cod": "1595", "razao": "MINEIRA MATERIAIS",                 "municipio": "VIANOPOLIS"},
     {"cod": "1419", "razao": "SUPERMERCADO PRATTICO LTDA",        "municipio": "CRIXAS"},
     {"cod": "1112", "razao": "AM ATENDIMENTO HOSPITALAR LTDA",    "municipio": "JUSSARA"},
+    {"cod": "12", "razao": "CASA LESSA",                          "municipio": "CRIXAS"},
+    {"cod": "1665", "razao": "CONSTRUTORA E CASA DO CIMENTO",     "municipio": "CRIXAS"},
 ]
 
 
 class PainelDmste(tk.Frame):
-    """Painel DMST-e — processa as 5 empresas fixas e gera CSV por empresa."""
+    """Painel DMST-e — processa as 6 empresas fixas e gera CSV por empresa."""
 
     def __init__(self, parent):
         super().__init__(parent, bg=COR_BG)
