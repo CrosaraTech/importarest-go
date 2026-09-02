@@ -157,10 +157,10 @@ async def create_job(
 
         validated.append((upload, content))
 
-    # Build the directory structure that WorkflowProcessor expects:
+    # Output directory for this job:
     #   UPLOAD_TEMP_DIR / <job_id> / <emp_cod>- / <vigencia> /
-    # processor.py line 97: pasta = BASE_DIR / f"{emp_cod}-" / vigencia
-    # We will point config.BASE_DIR → job_dir before calling processar().
+    # Uploaded XMLs land here. The processor itself fetches notes from the
+    # Autmais API; this tree holds the job's inputs and generated files.
     job_id = uuid.uuid4().hex[:12]
     job_dir = UPLOAD_TEMP_DIR / job_id
     nota_dir = job_dir / f"{emp_cod}-" / vigencia

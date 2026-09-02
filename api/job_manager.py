@@ -5,18 +5,14 @@ Exports:
     job_manager — module-level singleton (import this in routes)
 
 Thread-safety notes:
-    _lock protects both _jobs dict writes AND cfg.BASE_DIR swap.
-    Jobs are serialized in v1 (acceptable — each job is <5 min, single worker).
-    Two analysts submitting jobs simultaneously will queue — the second job
-    starts processing once the first releases the lock inside _run_job.
-
-Known v1 limitation:
-    cfg.BASE_DIR monkey-patch serializes concurrent jobs. This is intentional
-    for single-worker deployments. Phase N can replace with per-process isolation.
+    _lock protects _jobs dict writes only.
+    processar() runs OUTSIDE the lock: the processor fetches notes from the
+    Autmais API and no longer mutates global state, so concurrent jobs are safe.
+    Two analysts submitting jobs simultaneously now run in parallel.
 """
 import threading
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 
 # ---------------------------------------------------------------------------
@@ -65,7 +61,7 @@ class JobManager:
         self._jobs: dict[str, dict] = {}
         # analyst_name -> active job_id (cleared when job reaches terminal state)
         self._analyst_jobs: dict[str, str] = {}
-        # Protects _jobs writes and cfg.BASE_DIR swap (serialises processar() calls)
+        # Protects _jobs and _analyst_jobs writes (processar() runs outside it)
         self._lock = threading.Lock()
 
     # ------------------------------------------------------------------
@@ -125,7 +121,10 @@ class JobManager:
                 "analyst_name": analyst_name,
                 "emp_cod": emp_cod,
                 "vigencia": vigencia,
-                "created_at": datetime.utcnow(),
+                # utcnow() esta depreciado. now(timezone.utc).replace(tzinfo=None) devolve o
+                # mesmo datetime naive em UTC, preservando o formato ISO ja exposto pela API
+                # (sem sufixo +00:00, que quebraria o contrato com o frontend).
+                "created_at": datetime.now(timezone.utc).replace(tzinfo=None),
             }
             self._analyst_jobs[analyst_name] = job_id
 
@@ -253,8 +252,8 @@ class JobManager:
     def _run_job(self, job_id: str, emp_cod: str, vigencia: str, gerar_mei: bool, job_dir):
         """Worker function — runs in a dedicated threading.Thread.
 
-        Acquires _lock only around the cfg.BASE_DIR swap + processar() call
-        so that concurrent jobs queue rather than corrupt BASE_DIR.
+        processar() is called outside _lock — the processor reads from the
+        Autmais API, not from shared global state, so jobs may run in parallel.
         """
         # Mark running (outside the processar lock — just a status write)
         self._update_job(job_id, status="running")
@@ -299,7 +298,7 @@ class JobManager:
             """
             event = threading.Event()
             result_holder = [None]
-            timeout_at = (datetime.utcnow() + timedelta(seconds=300)).isoformat() + "Z"
+            timeout_at = (datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(seconds=300)).isoformat() + "Z"
 
             with self._lock:
                 job = self._jobs.get(job_id)
@@ -359,26 +358,16 @@ class JobManager:
 
             return result_holder[0]
 
-        # Import config and WorkflowProcessor here (worker thread only).
-        # We use importlib to avoid a bare "import config" line that would trip the
-        # api/ G-drive import linter (test_no_g_drive_import_in_api).
-        import importlib
-        cfg = importlib.import_module("config")
+        # NOTA: swap de cfg.BASE_DIR removido — o processor agora consulta a
+        # API Autmais diretamente e nao le mais notas do disco. job_dir e
+        # mantido como diretorio de saida, nao mais como fonte de XMLs.
         from services.processor import WorkflowProcessor
 
-        original_base_dir = cfg.BASE_DIR
         try:
-            # Acquire lock for the entire processar() call to protect BASE_DIR swap.
-            # This serialises jobs in v1 (intentional — see module docstring).
-            with self._lock:
-                cfg.BASE_DIR = job_dir
-                try:
-                    processor = WorkflowProcessor(
-                        log_fn, progress_fn, contador_fn, abrir_tela_manual_fn, gerar_mei
-                    )
-                    result = processor.processar(emp_cod, vigencia)
-                finally:
-                    cfg.BASE_DIR = original_base_dir
+            processor = WorkflowProcessor(
+                log_fn, progress_fn, contador_fn, abrir_tela_manual_fn, gerar_mei
+            )
+            result = processor.processar(emp_cod, vigencia)
 
             if result is not None:
                 with self._lock:
@@ -404,9 +393,6 @@ class JobManager:
                 if job is not None:
                     job["errors"].append(str(exc))
                     job["status"] = "failed"
-        finally:
-            # Belt-and-suspenders: always restore BASE_DIR even if lock wasn't held
-            cfg.BASE_DIR = original_base_dir
 
     def _update_job(self, job_id: str, **kwargs):
         """Thread-safe update of job fields."""
