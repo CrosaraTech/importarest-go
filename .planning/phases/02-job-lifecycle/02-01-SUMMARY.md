@@ -149,3 +149,15 @@ None - no external service configuration required for this plan. python-multipar
 ---
 *Phase: 02-job-lifecycle*
 *Completed: 2026-03-30*
+
+## Self-Check: PASSED
+
+- FOUND: api/models.py
+- FOUND: api/job_manager.py
+- FOUND: api/jobs.py
+- FOUND: tests/test_jobs.py
+- FOUND: .planning/phases/02-job-lifecycle/02-01-SUMMARY.md
+- FOUND commit: 4053f2f (feat: models + manager)
+- FOUND commit: 11d7ce9 (test: RED phase)
+- FOUND commit: d6b6da1 (feat: endpoints GREEN)
+- FOUND commit: 2736845 (docs: metadata)

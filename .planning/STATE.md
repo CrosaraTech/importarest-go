@@ -2,30 +2,17 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: in_progress
-stopped_at: Completed 05-02-PLAN.md (Batch HTTP endpoints)
-last_updated: "2026-03-31T18:21:51.938Z"
-last_activity: 2026-03-31 — Completed 04-01-PLAN.md (download endpoints)
+status: complete
+stopped_at: v1.0 milestone complete — all 6 phases executed, all checkpoints approved
+last_updated: "2026-04-01"
+last_activity: 2026-04-01 — Phase 6 n8n Compatibility & Hardening complete; v1.0 milestone done
 progress:
   total_phases: 6
-  completed_phases: 5
-  total_plans: 12
-  completed_plans: 12
+  completed_phases: 6
+  total_plans: 13
+  completed_plans: 13
+  percent: 100
 ---
-
----
-gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: in_progress
-stopped_at: Phase 5 context gathered
-last_updated: "2026-03-31T16:44:29.583Z"
-last_activity: 2026-03-31 — Completed 04-01-PLAN.md (download endpoints)
-progress:
-  total_phases: 6
-  completed_phases: 4
-  total_plans: 9
-  completed_plans: 9
 ---
 
 # Project State
@@ -35,35 +22,31 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-26)
 
 **Core value:** Analysts can upload NFS-e XMLs and download byte-perfect REST TXT files for ISS.NET import, with AI-assisted classification and inline manual review.
-**Current focus:** Phase 4 — Output Delivery
+**Current focus:** v1.0 entregue. Pendencia aberta: fixtures de fidelidade byte a byte (ver Blockers).
 
 ## Current Position
 
-Phase: 4 of 6 (Output Delivery)
-Plan: 1 of 1 in current phase
-Status: Phase 4 Plan 1 complete — download endpoints delivered
-Last activity: 2026-03-31 — Completed 04-01-PLAN.md (download endpoints)
+Phase: 6 of 6 (n8n Compatibility & Hardening) — concluida
+Plan: 13 of 13 concluidos
+Status: milestone v1.0 completo com uma pendencia de verificacao em aberto
+Last activity: 2026-04-01 — Phase 6 concluida
 
-Progress: [██████░░░░] ~55%
+Progress: [██████████] 100% dos planos executados
+
+ATENCAO: "planos executados" nao e o mesmo que "verificado". Os 8 testes de
+fidelidade byte a byte seguem SKIPPED por falta de fixtures — a garantia
+central do produto (TXT identico ao aceito pelo portal) nao tem cobertura
+automatica em nenhum dos 4 municipios. Ver Blockers.
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
-- Average duration: —
-- Total execution time: —
+- Total plans completed: 13 de 13
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
-
-**Recent Trend:**
-- Last 5 plans: —
-- Trend: —
-
-*Updated after each plan completion*
 | Phase 01-foundation P01 | 6 | 2 tasks | 9 files |
 | Phase 01-foundation P02 | 18min | 2 tasks | 7 files |
 | Phase 01-foundation P03 | 4 | 1 tasks | 3 files |
@@ -121,11 +104,17 @@ None yet.
 
 - Before Phase 1: Confirm Supabase project uses new key format (`sb_publishable_...` / `sb_secret_...`) — check Dashboard > Project Settings > API
 - Before Phase 1: Audit config.py for all G: drive / BASE_DIR references and isolate in config_web.py before any server start
-- Before Phase 4 sign-off: Byte-level diff test against desktop-generated TXT for all 4 municipalities (Goiania, Aparecida, Anapolis, Brasilia) required
+- EM ABERTO — Byte-level diff test against desktop-generated TXT for all 4
+  municipalities (Goiania, Aparecida, Anapolis, Brasilia). Os testes existem em
+  tests/test_byte_fidelity.py mas ficam SKIPPED: faltam as fixtures de
+  referencia em tests/fixtures/<municipio>/expected/ (4 TXT + 4 CSV).
+  Marcado como pendencia da Fase 4; o milestone foi fechado sem resolve-lo.
+  Desbloqueio: obter TXT/CSV ja aceitos nos portais e os XMLs que os geraram.
 - Phase 3 high risk: threading.Event gate is the most novel component — follow ARCHITECTURE.md Pattern 2 exactly; test review timeout explicitly
 
 ## Session Continuity
 
-Last session: 2026-03-31T18:21:51.935Z
-Stopped at: Completed 05-02-PLAN.md (Batch HTTP endpoints)
+Last session: 2026-09-02
+Stopped at: ambiente de desenvolvimento reconstruido (requirements + venv);
+suite de testes de 69 falhas para 0. Pendencia unica: fixtures de fidelidade.
 Resume file: None

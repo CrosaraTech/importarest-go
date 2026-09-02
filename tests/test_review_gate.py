@@ -417,8 +417,9 @@ def test_review_gate_timeout():
                 with jm._lock:
                     job = jm._jobs.get(job_id)
                     if job is not None:
-                        from datetime import datetime, timedelta
-                        timeout_at = (datetime.utcnow() + timedelta(seconds=timeout_secs)).isoformat() + "Z"
+                        from datetime import datetime, timedelta, timezone
+                        agora = datetime.now(timezone.utc).replace(tzinfo=None)
+                        timeout_at = (agora + timedelta(seconds=timeout_secs)).isoformat() + "Z"
                         job["status"] = "review_needed"
                         job["review_event"] = event
                         job["review_result"] = gate_result
