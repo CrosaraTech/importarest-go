@@ -1,0 +1,23 @@
+# Dependencias de execucao do ImportaREST GO.
+# Instalar com:  pip install -r requirements.txt
+# Python 3.12+
+
+# --- Interface desktop (Tkinter) ---
+customtkinter==6.0.0
+ttkbootstrap==2.2.2
+Pillow==12.3.0
+
+# --- Backend web (FastAPI) ---
+fastapi==0.141.1
+uvicorn[standard]==0.52.4
+python-multipart==0.0.32
+pydantic==2.13.5
+PyJWT==2.13.0
+supabase==2.31.0
+
+# --- Integracoes e dados ---
+requests==2.34.2
+httpx==0.28.1
+openpyxl==3.1.5
+python-dotenv==1.2.3
+certifi==2026.7.22

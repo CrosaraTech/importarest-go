@@ -29,3 +29,7 @@ certificados.json
 # OS
 Thumbs.db
 .DS_Store
+
+# Ambiente virtual
+.venv/
+venv/
