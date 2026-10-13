@@ -1,4 +1,5 @@
 import ctypes
+import sys
 import threading
 from pathlib import Path
 from tkinter import messagebox, filedialog, ttk
@@ -47,7 +48,12 @@ class JanelaCrosara:
         self.janela.configure(bg=COR_BG)
         self.janela.resizable(False, False)
 
-        ico = Path(__file__).resolve().parent.parent / "assets" / "logo_importarest.ico"
+        # PyInstaller: assets are inside _internal/; dev: relative to ui/app.py
+        if getattr(sys, 'frozen', False):
+            base = Path(sys._MEIPASS)
+        else:
+            base = Path(__file__).resolve().parent.parent
+        ico = base / "assets" / "logo_importarest.ico"
         if ico.exists():
             self.janela.iconbitmap(str(ico))
 

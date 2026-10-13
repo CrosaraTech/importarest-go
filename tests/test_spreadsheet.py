@@ -46,20 +46,23 @@ def test_load_analysts_returns_list(tmp_xlsx, monkeypatch):
 
 
 # ---------------------------------------------------------------------------
-# PLAN-02 — Only GOIÂNIA rows are included
+# PLAN-02 — Only accepted municipalities are included
 # ---------------------------------------------------------------------------
 
-def test_filters_goiania_only(tmp_xlsx, monkeypatch):
-    """Rows with MUNICIPIO != 'GOIÂNIA' are excluded from results."""
+def test_filters_accepted_municipalities_only(tmp_xlsx, monkeypatch):
+    """Rows with MUNICIPIO not in MUNICIPIOS_ACEITOS are excluded from results."""
     path = tmp_xlsx([
         ("001", "Empresa A", "GOIÂNIA", "Ana"),
         ("002", "Empresa B", "SAO PAULO", "Ana"),
-        ("003", "Empresa C", "BRASILIA", "Ana"),
+        ("003", "Empresa C", "BRASÍLIA", "Ana"),
+        ("004", "Empresa D", "CURITIBA", "Ana"),
     ])
     monkeypatch.setattr("services.spreadsheet.PLANILHA_EMPRESAS", path)
     companies = get_companies_for_analyst("Ana")
-    assert len(companies) == 1
-    assert companies[0]["cod"] == "001"
+    # GOIÂNIA and BRASÍLIA are in MUNICIPIOS_ACEITOS; SAO PAULO and CURITIBA are not
+    assert len(companies) == 2
+    cods = {c["cod"] for c in companies}
+    assert cods == {"001", "003"}
 
 
 # ---------------------------------------------------------------------------

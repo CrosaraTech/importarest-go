@@ -1,47 +1,59 @@
-"""FastAPI dependencies for the ImportaREST GO API.
-
-Provides `get_current_user` — the JWT verification dependency injected into
-all protected routes. Decodes the Supabase-issued HS256 JWT and looks up the
-analyst's name from the profiles table.
-
-Usage:
-    from api.deps import get_current_user
-    from fastapi import Depends
-
-    @router.get("/protected")
-    async def protected_route(current_user: dict = Depends(get_current_user)):
-        return {"hello": current_user["analyst_name"]}
-"""
+"""FastAPI dependencies for the ImportaREST GO API."""
 import jwt
+import httpx
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from api.supabase_client import get_supabase_admin
-from config_web import SUPABASE_JWT_SECRET
+from config_web import SUPABASE_URL, SUPABASE_JWT_SECRET
 
 bearer_scheme = HTTPBearer()
 
+def _get_jwt_secret():
+    """Return secret supporting both HS256 (legacy) and ES256 (new) Supabase tokens."""
+    return SUPABASE_JWT_SECRET
 
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
 ) -> dict:
-    """Verify the Bearer JWT and return the authenticated user context.
-
-    Returns:
-        dict with keys: user_id (str), email (str | None), analyst_name (str | None)
-
-    Raises:
-        HTTPException 401: If JWT is missing, malformed, expired, or lacks 'sub'.
-    """
     token = credentials.credentials
+
+    # Detect algorithm from token header to avoid unnecessary network calls.
+    # Supabase issues HS256 (legacy) or ES256 (new format) tokens.
     try:
-        payload = jwt.decode(
-            token,
-            SUPABASE_JWT_SECRET,
-            algorithms=["HS256"],
-            options={"verify_aud": False},  # Supabase does not set aud claim
+        unverified_header = jwt.get_unverified_header(token)
+        alg = unverified_header.get("alg", "HS256")
+    except jwt.exceptions.DecodeError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
         )
+
+    payload = None
+    try:
+        if alg == "ES256":
+            # Fetch public key from Supabase JWKS (only when token is actually ES256)
+            jwks_url = f"{SUPABASE_URL}/auth/v1/.well-known/jwks.json"
+            response = httpx.get(jwks_url, timeout=10)
+            jwks = response.json()
+            public_key = jwt.algorithms.ECAlgorithm.from_jwk(jwks["keys"][0])
+            payload = jwt.decode(
+                token,
+                public_key,
+                algorithms=["ES256"],
+                options={"verify_aud": False},
+            )
+        else:
+            payload = jwt.decode(
+                token,
+                SUPABASE_JWT_SECRET,
+                algorithms=["HS256"],
+                options={"verify_aud": False},
+            )
     except jwt.InvalidTokenError:
+        pass
+
+    if payload is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
@@ -54,10 +66,6 @@ async def get_current_user(
             detail="Token missing sub claim",
         )
 
-    # Look up analyst_name from profiles table.
-    # This is the secure approach — we do NOT trust user_metadata in the JWT
-    # because users can edit their own user_metadata via the Supabase JS client.
-    # The profiles table can only be written by the service role (admin).
     supabase = get_supabase_admin()
     result = (
         supabase.table("profiles")
