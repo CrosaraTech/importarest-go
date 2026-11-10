@@ -368,6 +368,14 @@ def get_cliente() -> AutmaisClient:
     return _cliente_singleton
 
 
+def _nota_cancelada(nota: dict) -> bool:
+    """Em /notas_servico a nota cancelada mantem url_xml preenchida. A API manda
+    `nota_cancelada` = 1 ou omite o campo; `url_xml_cancel` vem junto."""
+    return nota.get("nota_cancelada") in (1, "1") or bool(
+        (nota.get("url_xml_cancel") or "").strip()
+    )
+
+
 def baixar_xmls_da_empresa(
     cod: str,
     vigencia_yyyymm: str,
@@ -375,6 +383,8 @@ def baixar_xmls_da_empresa(
     log_fn=None,
     max_workers: int = 8,
     chaves_out: list[str] | None = None,
+    falhas_out: list[tuple[str, str]] | None = None,
+    canceladas_out: list[str] | None = None,
 ) -> dict[str, str]:
     """High-level: dado cod contabil + vigencia (YYYY-MM), retorna {nome_arq: xml_string}.
 
@@ -388,9 +398,14 @@ def baixar_xmls_da_empresa(
         chaves_out: lista opcional que sera preenchida com as chaves
             (`_id`) das notas baixadas — usado para chamar
             `marcar_baixadas()` depois de gerar com sucesso.
+        falhas_out: recebe (nome_arquivo, motivo) de cada nota sem XML obtido.
+        canceladas_out: recebe o nome_arquivo de cada nota cancelada descartada.
 
     Returns:
-        dict {nome_arquivo: conteudo_xml}. Vazio se nada encontrado.
+        dict {nome_arquivo: conteudo_xml}. Vazio se a empresa nao tem notas validas.
+
+    Raises:
+        AutmaisAPIError: empresa fora do cadastro, ou ha notas e nenhum XML veio.
     """
     def _log(msg: str):
         if log_fn:
@@ -399,8 +414,7 @@ def baixar_xmls_da_empresa(
     cli = get_cliente()
     cnpj = cli.buscar_cnpj_por_cod(cod)
     if not cnpj:
-        _log(f"❌ Empresa cod={cod} nao encontrada no cadastro Autmais.")
-        return {}
+        raise AutmaisAPIError(f"Empresa cod={cod} nao encontrada no cadastro Autmais.")
 
     _log(f"🔎 API Autmais — CNPJ={cnpj} vigencia={vigencia_yyyymm}")
     notas = list(cli.listar_notas(cnpj, vigencia_yyyymm))
@@ -408,34 +422,50 @@ def baixar_xmls_da_empresa(
         _log(f"📭 0 notas para CNPJ={cnpj} em {vigencia_yyyymm}.")
         return {}
 
+    def _chave(nota: dict) -> str:
+        return nota.get("_id") or nota.get("chave_nota") or str(nota.get("numero_nf", ""))
+
+    canceladas = [n for n in notas if _nota_cancelada(n)]
+    if canceladas:
+        ativas = [n for n in notas if not _nota_cancelada(n)]
+        _log(f"⛔ {len(canceladas)} nota(s) cancelada(s) fora da declaracao.")
+        if canceladas_out is not None:
+            canceladas_out.extend(f"{_chave(n)}.xml" for n in canceladas)
+        notas = ativas
+
     _log(f"📥 {len(notas)} nota(s). Baixando XMLs em paralelo...")
     dict_xmls: dict[str, str] = {}
 
     def _baixar(nota: dict):
+        """Devolve (nome_arquivo, conteudo, chave, motivo_da_falha)."""
+        chave = _chave(nota)
+        nome_arq = f"{chave}.xml"
         url = nota.get("url_xml")
         if not url:
-            return None
-        chave = nota.get("_id") or nota.get("chave_nota") or str(nota.get("numero_nf", ""))
-        nome_arq = f"{chave}.xml"
+            return nome_arq, None, chave, "Nota sem XML disponivel na Autmais"
         try:
-            conteudo = cli.baixar_xml(url)
-        except AutmaisAPIError:
-            return None
-        return nome_arq, conteudo, chave
+            return nome_arq, cli.baixar_xml(url), chave, ""
+        except AutmaisAPIError as e:
+            return nome_arq, None, chave, str(e)
 
     chaves_baixadas: list[str] = []
+    falhas: list[tuple[str, str]] = []
     with ThreadPoolExecutor(max_workers=max_workers) as ex:
         futs = [ex.submit(_baixar, n) for n in notas]
         for fut in as_completed(futs):
-            res = fut.result()
-            if res:
-                nome, conteudo, chave = res
+            nome, conteudo, chave, motivo = fut.result()
+            if conteudo is None:
+                falhas.append((nome, motivo))
+            else:
                 dict_xmls[nome] = conteudo
                 chaves_baixadas.append(chave)
 
-    faltam = len(notas) - len(dict_xmls)
-    if faltam:
-        _log(f"⚠️ {faltam} XML(s) falharam no download — ignorados.")
+    if falhas:
+        _log(f"⚠️ {len(falhas)} XML(s) nao obtidos — notas fora do arquivo.")
+        if not dict_xmls:
+            raise AutmaisAPIError(f"Nenhum XML obtido: {falhas[0][1]}")
+        if falhas_out is not None:
+            falhas_out.extend(falhas)
 
     if chaves_out is not None:
         chaves_out.extend(chaves_baixadas)

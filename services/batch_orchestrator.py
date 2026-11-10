@@ -145,20 +145,26 @@ class BatchOrchestrator:
             result = processor.processar(cod, vigencia, empresa_ibge=empresa_ibge)
             if result is None:
                 elapsed = time.monotonic() - t0
-                self._record(cod, "skipped", 0, elapsed, "Pasta não encontrada")
-                self._queue.put(("company_done", cod, "skipped", 0, elapsed, "Pasta não encontrada"))
+                detalhe = "Nenhuma nota aceita na vigência"
+                self._record(cod, "skipped", 0, elapsed, detalhe)
+                self._queue.put(("company_done", cod, "skipped", 0, elapsed, detalhe))
                 return
             self._save_txt(result, cod, razao, vigencia, dest_folder)
             self._registrar_faltantes(cod, razao, vigencia, result)
+            pendencias = result.pendencias
             # Pos-sucesso: marca notas baixadas na Autmais (opt-in, best-effort).
-            if marcar_baixadas:
+            # Com nota pendente nao marca: ela sumiria da proxima execucao.
+            if marcar_baixadas and not pendencias:
                 marcadas = processor.marcar_baixadas_na_autmais()
                 if marcadas:
                     self._queue.put(("log", cod, f"✅ {marcadas} nota(s) marcada(s) como baixada(s) na Autmais."))
             notes = len(result.linhas_dict)
             elapsed = time.monotonic() - t0
-            self._record(cod, "ok", notes, elapsed, "")
-            self._queue.put(("company_done", cod, "ok", notes, elapsed, ""))
+            status = "error" if pendencias else "ok"
+            detalhe = (f"TXT incompleto: {len(pendencias)} nota(s) fora do arquivo"
+                       if pendencias else "")
+            self._record(cod, status, notes, elapsed, detalhe)
+            self._queue.put(("company_done", cod, status, notes, elapsed, detalhe))
         except Exception as exc:
             elapsed = time.monotonic() - t0
             self._record(cod, "error", 0, elapsed, str(exc))

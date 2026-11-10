@@ -92,11 +92,15 @@ def processar_empresa_dmste(
         DmsteResult com contadores e caminho do arquivo gerado.
     """
     chaves_baixadas: list[str] = []
+    falhas: list[tuple[str, str]] = []
+    canceladas_api: list[str] = []
     try:
         yyyymm = vigencia_mmaaaa_para_yyyymm(vigencia)
         dict_xmls = baixar_xmls_da_empresa(
             cod, yyyymm,
             chaves_out=chaves_baixadas if marcar_baixadas else None,
+            falhas_out=falhas,
+            canceladas_out=canceladas_api,
         )
     except (AutmaisAPIError, ValueError) as e:
         return DmsteResult(
@@ -112,7 +116,7 @@ def processar_empresa_dmste(
 
     notas, canceladas = _filtrar_eventos(dict_xmls)
     linhas: list[dict] = []
-    erros = 0
+    erros = len(falhas)
     fora_vigencia = 0
     isentas = 0
 
@@ -152,14 +156,15 @@ def processar_empresa_dmste(
     if not linhas:
         return DmsteResult(
             cod=cod, razao=razao, municipio=municipio,
-            status="vazio", notas_erro=erros,
+            status="erro" if erros else "vazio", notas_erro=erros,
             detalhe="Nenhuma nota válida extraída.",
         )
 
     escrever_csv_dmste(linhas, arquivo)
 
-    # Marca notas como baixadas na API (opt-in, best-effort).
-    if marcar_baixadas and chaves_baixadas:
+    # Marca notas como baixadas na API (opt-in, best-effort). Com erro nao marca:
+    # a nota perdida sumiria da proxima execucao.
+    if marcar_baixadas and chaves_baixadas and not erros:
         try:
             get_cliente_autmais().marcar_baixadas(chaves_baixadas)
         except AutmaisAPIError:
@@ -169,7 +174,7 @@ def processar_empresa_dmste(
         cod=cod, razao=razao, municipio=municipio,
         status="ok",
         notas_processadas=len(linhas),
-        notas_canceladas=len(canceladas),
+        notas_canceladas=len(canceladas) + len(canceladas_api),
         notas_erro=erros,
         notas_fora_vigencia=fora_vigencia,
         notas_isentas=isentas,

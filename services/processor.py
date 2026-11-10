@@ -53,6 +53,14 @@ class ProcessorResult:
         self.conteudo_final = conteudo_final
         self.cnpj_tomador_cab = cnpj_tomador_cab
 
+    @property
+    def pendencias(self) -> list:
+        """Linhas do relatorio de notas que deveriam estar no TXT e nao estao."""
+        return [r for r in self.relatorio if len(r) > 4 and r[4] in _STATUS_PENDENTES]
+
+
+_STATUS_PENDENTES = ("Erro", "Manual Review", "Cancelado")
+
 
 def _parse_json_safe(response):
     """Tenta parsear JSON da resposta N8N. Retorna None se falhar."""
@@ -247,11 +255,10 @@ class WorkflowProcessor:
         # Compara com codigo_municipio do PRESTADOR pra decidir modelo (2=mesmo mun, 4=fora).
         self._empresa_ibge = empresa_ibge
         self._chaves_baixadas = []
-        try:
-            dict_xmls = self._baixar_xmls_via_api(emp_cod, vigencia)
-        except AutmaisAPIError as e:
-            self._log(f"❌ Erro na API Autmais: {e}")
-            return None
+        self._falhas_download = []
+        self._canceladas_api = []
+        # AutmaisAPIError sobe de proposito: falha de consulta nao e "sem notas".
+        dict_xmls = self._baixar_xmls_via_api(emp_cod, vigencia)
 
         if not dict_xmls:
             self._log("❌ Nenhuma nota encontrada na API para essa empresa/vigência.")
@@ -264,6 +271,10 @@ class WorkflowProcessor:
         linhas_dict, relatorio, _chave_map, _ts_map = self._processar_notas(
             notas_xmls, chaves_canceladas, dict_xmls, vigencia
         )
+        for nome in self._canceladas_api:
+            relatorio.append([nome, "", "", "", "Ignorada", "-", "Nota cancelada"])
+        for nome, motivo in self._falhas_download:
+            relatorio.append([nome, "", "", "", "Erro", "download", motivo])
 
         notas_vig_errada = self._filtrar_vigencia(linhas_dict, vigencia, emp_cod)
 
@@ -325,6 +336,8 @@ class WorkflowProcessor:
             emp_cod, yyyymm,
             log_fn=self._log,
             chaves_out=self._chaves_baixadas if self._marcar_baixadas else None,
+            falhas_out=self._falhas_download,
+            canceladas_out=self._canceladas_api,
         )
 
     def marcar_baixadas_na_autmais(self) -> int:
