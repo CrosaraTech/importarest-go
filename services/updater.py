@@ -1,11 +1,13 @@
 """Auto-update: consulta GitHub Releases, baixa zip, dispara updater.bat."""
 import json
 import os
+import shutil
 import ssl
 import subprocess
 import sys
 import tempfile
 import urllib.request
+import zipfile
 from pathlib import Path
 
 from config import __version__, GITHUB_REPO, INSTALL_DIR
@@ -18,6 +20,7 @@ except ImportError:
 
 GITHUB_API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
 _UA = f"ImportaREST/{__version__}"
+EXE_NOME = "ImportaREST.exe"
 
 # Marker de update pendente — baixado numa sessao, aplicado na proxima.
 _appdata = os.environ.get("LOCALAPPDATA") or os.path.expanduser("~/.cache")
@@ -94,11 +97,38 @@ def download_zip(url: str, dest: Path, timeout: int = 120,
         return False
 
 
-def _bat_template(zip_path: Path, install_dir: str, pid: int) -> str:
+def preparar_instalacao(zip_path: Path, install_dir: str = None) -> Path | None:
+    """Extrai o update ao lado da instalacao, com o programa ainda aberto.
+
+    Usa zipfile, nao PowerShell: o antivirus corporativo bloqueia o PowerShell
+    de tocar o exe. Nada da instalacao atual e alterado aqui. Retorna a pasta
+    pronta para a troca, ou None se o update nao serve.
+    """
+    install_dir = install_dir or INSTALL_DIR
+    staging = Path(f"{install_dir}_novo")
+    shutil.rmtree(staging, ignore_errors=True)
+    try:
+        with zipfile.ZipFile(zip_path) as z:
+            z.extractall(staging)
+        aninhada = staging / "ImportaREST"
+        raiz = aninhada if (aninhada / EXE_NOME).exists() else staging
+        if not (raiz / EXE_NOME).exists():
+            raise FileNotFoundError(EXE_NOME)
+        env = Path(install_dir) / ".env"
+        if env.exists():
+            shutil.copy2(env, raiz / ".env")
+    except Exception:  # update ruim nunca pode impedir o programa de abrir
+        shutil.rmtree(staging, ignore_errors=True)
+        return None
+    return raiz
+
+
+def _bat_template(novo: Path, zip_path: Path, install_dir: str, pid: int) -> str:
     # Batch em cp850 (default Windows). Sem acentos.
     return f"""@echo off
 setlocal
 set INSTALL={install_dir}
+set NOVO={novo}
 set ZIP={zip_path}
 set PIDMATA={pid}
 
@@ -108,65 +138,62 @@ set /a WAIT=0
 tasklist /FI "PID eq %PIDMATA%" 2>NUL | find "%PIDMATA%" >NUL
 if not errorlevel 1 (
     if %WAIT% lss 30 (
-        timeout /t 1 /nobreak >nul
+        ping -n 2 127.0.0.1 >nul
         set /a WAIT+=1
         goto wait_loop
     )
 )
 
-REM Backup pasta atual para rollback
+REM Pasta em uso: desiste sem tocar em nada e reabre a versao atual
 if exist "%INSTALL%_bak" rmdir /s /q "%INSTALL%_bak"
-if exist "%INSTALL%" (
-    move "%INSTALL%" "%INSTALL%_bak" >nul 2>&1
+move "%INSTALL%" "%INSTALL%_bak" >nul 2>&1
+if errorlevel 1 goto reabrir
+
+REM Antivirus prende arquivos recem-gravados por instantes: insiste por mais de 1 min.
+REM ping e nao timeout: timeout falha em processo sem console.
+set /a TENT=0
+:mover_novo
+move "%NOVO%" "%INSTALL%" >nul 2>&1
+if exist "%INSTALL%\\{EXE_NOME}" goto concluir
+if not exist "%NOVO%" goto restaurar
+if %TENT% lss 12 (
+    ping -n 3 127.0.0.1 >nul
+    set /a TENT+=1
+    goto mover_novo
 )
 
-REM Cria destino e extrai zip
-mkdir "%INSTALL%" 2>nul
-powershell -NoProfile -Command "try {{ Expand-Archive -Path '%ZIP%' -DestinationPath '%INSTALL%' -Force; exit 0 }} catch {{ exit 1 }}"
+:restaurar
 
-if errorlevel 1 (
-    rmdir /s /q "%INSTALL%" 2>nul
-    if exist "%INSTALL%_bak" move "%INSTALL%_bak" "%INSTALL%" >nul
-    echo Falha ao aplicar atualizacao. Backup restaurado.
-    pause
-    exit /b 1
-)
+REM xcopy e nao move: se a pasta nao sumir, move aninharia o backup dentro dela
+rmdir /s /q "%INSTALL%" 2>nul
+xcopy "%INSTALL%_bak" "%INSTALL%" /e /i /y /q /h >nul
+goto reabrir
 
-REM Zip pode extrair como C:\\ImportaREST\\ImportaREST\\ (subpasta). Achatar.
-if exist "%INSTALL%\\ImportaREST\\ImportaREST.exe" (
-    powershell -NoProfile -Command "Get-ChildItem -Path '%INSTALL%\\ImportaREST' -Force | Move-Item -Destination '%INSTALL%' -Force"
-    rmdir /s /q "%INSTALL%\\ImportaREST" 2>nul
-)
+:concluir
+rmdir /s /q "%INSTALL%_bak" 2>nul
 
-REM Preserva .env do backup (zip nao contem credenciais)
-if exist "%INSTALL%_bak\\.env" (
-    copy /Y "%INSTALL%_bak\\.env" "%INSTALL%\\.env" >nul
-)
+:reabrir
+rmdir /s /q "%INSTALL%_novo" 2>nul
+del "%ZIP%" 2>nul
 
 REM Cria atalho desktop se nao existir
 set SHORTCUT=%USERPROFILE%\\Desktop\\ImportaREST.lnk
-if not exist "%SHORTCUT%" (
-    powershell -NoProfile -Command "$s=(New-Object -COM WScript.Shell).CreateShortcut('%SHORTCUT%'); $s.TargetPath='%INSTALL%\\ImportaREST.exe'; $s.IconLocation='%INSTALL%\\ImportaREST.exe'; $s.WorkingDirectory='%INSTALL%'; $s.Save()"
-)
-
-REM Limpa backup, remove zip
-if exist "%INSTALL%_bak" rmdir /s /q "%INSTALL%_bak"
-del "%ZIP%" 2>nul
+if not exist "%SHORTCUT%" powershell -NoProfile -Command "$s=(New-Object -COM WScript.Shell).CreateShortcut('%SHORTCUT%'); $s.TargetPath='%INSTALL%\\{EXE_NOME}'; $s.IconLocation='%INSTALL%\\{EXE_NOME}'; $s.WorkingDirectory='%INSTALL%'; $s.Save()"
 
 REM Reinicia programa
-start "" "%INSTALL%\\ImportaREST.exe"
+start "" "%INSTALL%\\{EXE_NOME}"
 
 REM Auto-delete .bat
 (goto) 2>nul & del "%~f0"
 """
 
 
-def apply_update(zip_path: Path, install_dir: str = None) -> None:
+def apply_update(novo: Path, zip_path: Path, install_dir: str = None) -> None:
     """Escreve updater.bat, dispara em background e mata o processo atual."""
     install_dir = install_dir or INSTALL_DIR
     bat_path = Path(tempfile.gettempdir()) / "importarest_updater.bat"
     bat_path.write_text(
-        _bat_template(zip_path, install_dir, os.getpid()),
+        _bat_template(novo, zip_path, install_dir, os.getpid()),
         encoding="cp850",
         errors="replace",
     )
@@ -231,7 +258,14 @@ def check_pending_update() -> bool:
         return False
 
     _limpar_marker()
-    apply_update(zip_path)
+    novo = preparar_instalacao(zip_path)
+    if novo is None:
+        try:
+            zip_path.unlink()
+        except OSError:
+            pass
+        return False
+    apply_update(novo, zip_path)
     return True  # nao alcanca (apply_update chama sys.exit)
 
 
